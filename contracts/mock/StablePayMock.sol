@@ -30,6 +30,6 @@ contract StablePayMock is StablePay {
     view
     returns (bool)
     {
-        return true;
+        return super.checkAllowance(_erc20, _payer, _amount);
     }
 }

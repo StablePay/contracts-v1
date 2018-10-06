@@ -2,7 +2,7 @@ const config = require("../truffle");
 const jsonfile = require('jsonfile');
 const contractsJson = './build/contracts.json';
 
-const StandardTokenMock = artifacts.require("./mocks/StandardTokenMock.sol");
+const StandardTokenMock = artifacts.require("./mock/StandardTokenMock.sol");
 const SafeMath = artifacts.require("./util/SafeMath.sol");
 const StablePay = artifacts.require("./StablePay.sol");
 
@@ -31,7 +31,7 @@ module.exports = function(deployer, network, accounts) {
     // Deploy StablePay
     const assetProxyAddress = process.env.ERC20PROXY;
     const exchangeAddress = process.env.EXCHANGE;
-    const wethAddress = process.env.WETH;
+    const wethAddress = process.env.WETH9;
     await deployer.deploy(StablePay, assetProxyAddress, exchangeAddress, wethAddress);
     addContractInfo("StablePay", StablePay.address);
 

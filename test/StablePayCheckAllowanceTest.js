@@ -1,5 +1,5 @@
 const StandardTokenMock = artifacts.require("./mock/StandardTokenMock.sol");
-const StablePayMock = artifacts.require("./mocks/StablePayMock.sol");
+const StablePayMock = artifacts.require("./mock/StablePayMock.sol");
 
 const { EXCHANGE, ERC20PROXY, WETH9 } = require('./util/addresses');
 const { providerEngine } = require('./util/provider_engine');
