@@ -4,13 +4,14 @@ const { BigNumber } = require('0x.js');
 const { createOrder, getRandomFutureDateInSeconds } = require('./util/orderUtil');
 const { toBaseUnitAmount } = require('./util/tokenUtil');
 const { NULL_ADDRESS, ZERO } =require('./util/constants');
-const { EXCHANGE, ERC20PROXY, ZRXTOKEN, WETH9, DUMMYERC20TOKEN1, DUMMYERC20TOKEN2 } = require('./util/addresses');
+const { EXCHANGE, ERC20PROXY, ZRXTOKEN, WETH9, DUMMYERC20TOKEN1 } = require('./util/addresses');
 const { providerEngine } = require('./util/provider_engine');
 const { ContractWrapperByAccount } = require('./util/contractWrapper');
 
 const leche = require('leche');
 const withData = leche.withData;
 const t = require('./util/TestUtil').title;
+//const { printBalanceOf } = require('./util/payUtil');
 
 contract('StablePayPayTokenTest', accounts => {
     const DAITOKEN = DUMMYERC20TOKEN1;
@@ -56,10 +57,10 @@ contract('StablePayPayTokenTest', accounts => {
     withData({
         _1_zeroAmount: [5]
     }, function(unitsOfTokens) {
-        it(t('anUser', 'pay', 'Should be able to pay.'), async function() {
+        it(t('anUser', 'payToken', 'Should be able to pay using tokens.'), async function() {
             const signedOrder = await createOrder(orderInput, providerEngine);
             const order = signedOrder.order;
-            console.log('Signed Order: ', signedOrder);
+            //console.log('Signed Order: ', signedOrder);
 
             const amountOfTokens = toBaseUnitAmount(unitsOfTokens);
 
@@ -113,19 +114,36 @@ contract('StablePayPayTokenTest', accounts => {
             // Assertions
             assert(result);
 
-            const printBalanceOf = (who, token, initial, final) => {
-                console.log(`${who.padEnd(10)} ${token.padEnd(4)}: ${initial}    ->  ${final} = ${new BigNumber(final).sub(new BigNumber(initial)).toNumber()}`);
-            };
-
             const finalMakerZrxBalance = await zrxToken.balanceOf(maker);
             const finalSellerDaiBalance = await daiToken.balanceOf(seller);
             const finalPayerZrxBalance = await zrxToken.balanceOf(payer);
             const finalStablePayDaiBalance = await daiToken.balanceOf(stablePay.address);
 
+            // Maker balance assert
+            const resultMakerZrxBalance = new BigNumber(finalMakerZrxBalance).sub(new BigNumber(initialMakerZrxBalance)).toNumber();
+            const expectedMakerZrxBalance = new BigNumber(order.takerAssetAmount.toString()).toNumber();
+            assert.equal(resultMakerZrxBalance, expectedMakerZrxBalance);
+
+            // Seller balance assert
+            const resultSellerDaiBalance = new BigNumber(finalSellerDaiBalance).sub(new BigNumber(initialSellerDaiBalance)).toNumber();
+            const expectedSellerDaiBalance = new BigNumber(order.makerAssetAmount.toString()).toNumber();
+            assert.equal(resultSellerDaiBalance, expectedSellerDaiBalance);
+
+            // StablePay balance assert
+            assert.equal(new BigNumber(initialStablePayDaiBalance.toString()).toNumber(), new BigNumber(finalStablePayDaiBalance.toString()).toNumber());
+
+            // Payer balance assert
+            const resultPayerZrxBalance = new BigNumber(finalPayerZrxBalance).sub(new BigNumber(initialPayerZrxBalance)).toNumber();
+            const expectedPayerZrxBalance = new BigNumber(order.takerAssetAmount.toString()).mul(-1);
+            assert.equal(resultPayerZrxBalance, expectedPayerZrxBalance);
+
+            /*
             printBalanceOf('Maker', 'ZRX', initialMakerZrxBalance, finalMakerZrxBalance);
             printBalanceOf('Seller', 'DAI', initialSellerDaiBalance, finalSellerDaiBalance);
             printBalanceOf('Payer', 'ZRX', initialPayerZrxBalance, finalPayerZrxBalance);
             printBalanceOf('StablePay', 'DAI', initialStablePayDaiBalance, finalStablePayDaiBalance);
+            */
+            
         });
     });
 });
