@@ -7,6 +7,7 @@ import "./0x/interfaces/IExchange.sol";
 import "./0x/interfaces/IAssetProxy.sol";
 import "./0x/libs/LibOrder.sol";
 import "./0x/libs/LibFillResults.sol";
+import "./erc20/WETH9.sol";
 
 /**
     @dev Stable Pay smart contract.
@@ -96,6 +97,45 @@ contract StablePay {
         LibFillResults.FillResults memory fillResults = IExchange(exchange).fillOrder(
             _order,
             _amount,
+            _signature
+        );
+
+        ERC20(_destErc20).transfer(_seller, fillResults.makerAssetFilledAmount);
+
+        return true;
+    }
+
+
+
+    function payETH(
+        LibOrder.Order _order,
+       // address _fromErc20,
+        address _destErc20,
+        address _seller,
+        uint256 _paymentAmount,
+        bytes _signature
+    )
+    public payable
+    returns (bool)
+    {
+
+        WETH9 weth = WETH9(wethErc20);
+        // deposit eth to weth
+        weth.deposit.value(msg.value)();
+
+        //now we have the weth continue with transaction
+
+        // Check if this contract has enough balance.
+        require(weth.balanceOf(address(this)) >= _paymentAmount);
+
+
+        // Allow Exchange to the transfer amount.
+        weth.approve(assetProxy, _paymentAmount);
+
+        // Call fillOrder function in the IExchange instance.
+        LibFillResults.FillResults memory fillResults = IExchange(exchange).fillOrder(
+            _order,
+                _paymentAmount,
             _signature
         );
 
