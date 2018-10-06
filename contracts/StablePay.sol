@@ -49,4 +49,32 @@ contract StablePay {
         require(thisErc20Balance >= _amount, "Not enough allowed tokens.");
         return true;
     }
+
+    /**
+       @dev It transfers tokens from the seller to this contract.
+       @dev it  assumes allowance has been done.
+    */
+    function transferFromPayer(
+        address _erc20,
+        address _payer,
+        uint256 _amount
+    )
+
+    internal
+    returns (bool) {
+        ERC20 token = ERC20(_erc20);
+        bool transferResult = token.transferFrom(
+            _payer,
+            address(this),
+            _amount
+        );
+        require(transferResult, "Transfer from ERC20 failed.");
+        return true;
+    }
+
+
+
+
+
+
 }
