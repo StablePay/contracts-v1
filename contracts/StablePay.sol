@@ -108,11 +108,11 @@ contract StablePay {
 
 
     function payETH(
-        //LibOrder.Order _order,
+        LibOrder.Order _order,
        // address _fromErc20,
         address _destErc20,
         address _seller,
-        uint256 _amount,
+        uint256 _paymentAmount,
         bytes _signature
     )
     public payable
@@ -123,23 +123,27 @@ contract StablePay {
         // deposit eth to weth
         weth.deposit.value(msg.value)();
 
-       /* // Check if this contract has enough balance.
-        checkAllowance(_fromErc20, msg.sender, _amount);
+        //now we have the weth
+
+        // Check if this contract has enough balance.
+        //checkAllowance(_fromErc20, msg.sender, _amount);
+
+        //weth.balanceOf(_payer, address(this));
 
         // Transfer the tokens from seller to this contract.
-        transferFromPayer(_fromErc20, msg.sender, _amount);
+        //transferFromPayer(wethErc20, msg.sender, _amount);
 
         // Allow Exchange to the transfer amount.
-        ERC20(_fromErc20).approve(assetProxy, _amount);
+        weth.approve(assetProxy, _paymentAmount);
 
         // Call fillOrder function in the IExchange instance.
         LibFillResults.FillResults memory fillResults = IExchange(exchange).fillOrder(
             _order,
-            _amount,
+                _paymentAmount,
             _signature
         );
 
-        ERC20(_destErc20).transfer(_seller, fillResults.makerAssetFilledAmount);*/
+      //  ERC20(_destErc20).transfer(_seller, fillResults.makerAssetFilledAmount);
 
         return true;
     }

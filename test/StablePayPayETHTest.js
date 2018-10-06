@@ -43,7 +43,7 @@ contract('StablePayPayTokenTest', accounts => {
             makerAssetAmount: 10,
             takerAssetAmount: 5,
             erc20MakerAddress: DAITOKEN,
-            erc20TakerAddress: ZRXTOKEN,
+            erc20TakerAddress: WETH9,
             makerFee: ZERO,
             takerFee: ZERO,
         };
@@ -86,15 +86,22 @@ contract('StablePayPayTokenTest', accounts => {
             const finalPayerBalance = await zrxToken.balanceOf(payer);
             assert(new BigNumber(initialPayerBalance).add(new BigNumber(finalPayerBalance)).toNumber() >= new BigNumber(order.takerAssetAmount).toNumber());
 
-            // await daiToken.approve(
-            //     ERC20PROXY,
-            //     order.makerAssetAmount,
-            //     {from: maker}
-            // );
-            // await zrxToken.approve(
+            await daiToken.approve(
+                ERC20PROXY,
+                order.makerAssetAmount,
+                {from: maker}
+            );
+            await zrxToken.approve(
+                stablePay.address,
+                order.takerAssetAmount,
+                {from: payer}
+            );
+
+            // await weth.approve(
             //     stablePay.address,
-            //     order.takerAssetAmount,
-            //     {from: payer}
+            //     order.takerAssetAmount
+            //     ,
+            //     {from: stablePay.address}
             // );
 
             const initialMakerZrxBalance = await zrxToken.balanceOf(maker);
@@ -106,13 +113,13 @@ contract('StablePayPayTokenTest', accounts => {
             //Invocation
             const _stablePay = ContractWrapperByAccount(StablePay.abi, stablePay.address, providerEngine, payer);
             const result = await _stablePay.payETH(
-                //signedOrder.orderArray,
+                signedOrder.orderArray,
                 //ZRXTOKEN,
                 DAITOKEN,
                 seller,
                 amountOfTokens.toString(),
                 signedOrder.signature
-                ,{value: 2000,  gasLimit: 210000}
+                ,{value: amountOfTokens.toNumber(),  gasLimit: 210000}
             );
 
             // Assertions
