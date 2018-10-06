@@ -13,3 +13,4 @@ coverage.json
 /.soliumrc.json
 /.node*
 .env
+ganache-db/
