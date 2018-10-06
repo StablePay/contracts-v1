@@ -4,7 +4,9 @@
   "description": "StablePay Smart Contracts",
   "main": "truffle-config.js",
   "scripts": {
-    "test": "truffle test"
+    "test": "truffle test",
+    "deploy-ganache": "truffle migrate --network ganache",
+    "test-ganache": "truffle test --network ganache"
   },
   "repository": {
     "type": "git",
