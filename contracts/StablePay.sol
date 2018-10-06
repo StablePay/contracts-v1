@@ -52,15 +52,15 @@ contract StablePay {
 
     /**
        @dev It transfers tokens from the seller to this contract.
-       @dev It assumes the allowance validation was ok.
+       @dev it  assumes allowance has been done.
     */
     function transferFromPayer(
         address _erc20,
         address _payer,
         uint256 _amount
     )
-        //TODO Make it internal, and create a mock to test it.
-    public
+
+    internal
     returns (bool) {
         ERC20 token = ERC20(_erc20);
         bool transferResult = token.transferFrom(

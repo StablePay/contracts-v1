@@ -32,4 +32,17 @@ contract StablePayMock is StablePay {
     {
         return super.checkAllowance(_erc20, _payer, _amount);
     }
+
+    function _transferFromPayer(
+        address _erc20,
+        address _payer,
+        uint256 _amount
+    )
+
+    public
+    returns (bool) {
+
+        return super.transferFromPayer(_erc20, _payer, _amount);
+    }
+
 }
