@@ -1,0 +1,15 @@
+node_modules/
+package-lock.json
+build/
+tsconfig.json
+tslint.json
+yarn.lock
+.idea
+.vscode
+coverage/
+coverageEnv/
+coverage.json
+/.soliumignore
+/.soliumrc.json
+/.node*
+.env
