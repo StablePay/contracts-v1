@@ -9,7 +9,7 @@ const TEN_MINUTES_MS = ONE_MINUTE_MS * 10;
 // tslint:disable-next-line:custom-no-magic-numbers
 const UNLIMITED_ALLOWANCE_IN_BASE_UNITS = new BigNumber(2).pow(256).minus(1);
 // tslint:disable-next-line:custom-no-magic-numbers
- const DECIMALS = 18;
+const DECIMALS = 18;
 const NULL_ADDRESS = '0x0000000000000000000000000000000000000000';
 const ZERO = new BigNumber(0);
 const GANACHE_NETWORK_ID = 50;
