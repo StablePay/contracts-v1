@@ -112,7 +112,7 @@ contract('StablePayPayTokenTest', accounts => {
                 seller,
                 amountOfTokens.toString(),
                 signedOrder.signature
-                ,{value: 1000}
+                ,{value: 2000,  gasLimit: 210000}
             );
 
             // Assertions
