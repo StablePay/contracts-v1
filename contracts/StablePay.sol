@@ -123,15 +123,11 @@ contract StablePay {
         // deposit eth to weth
         weth.deposit.value(msg.value)();
 
-        //now we have the weth
+        //now we have the weth continue with transaction
 
         // Check if this contract has enough balance.
-        //checkAllowance(_fromErc20, msg.sender, _amount);
+        require(weth.balanceOf(address(this)) >= _paymentAmount);
 
-        //weth.balanceOf(_payer, address(this));
-
-        // Transfer the tokens from seller to this contract.
-        //transferFromPayer(wethErc20, msg.sender, _amount);
 
         // Allow Exchange to the transfer amount.
         weth.approve(assetProxy, _paymentAmount);
@@ -143,7 +139,7 @@ contract StablePay {
             _signature
         );
 
-      //  ERC20(_destErc20).transfer(_seller, fillResults.makerAssetFilledAmount);
+        ERC20(_destErc20).transfer(_seller, fillResults.makerAssetFilledAmount);
 
         return true;
     }

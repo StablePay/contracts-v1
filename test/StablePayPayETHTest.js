@@ -22,7 +22,7 @@ contract('StablePayPayTokenTest', accounts => {
 
     let stablePay;
     let daiToken;
-    let zrxToken;
+    //let zrxToken;
     let weth;
 
     let orderInput;
@@ -30,7 +30,7 @@ contract('StablePayPayTokenTest', accounts => {
     beforeEach('Deploying contract for each test', async () => {
         stablePay = await StablePay.new(ERC20PROXY, EXCHANGE, WETH9);
         daiToken = await ERC20.at(DAITOKEN);
-        zrxToken = await ERC20.at(ZRXTOKEN);
+       // zrxToken = await ERC20.at(ZRXTOKEN);
         weth = await WETH.at(WETH9);
 
         orderInput = {
@@ -40,8 +40,8 @@ contract('StablePayPayTokenTest', accounts => {
             senderAddress: NULL_ADDRESS, // Who "relays" the transaction.
             feeRecipientAddress: NULL_ADDRESS,
             expirationTimeSeconds: getRandomFutureDateInSeconds(),
-            makerAssetAmount: 10,
-            takerAssetAmount: 5,
+            makerAssetAmount: 1,
+            takerAssetAmount: 0.01,
             erc20MakerAddress: DAITOKEN,
             erc20TakerAddress: WETH9,
             makerFee: ZERO,
@@ -51,18 +51,18 @@ contract('StablePayPayTokenTest', accounts => {
         assert(stablePay.address);
         assert(daiToken);
         assert(daiToken.address);
-        assert(zrxToken);
-        assert(zrxToken.address);
+        assert(weth);
+        assert(weth.address);
+
     });
 
 
     withData({
-        _1_zeroAmount: [5]
+        _1_zeroAmount: [0.01]
     }, function(unitsOfTokens) {
         it(t('anUser', 'pay', 'Should be able to pay using ETH.'), async function() {
             const signedOrder = await createOrder(orderInput, providerEngine);
             const order = signedOrder.order;
-            //console.log('Signed Order: ', signedOrder);
 
             const amountOfTokens = toBaseUnitAmount(unitsOfTokens);
 
@@ -70,8 +70,8 @@ contract('StablePayPayTokenTest', accounts => {
             const initialOwnerDaiBalance = await daiToken.balanceOf(owner);
             assert(new BigNumber(initialOwnerDaiBalance).toNumber() > 0);
 
-            const initialOwnerZrxBalance = await zrxToken.balanceOf(owner);
-            assert(new BigNumber(initialOwnerZrxBalance).toNumber() > 0);
+            const initialOwnerWETHBalance = await weth.balanceOf(owner);
+            assert(new BigNumber(initialOwnerWETHBalance).toNumber() > 0);
 
             // Checking Maker DAI Balance
             const initialMakerBalance = await daiToken.balanceOf(maker);
@@ -80,66 +80,61 @@ contract('StablePayPayTokenTest', accounts => {
 
             assert(new BigNumber(initialMakerBalance).add(new BigNumber(finalMakerBalance)).toNumber() >= new BigNumber(order.makerAssetAmount).toNumber());
 
-            // Checking Payer ZRX Balance
-            const initialPayerBalance = await zrxToken.balanceOf(payer);
-            await zrxToken.transfer(payer, order.takerAssetAmount, {from: owner});
-            const finalPayerBalance = await zrxToken.balanceOf(payer);
-            assert(new BigNumber(initialPayerBalance).add(new BigNumber(finalPayerBalance)).toNumber() >= new BigNumber(order.takerAssetAmount).toNumber());
-
             await daiToken.approve(
                 ERC20PROXY,
                 order.makerAssetAmount,
                 {from: maker}
             );
-            await zrxToken.approve(
-                stablePay.address,
-                order.takerAssetAmount,
-                {from: payer}
-            );
 
-            // await weth.approve(
-            //     stablePay.address,
-            //     order.takerAssetAmount
-            //     ,
-            //     {from: stablePay.address}
-            // );
-
-            const initialMakerZrxBalance = await zrxToken.balanceOf(maker);
+            const initialMakerWETHBalance = await weth.balanceOf(maker);
             const initialSellerDaiBalance = await daiToken.balanceOf(seller);
-            const initialPayerZrxBalance = await zrxToken.balanceOf(payer);
             const initialStablePayDaiBalance = await daiToken.balanceOf(stablePay.address);
-            const initialWETHBalance = await weth.balanceOf(stablePay.address);
+            const initialStablePayWETHBalance = await weth.balanceOf(stablePay.address);
 
             //Invocation
             const _stablePay = ContractWrapperByAccount(StablePay.abi, stablePay.address, providerEngine, payer);
             const result = await _stablePay.payETH(
                 signedOrder.orderArray,
-                //ZRXTOKEN,
                 DAITOKEN,
                 seller,
                 amountOfTokens.toString(),
                 signedOrder.signature
-                ,{value: amountOfTokens.toNumber(),  gasLimit: 210000}
+                ,{value: amountOfTokens.toNumber(),  gasLimit: 290227} // 450000??}
             );
 
             // Assertions
             assert(result);
 
-            const printBalanceOf = (who, token, initial, final) => {
+           /* const printBalanceOf = (who, token, initial, final) => {
                 console.log(`${who.padEnd(10)} ${token.padEnd(4)}: ${initial}    ->  ${final} = ${new BigNumber(final).sub(new BigNumber(initial)).toNumber()}`);
-            };
+            };*/
 
-            // const finalMakerZrxBalance = await zrxToken.balanceOf(maker);
-            // const finalSellerDaiBalance = await daiToken.balanceOf(seller);
-            // const finalPayerZrxBalance = await zrxToken.balanceOf(payer);
-            // const finalStablePayDaiBalance = await daiToken.balanceOf(stablePay.address);
-            const finalWETHBalance = await weth.balanceOf(stablePay.address);
+            const finalMakerWETHBalance = await weth.balanceOf(maker);
+             const finalSellerDaiBalance = await daiToken.balanceOf(seller);
+             const finalStablePayDaiBalance = await daiToken.balanceOf(stablePay.address);
+            const finalStablePayWETHBalance = await weth.balanceOf(stablePay.address);
 
-            // printBalanceOf('Maker', 'ZRX', initialMakerZrxBalance, finalMakerZrxBalance);
-            // printBalanceOf('Seller', 'DAI', initialSellerDaiBalance, finalSellerDaiBalance);
-            // printBalanceOf('Payer', 'ZRX', initialPayerZrxBalance, finalPayerZrxBalance);
-            // printBalanceOf('StablePay', 'DAI', initialStablePayDaiBalance, finalStablePayDaiBalance);
-            printBalanceOf('finalWETHBalance', 'WETH', initialWETHBalance, finalWETHBalance);
+         /*    printBalanceOf('Maker', 'ZRX', initialMakerWETHBalance, finalMakerWETHBalance);
+             printBalanceOf('Seller', 'DAI', initialSellerDaiBalance, finalSellerDaiBalance);
+             printBalanceOf('Payer', 'WETH', initialPayerWETHBalance, finalPayerWETHBalance);
+             printBalanceOf('StablePay', 'DAI', initialStablePayDaiBalance, finalStablePayDaiBalance);
+             printBalanceOf('finalWETHBalance', 'WETH', initialStablePayWETHBalance, finalWETHBalance);*/
+
+            // Maker balance assert
+            const resultMakerWETHBalance = new BigNumber(finalMakerWETHBalance).sub(new BigNumber(initialMakerWETHBalance)).toNumber();
+            const expectedMakerWETHBalance = new BigNumber(order.takerAssetAmount.toString()).toNumber();
+            assert.equal(resultMakerWETHBalance, expectedMakerWETHBalance);
+
+            // Seller balance assert
+            const resultSellerDaiBalance = new BigNumber(finalSellerDaiBalance).sub(new BigNumber(initialSellerDaiBalance)).toNumber();
+            const expectedSellerDaiBalance = new BigNumber(order.makerAssetAmount.toString()).toNumber();
+            assert.equal(resultSellerDaiBalance, expectedSellerDaiBalance);
+
+            // StablePay balance assert
+            assert.equal(new BigNumber(initialStablePayDaiBalance.toString()).toNumber(), new BigNumber(finalStablePayDaiBalance.toString()).toNumber());
+
+            // StablePay balance assert
+            assert.equal(initialStablePayWETHBalance.toNumber(), finalStablePayWETHBalance.toNumber());
         });
     });
 });
