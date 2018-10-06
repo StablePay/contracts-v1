@@ -35,4 +35,18 @@ contract StablePay {
 
     /*** Methods ***************/
 
+    function checkAllowance(
+        address _erc20,
+        address _payer,
+        uint256 _amount
+    )
+    internal
+    view
+    returns (bool)
+    {
+        ERC20 token = ERC20(_erc20);
+        uint256 thisErc20Balance = token.allowance(_payer, address(this));
+        require(thisErc20Balance >= _amount, "Not enough allowed tokens.");
+        return true;
+    }
 }
