@@ -72,9 +72,35 @@ contract StablePay {
         return true;
     }
 
+    function payToken(
+        LibOrder.Order _order,
+        address _fromErc20,
+        address _destErc20,
+        address _seller,
+        uint256 _amount,
+        bytes _signature
+    )
+    public
+    returns (bool)
+    {
+        // Check if this contract has enough balance.
+        checkAllowance(_fromErc20, msg.sender, _amount);
+        
+        // Transfer the tokens from seller to this contract.
+        transferFromPayer(_fromErc20, msg.sender, _amount);
+        
+        // Allow Exchange to the transfer amount.
+        ERC20(_fromErc20).approve(assetProxy, _amount);
 
+        // Call fillOrder function in the IExchange instance.
+        LibFillResults.FillResults memory fillResults = IExchange(exchange).fillOrder(
+            _order,
+            _amount,
+            _signature
+        );
 
+        ERC20(_destErc20).transfer(_seller, fillResults.makerAssetFilledAmount);
 
-
-
+        return true;
+    }
 }
