@@ -1,13 +1,13 @@
-pragma solidity 0.4.24;
+pragma solidity 0.4.25;
 pragma experimental ABIEncoderV2;
 
 
-import "../StablePay.sol";
+import "../ZeroxSwappingProvider.sol";
 
 /**
     @dev Mock for Stable Pay smart contract.
  */
-contract StablePayMock is StablePay {
+contract StablePayMock is ZeroxSwappingProvider {
 
     /**** Events ***********/
 
@@ -16,7 +16,7 @@ contract StablePayMock is StablePay {
     /*** Constructor ***************/
 
     constructor(address _assetProxy, address _exchange, address _wethErc20)
-    public StablePay(_assetProxy, _exchange, _wethErc20) {
+    public ZeroxSwappingProvider(_assetProxy, _exchange, _wethErc20) {
     }
 
     /*** Methods ***************/
