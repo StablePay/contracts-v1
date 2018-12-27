@@ -1,7 +1,7 @@
 # stablepay_contracts
 Smart Contracts for StablePay
-
-
+Kyber Network
+ganache-cli --db ./full-ganache-db --accounts 10 --mnemonic 'concert load couple harbor equip island argue ramp clarify fence smart topic' --networkId 5777 --debug
 
 # Architecture Diagram for StablePay
 

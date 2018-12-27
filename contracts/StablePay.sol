@@ -1,33 +1,108 @@
-pragma solidity 0.4.24;
+pragma solidity 0.4.25;
 pragma experimental ABIEncoderV2;
 
+import "./util/SafeMath.sol";
+import "./StablePayCommon.sol";
+import "./ISwappingProvider.sol";
 
-import "./erc20/ERC20.sol";
-import "./0x/interfaces/IExchange.sol";
-import "./0x/interfaces/IAssetProxy.sol";
-import "./0x/libs/LibOrder.sol";
-import "./0x/libs/LibFillResults.sol";
-import "./erc20/WETH9.sol";
-
-/**
-    @dev Stable Pay smart contract.
- */
 contract StablePay {
+    using SafeMath for uint256;
 
-    address public assetProxy;
-    address public exchange;
-    address public wethErc20;
+    /** Properties */
+
+    address public owner;
+
+    /**
+        @dev This mapping is used to store providers to swap tokens.
+     */
+    mapping (bytes32 => StablePayCommon.SwappingProvider) public providers;
 
     /**** Events ***********/
 
+    /**
+        @dev This event is emitted when a new swapping provider is registered.
+     */
+    event NewSwappingProviderRegistered(
+        address indexed thisContract,
+        bytes32 providerKey,
+        address swappingProvider,
+        address owner
+    );
+
+    /**
+        @dev This event is emitted when a swap execution has failed.
+     */
+    event SwapExecutionFailed(
+        address indexed thisContract,
+        address indexed providerAddress,
+        bytes32 providerKey
+    );
+
+    /**
+        @dev This event is emitted when a swap has been executed successfully.
+     */
+    event SwapExecutionSuccess(
+        address indexed thisContract,
+        address indexed providerAddress,
+        bytes32 providerKey
+    );
+
+    /**
+        @dev This event is emitted when a swap ETH has been executed successfully.
+     */
+    event SwapEthExecutionFailed(
+        address indexed thisContract,
+        address indexed strategyAddress,
+        bytes32 _providerKey
+    );
+
+    /**
+        @dev This event is emitted when a swap ETH has been executed successfully.
+     */
+    event SwapEthExecutionSuccess(
+        address indexed thisContract,
+        address indexed strategyAddress,
+        bytes32 _providerKey
+    );
+
+    /**
+        @dev This event is emitted when a specific swapping provider is paused.
+     */
+    event SwappingProviderPaused(
+        address indexed thisContract,
+        address indexed providerAddress
+    );
+
+    event SwappingProviderUnpaused(
+        address indexed thisContract,
+        address indexed providerAddress
+    );
+
     /*** Modifiers ***************/
+
+    modifier isOwner(address _anAddress) {
+        require(msg.sender == _anAddress);
+        _;
+    }
+
+    modifier isSwappingProviderOwner(bytes32 _providerKey, address _owner) {
+        require(providers[_providerKey].ownerAddress == _owner, "Swapping provider owner is not valid.");
+        _;
+    }
+
+    modifier isSwappingProviderNewOrUpdate(bytes32 _providerKey, address _owner) {
+        StablePayCommon.SwappingProvider storage swappingProvider = providers[_providerKey];
+
+        bool isNewOrUpdate =    ( swappingProvider.exists && swappingProvider.ownerAddress == _owner ) ||
+                                ( !swappingProvider.exists );
+        require(isNewOrUpdate, "Swapping provider must be new or an update by owner.");
+        _;
+    }
 
     /*** Constructor ***************/
 
-    constructor(address _assetProxy, address _exchange, address _wethErc20) public {
-        assetProxy = _assetProxy;
-        exchange = _exchange;
-        wethErc20 = _wethErc20;
+    constructor() public {
+        owner = msg.sender;
     }
 
     /*** Fallback Method ***************/
@@ -35,112 +110,158 @@ contract StablePay {
     function () public payable {}
 
     /*** Methods ***************/
+    function getSwappingProvider(bytes32 _providerKey)
+        internal
+        view
+        returns (StablePayCommon.SwappingProvider){
+            return providers[_providerKey];
+    }
 
-    function checkAllowance(
-        address _erc20,
-        address _payer,
-        uint256 _amount
+
+    function isSwappingProviderValid(bytes32 _providerKey)
+        internal
+        view
+        returns (bool){
+            return providers[_providerKey].exists && !providers[_providerKey].paused;
+    }
+
+    function pauseSwappingProvider(bytes32 _providerKey)
+        public
+        isSwappingProviderOwner(_providerKey, msg.sender)
+        returns (bool){
+
+        providers[_providerKey].paused = true;
+
+        emit SwappingProviderPaused(
+            address(this),
+            providers[_providerKey].providerAddress          
+        );
+        return true;
+    }
+
+    function unpauseSwappingProvider(bytes32 _providerKey)
+        public
+        isSwappingProviderOwner(_providerKey, msg.sender)
+        returns (bool){
+
+        providers[_providerKey].paused = false;
+
+        emit SwappingProviderUnpaused(
+            address(this),
+            providers[_providerKey].providerAddress          
+        );
+        return true;
+    }
+
+    function registerSwappingProvider(
+        address _providerAddress,
+        bytes32 _providerKey,
+        address _owner
     )
     internal
-    view
+    isSwappingProviderNewOrUpdate(_providerKey, _owner)
     returns (bool)
     {
-        ERC20 token = ERC20(_erc20);
-        uint256 thisErc20Balance = token.allowance(_payer, address(this));
-        require(thisErc20Balance >= _amount, "Not enough allowed tokens.");
-        return true;
-    }
+        require(_providerAddress != 0x0, "Provider address must not be 0x0.");
 
-    /**
-       @dev It transfers tokens from the seller to this contract.
-       @dev it  assumes allowance has been done.
-    */
-    function transferFromPayer(
-        address _erc20,
-        address _payer,
-        uint256 _amount
-    )
+        providers[_providerKey] = StablePayCommon.SwappingProvider({
+            providerAddress: _providerAddress,
+            ownerAddress: _owner,
+            paused: false,
+            exists: true
+        });
 
-    internal
-    returns (bool) {
-        ERC20 token = ERC20(_erc20);
-        bool transferResult = token.transferFrom(
-            _payer,
+        emit NewSwappingProviderRegistered(
             address(this),
-            _amount
+            _providerKey,
+            _providerAddress,
+            _owner
         );
-        require(transferResult, "Transfer from ERC20 failed.");
+
         return true;
     }
 
-    function payToken(
-        LibOrder.Order _order,
-        address _fromErc20,
-        address _destErc20,
-        address _seller,
-        uint256 _amount,
-        bytes _signature
+    function registerSwappingProvider(
+        address _providerAddress,
+        bytes32 _providerKey
     )
+    public
+    isSwappingProviderNewOrUpdate(_providerKey, msg.sender)
+    returns (bool)
+    {
+        return registerSwappingProvider(_providerAddress, _providerKey, msg.sender);
+    }
+
+    function payToken(StablePayCommon.Order order, bytes32[] _providerKeys)
     public
     returns (bool)
     {
-        // Check if this contract has enough balance.
-        checkAllowance(_fromErc20, msg.sender, _amount);
-        
-        // Transfer the tokens from seller to this contract.
-        transferFromPayer(_fromErc20, msg.sender, _amount);
-        
-        // Allow Exchange to the transfer amount.
-        ERC20(_fromErc20).approve(assetProxy, _amount);
+        require(_providerKeys.length > 0, "Provider keys must not be empty.");
 
-        // Call fillOrder function in the IExchange instance.
-        LibFillResults.FillResults memory fillResults = IExchange(exchange).fillOrder(
-            _order,
-            _amount,
-            _signature
-        );
+        for (uint256 index = 0; index < _providerKeys.length; index = index.add(1)) {
+            bytes32 _providerKey = _providerKeys[index];
+            /*
+                TODO The validation process may be delegated to the SwappingProvider smart contract using a method ```iSwappingProvider.isOrderValid(order);```
+            */ 
+            if(isSwappingProviderValid(_providerKey)) {
+                StablePayCommon.SwappingProvider storage swappingProvider = providers[_providerKey];
+                ISwappingProvider iSwappingProvider = ISwappingProvider(swappingProvider.providerAddress);
 
-        ERC20(_destErc20).transfer(_seller, fillResults.makerAssetFilledAmount);
-
-        return true;
+                bool result = iSwappingProvider.payToken(order);
+                if(result) {
+                    emit SwapExecutionSuccess(
+                        address(this),
+                        swappingProvider.providerAddress,
+                        _providerKey
+                    );
+                    return true;
+                } else {
+                    emit SwapExecutionFailed(
+                        address(this),
+                        swappingProvider.providerAddress,
+                        _providerKey
+                    );
+                }
+            }
+        }
+        return false;
     }
 
-
-
-    function payETH(
-        LibOrder.Order _order,
-       // address _fromErc20,
-        address _destErc20,
-        address _seller,
-        uint256 _paymentAmount,
-        bytes _signature
-    )
-    public payable
+    function payEther(StablePayCommon.Order order, bytes32[] _providerKeys)
+    public
+    payable
     returns (bool)
     {
+        require(_providerKeys.length > 0, "Provider keys must not be empty.");
 
-        WETH9 weth = WETH9(wethErc20);
-        // deposit eth to weth
-        weth.deposit.value(msg.value)();
-
-        //now we have the weth continue with transaction
-
-        // Check if this contract has enough balance.
-        require(weth.balanceOf(address(this)) >= _paymentAmount);
-
-
-        // Allow Exchange to the transfer amount.
-        weth.approve(assetProxy, _paymentAmount);
-
-        // Call fillOrder function in the IExchange instance.
-        LibFillResults.FillResults memory fillResults = IExchange(exchange).fillOrder(
-            _order,
-                _paymentAmount,
-            _signature
-        );
-
-        ERC20(_destErc20).transfer(_seller, fillResults.makerAssetFilledAmount);
-
-        return true;
+        for (uint256 index = 0; index < _providerKeys.length; index = index.add(1)) {
+            bytes32 _providerKey = _providerKeys[index];
+            /*
+                TODO The validation process may be delegated to the SwappingProvider smart contract using a method ```iSwappingProvider.isOrderValid(order);```
+            */ 
+            if(isSwappingProviderValid(_providerKey)) {
+                StablePayCommon.SwappingProvider storage swappingProvider = providers[_providerKey];                
+                ISwappingProvider iSwappingProvider = ISwappingProvider(swappingProvider.providerAddress);
+                
+                bool result = iSwappingProvider.payEther.value(msg.value)(order);
+                if(result) {
+                    emit SwapEthExecutionSuccess(
+                        address(this),
+                        swappingProvider.providerAddress,
+                        _providerKey
+                    );
+                    return true;
+                } else {
+                    emit SwapEthExecutionFailed(
+                        address(this),
+                        swappingProvider.providerAddress,
+                        _providerKey
+                    );
+                }
+            }
+        }
+        // TODO Does it need a require(false, "Swap could not be performed.") at this point?
+        return false;
     }
+
 }
