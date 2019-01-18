@@ -114,13 +114,14 @@ contract('StablePay_KyberSwappingProviderSwapTokenTest', (accounts) => {
                 providerEngine,
                 customerAddress
             );
+            console.log('KyberSwappingProvider.testGetExpectedRate Execution');
             const testGetExpectedRateResult = await _kyberProvider.testGetExpectedRate(
                 targetToken.amountWei,
                 sourceToken.instance.address,
                 targetToken.instance.address
             );
-            console.log('expectedRate   ', testGetExpectedRateResult[0].toString());
-            console.log('slippageRate   ', testGetExpectedRateResult[1].toString());
+            console.log(`Expected rate: ${testGetExpectedRateResult[0].toString()}`);
+            console.log(`Slippage rate: ${testGetExpectedRateResult[1].toString()}\n\n\n`);
             assert(testGetExpectedRateResult);
 
             const orderArray = new KyberOrderFactory({
@@ -138,19 +139,19 @@ contract('StablePay_KyberSwappingProviderSwapTokenTest', (accounts) => {
                 providerEngine,
                 customerAddress
             );
-
             const kyberProviderKey = providersMap.get('KyberNetwork_v1');
-            console.log(`KyberNetwork_v1 -> ${kyberProviderKey}`);
+            console.log(`KyberNetwork_v1 -> ${kyberProviderKey}\n\n\n`);
 
+            console.log('StablePay.getExpectedRate Execution');
             const stablePayExpectedRateResult = await _stablePay.getExpectedRate(
                 kyberProviderKey,
                 sourceToken.instance.address,
                 targetToken.instance.address,
                 targetToken.amountWei
             );
-            console.log('stablePayExpectedRateResult    ', stablePayExpectedRateResult);
+            console.log(`Expected rate: ${stablePayExpectedRateResult}\n\n\n`);
             
-            console.log(`Before stablePay.swapToken`);
+            console.log(`StablePay.swapToken Execution`);
             const result = await _stablePay.swapToken(orderArray, [kyberProviderKey]);
 
             assert(false);

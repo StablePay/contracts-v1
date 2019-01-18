@@ -56,7 +56,6 @@ contract KyberSwappingProvider {//is ISwappingProvider {
     {
         ERC20 sourceToken = ERC20(_sourceToken);
         ERC20 targetToken = ERC20(_targetToken);
-        //emit CheckGetRateExpected(_sourceToken, _targetToken, _amount);
         return KyberNetworkProxy(proxy).getExpectedRate(sourceToken, targetToken, _amount);
     }
 
