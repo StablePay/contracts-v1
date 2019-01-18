@@ -51,7 +51,6 @@ contract KyberSwappingProvider {//is ISwappingProvider {
 
     function testGetExpectedRate(uint _amount, address _sourceToken, address _targetToken)
     public
-    view
     returns (uint, uint)
     {
         ERC20 sourceToken = ERC20(_sourceToken);
@@ -74,10 +73,10 @@ contract KyberSwappingProvider {//is ISwappingProvider {
         uint minConversionRate;
         uint slippageRate;
 
-        //KyberNetworkProxy networkProxy = KyberNetworkProxy(proxy);
-        //(minConversionRate,slippageRate) = networkProxy.getExpectedRate(_sourceToken, _targetToken, _amount);
-        emit CheckGetRateExpected(address(_sourceToken), address(_targetToken), _amount);
-        return 110744592760220000;
+        KyberNetworkProxy networkProxy = KyberNetworkProxy(proxy);
+        (minConversionRate,slippageRate) = networkProxy.getExpectedRate(_sourceToken, _targetToken, _amount);
+        //emit CheckGetRateExpected(address(_sourceToken), address(_targetToken), _amount);
+        return minConversionRate;
 
     }
 

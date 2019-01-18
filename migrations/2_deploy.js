@@ -99,6 +99,6 @@ module.exports = function(deployer, network, accounts) {
     
     deployerApp.writeJson();
 
-    //deployerApp.prettyPrint(true);
+    deployerApp.prettyPrint(true);
   });
 };

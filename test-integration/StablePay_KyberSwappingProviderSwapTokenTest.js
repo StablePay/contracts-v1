@@ -151,8 +151,8 @@ contract('StablePay_KyberSwappingProviderSwapTokenTest', (accounts) => {
             );
             console.log(`Expected rate: ${stablePayExpectedRateResult}\n\n\n`);
             
-            console.log(`StablePay.swapToken Execution`);
-            const result = await _stablePay.swapToken(orderArray, [kyberProviderKey]);
+            //console.log(`StablePay.swapToken Execution`);
+            //const result = await _stablePay.swapToken(orderArray, [kyberProviderKey]);
 
             assert(false);
             console.log(result);
