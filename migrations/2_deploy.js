@@ -1,31 +1,32 @@
 const config = require("../truffle");
-const jsonfile = require('jsonfile');
 const util = require('ethereumjs-util');
-const contractsJson = './build/contracts.json';
+const DeployerApp = require('./util/DeployerApp');
 
 // Mock Smart Contracts
 
+// Libraries
+const Bytes32ArrayLib = artifacts.require("./util/Bytes32ArrayLib.sol");
 
 // Official Smart Contracts
+const Settings = artifacts.require("./base/Settings.sol");
+const Storage = artifacts.require("./base/Storage.sol");
+const Upgrade = artifacts.require("./base/Upgrade.sol");
 const StablePay = artifacts.require("./StablePay.sol");
 const SafeMath = artifacts.require("./util/SafeMath.sol");
 const StablePayCommon = artifacts.require("./StablePayCommon.sol");
-const ZeroxSwappingProvider = artifacts.require("./ZeroxSwappingProvider.sol");
-const KyberSwappingProvider = artifacts.require("./KyberSwappingProvider.sol");
+const ZeroxSwappingProvider = artifacts.require("./providers/ZeroxSwappingProvider.sol");
+const KyberSwappingProvider = artifacts.require("./providers/KyberSwappingProvider.sol");
 
-const contracts = [];
-
-const addContractInfo = (name, address) => {
-  console.log(`Address: ${address} - Name: ${name}`);
-  contracts.push(
-    {
-        "address": address,
-        "contractName": name
-    }
-  );
+const createPoviderKey = (name, version) => {
+  const providerName = `${name}_v${version}`;
+  return {
+    name: providerName,
+    providerKey: util.bufferToHex(util.setLengthRight(providerName, 32))
+  };
 };
 
 module.exports = function(deployer, network, accounts) {
+  console.log(`Deploying smart contracts to '${network}'.`)
   const envConf = require('../config')(network);
   const kyberConf = envConf.kyber;
   const zeroxConf = envConf.zerox;
@@ -40,54 +41,64 @@ module.exports = function(deployer, network, accounts) {
 
   const owner = accounts[0];
 
-  const initialAmount = 9000000;
-  deployer.deploy(SafeMath).then(async () => {
-    addContractInfo("SafeMath", SafeMath.address);
+  deployer.deploy(SafeMath).then(async (txInfo) => {
 
-    await deployer.deploy(StablePayCommon);
-    addContractInfo("StablePayCommon", StablePayCommon.address);
+    const deployerApp = new DeployerApp(deployer, web3, owner);
 
-    // Deploy ZeroxSwappingProvider
-    /*
-    console.log(zeroxContracts);
-    const assetProxyAddress = zeroxContracts.Erc20Proxy;
-    const exchangeAddress = zeroxContracts.Exchange;
-    const wethAddress = zeroxContracts.Weth9;
-    await deployer.deploy(ZeroxSwappingProvider, assetProxyAddress, exchangeAddress, wethAddress);
-    addContractInfo("ZeroxSwappingProvider", ZeroxSwappingProvider.address);
-    */
+    await deployerApp.addContractInfoByTransactionInfo(SafeMath, txInfo);
 
-    // Deploy KyberSwappingProvider
-    await deployer.deploy(KyberSwappingProvider, kyberContracts.KyberNetworkProxy, {from: owner});
-    addContractInfo("KyberSwappingProvider", KyberSwappingProvider.address);
+    await deployerApp.deploys([
+      Bytes32ArrayLib,
+      Storage,
+      StablePayCommon
+    ]);
 
-    await deployer.link(SafeMath, StablePay);
-    await deployer.deploy(StablePay, {from: owner});
-    addContractInfo("StablePay", StablePay.address);
+    await deployerApp.deploy(Settings, Storage.address);
+    await deployerApp.deploy(Upgrade, Storage.address);
 
+    await deployerApp.links(StablePay, [
+      Bytes32ArrayLib,
+      SafeMath
+    ]);
+    await deployerApp.deploy(StablePay, Storage.address, {from: owner});
+    
     const stablePayInstance = await StablePay.deployed();
 
-    const kyberBytes32 = util.bufferToHex(util.setLengthRight(`KyberSwappingProvider_${KyberSwappingProvider.address}`, 32));
+    // Deploy ZeroxSwappingProvider
+    await deployerApp.deploy(
+      ZeroxSwappingProvider,
+      zeroxContracts.Erc20Proxy,
+      zeroxContracts.Exchange,
+      zeroxContracts.Weth9,
+      {
+        from: owner
+      }
+    );
 
-    console.log(`KyberSwappingProvider => ${kyberBytes32} = ${KyberSwappingProvider.address}.`);
+    const zeroxProviderKey = createPoviderKey('0x','1');
+    await stablePayInstance.registerSwappingProvider(
+        ZeroxSwappingProvider.address,
+        zeroxProviderKey.providerKey
+    );
+    deployerApp.addData(zeroxProviderKey.name, zeroxProviderKey.providerKey);
 
+    // Deploy KyberSwappingProvider
+    console.log("kyberContracts.KyberNetworkProxy");
+    console.log(kyberContracts.KyberNetworkProxy);
+    await deployerApp.deploy(
+      KyberSwappingProvider,
+      kyberContracts.KyberNetworkProxy
+    );
+    const kyberProviderKey = createPoviderKey('KyberNetwork', '1');
+    
     await stablePayInstance.registerSwappingProvider(
         KyberSwappingProvider.address,
-        kyberBytes32
+        kyberProviderKey.providerKey
     );
+    deployerApp.addData(kyberProviderKey.name, kyberProviderKey.providerKey);
+    
+    deployerApp.writeJson();
 
-    /*
-    await stablePayInstance.registerProviders(
-        config.web3.utils.soliditySha3('ZeroxSwappingProvider', ZeroxSwappingProvider.address),
-        [ZeroxSwappingProvider.address]
-    );
-    */
-
-    jsonfile.writeFile(contractsJson, contracts, {spaces: 2, EOL: '\r\n'}, function (err) {
-      console.log(`JSON file created at '${contractsJson}'.`);
-      if(err) {
-        console.error("Errors: " + err);
-      }
-    });
+    //deployerApp.prettyPrint(true);
   });
 };

@@ -5,6 +5,7 @@ contract StablePayCommon {
     struct SwappingProvider {
         address providerAddress;
         address ownerAddress;
+        uint256 createdAt;
         bool paused;
         bool exists;
     }
