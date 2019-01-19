@@ -1,5 +1,5 @@
 pragma solidity 0.4.25;
-//pragma experimental ABIEncoderV2;
+pragma experimental ABIEncoderV2;
 
 import "../erc20/ERC20.sol";
 import "../kyber/KyberNetworkProxy.sol";
@@ -12,7 +12,7 @@ import "./ISwappingProvider.sol";
 https://developer.kyber.network/docs/VendorsGuide/#converting-from-erc20
 https://developer.kyber.network/docs/KyberNetworkProxy/#getexpectedrate
  */
-contract KyberSwappingProvider {//is ISwappingProvider {
+contract KyberSwappingProvider is ISwappingProvider {
 
     ERC20 constant internal ETH_TOKEN_ADDRESS = ERC20(0x00eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee);
     address public proxy;
@@ -51,6 +51,7 @@ contract KyberSwappingProvider {//is ISwappingProvider {
 
     function testGetExpectedRate(uint _amount, address _sourceToken, address _targetToken)
     public
+    view
     returns (uint, uint)
     {
         ERC20 sourceToken = ERC20(_sourceToken);
@@ -75,13 +76,12 @@ contract KyberSwappingProvider {//is ISwappingProvider {
 
         KyberNetworkProxy networkProxy = KyberNetworkProxy(proxy);
         (minConversionRate,slippageRate) = networkProxy.getExpectedRate(_sourceToken, _targetToken, _amount);
-        //emit CheckGetRateExpected(address(_sourceToken), address(_targetToken), _amount);
         return minConversionRate;
 
     }
 
     // TODO Add restriction for StablePay contract.
-/*    function swapToken(StablePayCommon.Order _order)
+    function swapToken(StablePayCommon.Order _order)
     public
     returns (bool)
     {
@@ -131,5 +131,4 @@ contract KyberSwappingProvider {//is ISwappingProvider {
     {
         return false;
     }
-    */
 }

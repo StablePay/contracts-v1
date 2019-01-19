@@ -2,6 +2,10 @@ const config = require("../truffle");
 const util = require('ethereumjs-util');
 const DeployerApp = require('./util/DeployerApp');
 
+// Env configuration
+const DEFAULT_PRINT_DEPLOY_COST = false;
+const printDeployCostValue = process.env['PRINT_DEPLOY_COST'] || DEFAULT_PRINT_DEPLOY_COST;
+
 // Mock Smart Contracts
 
 // Libraries
@@ -83,8 +87,6 @@ module.exports = function(deployer, network, accounts) {
     deployerApp.addData(zeroxProviderKey.name, zeroxProviderKey.providerKey);
 
     // Deploy KyberSwappingProvider
-    console.log("kyberContracts.KyberNetworkProxy");
-    console.log(kyberContracts.KyberNetworkProxy);
     await deployerApp.deploy(
       KyberSwappingProvider,
       kyberContracts.KyberNetworkProxy
@@ -99,6 +101,8 @@ module.exports = function(deployer, network, accounts) {
     
     deployerApp.writeJson();
 
-    deployerApp.prettyPrint(true);
+    if(printDeployCostValue) {
+      deployerApp.prettyPrint(true);
+    }
   });
 };

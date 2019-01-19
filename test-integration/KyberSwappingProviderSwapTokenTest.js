@@ -62,7 +62,7 @@ contract('KyberSwappingProviderSwapTokenTest', (accounts) => {
             const sourceToken = {
                 name: 'KNC',
                 instance: sourceErc20,
-                amountWei: "0"
+                amountWei: "10000"
             };
             const targetToken = {
                 name: 'OMG',

@@ -11,10 +11,10 @@ const KyberSwappingProvider = artifacts.require("./providers/KyberSwappingProvid
 const StablePay = artifacts.require("./StablePay.sol");
 const KyberNetworkInterface = artifacts.require("./kyber/KyberNetworkInterface.sol");
 const KyberNetworkProxy = artifacts.require("./kyber/KyberNetworkProxy.sol");
+const KyberNetworkProxyInterface = artifacts.require("./kyber/KyberNetworkProxyInterface.sol");
 const ERC20 = artifacts.require("./erc20/ERC20.sol");
 const { BigNumber } = require('0x.js');
 const { createOrder, getRandomFutureDateInSeconds } = require('../test/util/orderUtil');
-const { toBaseUnitAmount } = require('../test/util/tokenUtil');
 const { providerEngine } = require('../test/util/provider_engine');
 const { ContractWrapperByAccount } = require('../test/util/contractWrapper');
 
@@ -151,10 +151,16 @@ contract('StablePay_KyberSwappingProviderSwapTokenTest', (accounts) => {
             );
             console.log(`Expected rate: ${stablePayExpectedRateResult}\n\n\n`);
             
-            //console.log(`StablePay.swapToken Execution`);
-            //const result = await _stablePay.swapToken(orderArray, [kyberProviderKey]);
+            console.log(`Gas Estimation: StablePay.swapToken Execution`);
+            const stablePaySwapEtherEstimatedGas = await stablePay.swapToken.estimateGas(orderArray, [kyberProviderKey], {from: customerAddress});
+            console.log(`StablePay.swapToken:   ${stablePaySwapEtherEstimatedGas.toString()}`);
 
-            assert(false);
+            console.log(`StablePay.swapToken Execution`);
+            let overrides = {
+                gasLimit: 640000//840247//1680494//3360988//6721975
+            };
+            const result = await _stablePay.swapToken(orderArray, [kyberProviderKey], overrides);
+
             console.log(result);
 
             // Assertions
@@ -171,6 +177,8 @@ contract('StablePay_KyberSwappingProviderSwapTokenTest', (accounts) => {
 
             printBalanceOf('Merchant', 'SOURCE', initialMerchantSourceBalance, finalMerchantSourceBalance);
             printBalanceOf('Merchant', 'TARGET', initialMerchantTargetBalance, finalMerchantTargetBalance);
+
+            assert(false);
         });
     });
 });

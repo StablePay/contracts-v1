@@ -24,7 +24,7 @@ The steps are:
 - Copy/paste the file located at ```/resources/kyber-ganache-template-conf.js``` into ```/conf/ganache/```, and save as ```kyber.js``` (replace current one if it is needed).
 - Copy the MNEMONIC value in the file ```/resources/kyber-ganache-template-conf-mnemonic.js```.
 - Replace the ```MNEMONIC_KEY``` key in your ```.env``` file with the value copied in the previous step.
-- Start ganach-cli in a bash console (**CHECK THE MNEMONIC VALUE**):
+- Start ganache-cli in a bash console (**CHECK THE MNEMONIC VALUE**):
 
     ```ganache-cli --db ./kyber_db --accounts 10 --mnemonic 'concert load couple harbor equip island argue ramp clarify fence smart topic' --networkId 5777 --debug```
 

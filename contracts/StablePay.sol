@@ -263,8 +263,8 @@ contract StablePay is Base {
         for (uint256 index = 0; index < _providerKeys.length; index = index.add(1)) {
             bytes32 _providerKey = _providerKeys[index];
             /*
-                TODO The validation process may be delegated to the SwappingProvider smart contract using a method ```iSwappingProvider.isOrderValid(order);```
-            */ 
+            TODO The validation process may be delegated to the SwappingProvider smart contract using a method ```iSwappingProvider.isOrderValid(order);```
+            */
             if(isSwappingProviderValid(_providerKey)) {
                 ERC20 sourceToken = ERC20(order.sourceToken);
                 require(sourceToken.allowance(msg.sender, address(this)) >= order.amount, "Not enough allowed tokens to StablePay.");
