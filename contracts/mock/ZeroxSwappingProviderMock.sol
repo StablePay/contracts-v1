@@ -15,8 +15,8 @@ contract ZeroxSwappingProviderMock is ZeroxSwappingProvider {
 
     /*** Constructor ***************/
 
-    constructor(address _assetProxy, address _exchange, address _wethErc20)
-    public ZeroxSwappingProvider(_assetProxy, _exchange, _wethErc20) {
+    constructor(address _stablePay, address _assetProxy, address _exchange, address _wethErc20)
+    public ZeroxSwappingProvider(_stablePay, _assetProxy, _exchange, _wethErc20) {
     }
 
     /*** Methods ***************/

@@ -74,7 +74,7 @@ module.exports = {
 			},
 			gas: gasKeyValue,
 			gasPrice: web3.utils.toWei(gasPriceKeyValue, 'gwei'),
-			network_id: '5'
+			network_id: '4'
 		},
 		infuraKovan: {
 			provider: function() {
@@ -87,7 +87,7 @@ module.exports = {
 			},
 			gas: gasKeyValue,
 			gasPrice: web3.utils.toWei(gasPriceKeyValue, 'gwei'),
-			network_id: '4'
+			network_id: '42'
 		},
 		infuraRopsten: {
 			provider: function() {

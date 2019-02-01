@@ -10,25 +10,34 @@ class KyberOrderFactory extends BaseOrderFactory {
         const {
             sourceToken,
             targetToken,
-            amountWei,
+            sourceAmount,
+            targetAmount,
+            minRate,
+            maxRate,
             merchantAddress
         } = data;
         this.sourceToken = sourceToken;
         this.targetToken = targetToken;
-        this.amountWei = amountWei;
+        this.sourceAmount = sourceAmount;
+        this.targetAmount = targetAmount;
+        this.minRate = minRate;
+        this.maxRate = maxRate;
         this.merchantAddress = merchantAddress;
     }
 }
 
 KyberOrderFactory.prototype.createOrder = function() {
     return [
-        this.amountWei,
+        this.sourceAmount,
+        this.targetAmount,
         '0', // Amount of makerAsset being offered by maker. Must be greater than 0.
         '0', // Amount of takerAsset being bid on by maker. Must be greater than 0.
         '0', // Amount of ZRX paid to feeRecipient by maker when order is filled. If set to 0, no transfer of ZRX from maker to feeRecipient will be attempted.
         '0', // Amount of ZRX paid to feeRecipient by taker when order is filled. If set to 0, no transfer of ZRX from taker to feeRecipient will be attempted.
         '0', // Timestamp in seconds at which order expires.
         '0', // Arbitrary number to facilitate uniqueness of the order's hash.
+        this.minRate,
+        this.maxRate,
 
         this.sourceToken,
         this.targetToken,

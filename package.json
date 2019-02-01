@@ -72,6 +72,6 @@
     "solium": "1.1.2",
     "truffle": "5.0.2",
     "truffle-config": "1.1.2",
-    "truffle-hdwallet-provider": "0.0.7-beta.0"
+    "truffle-hdwallet-provider": "^1.0.2"
   }
 }

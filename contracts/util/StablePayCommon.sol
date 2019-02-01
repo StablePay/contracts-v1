@@ -10,14 +10,23 @@ contract StablePayCommon {
         bool exists;
     }
 
+    struct ExpectedRate {
+        bytes32 providerKey;
+        uint256 minRate;
+        uint256 maxRate;
+    }
+
     struct Order {
-        uint256 amount;
+        uint256 sourceAmount;
+        uint256 targetAmount;
         uint256 makerAssetAmount;       // Amount of makerAsset being offered by maker. Must be greater than 0.        
         uint256 takerAssetAmount;       // Amount of takerAsset being bid on by maker. Must be greater than 0.        
         uint256 makerFee;               // Amount of ZRX paid to feeRecipient by maker when order is filled. If set to 0, no transfer of ZRX from maker to feeRecipient will be attempted.
         uint256 takerFee;               // Amount of ZRX paid to feeRecipient by taker when order is filled. If set to 0, no transfer of ZRX from taker to feeRecipient will be attempted.
         uint256 expirationTimeSeconds;  // Timestamp in seconds at which order expires.          
-        uint256 salt;                   // Arbitrary number to facilitate uniqueness of the order's hash.     
+        uint256 salt;                   // Arbitrary number to facilitate uniqueness of the order's hash.
+        uint256 minRate;
+        uint256 maxRate;
         
         address sourceToken;    // Source ERC20 token address.
         address targetToken;     // Target ERC20 token address.

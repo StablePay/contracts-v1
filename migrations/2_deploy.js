@@ -5,6 +5,11 @@ const DeployerApp = require('./util/DeployerApp');
 // Env configuration
 const DEFAULT_PRINT_DEPLOY_COST = false;
 const printDeployCostValue = process.env['PRINT_DEPLOY_COST'] || DEFAULT_PRINT_DEPLOY_COST;
+const platformFee = process.env['PLATFORM_FEE'];
+
+if(platformFee === undefined) {
+  throw new Error(`StablePay: Platform fee is not defined in .env file. See details in env.template file.`);
+}
 
 // Mock Smart Contracts
 
@@ -29,8 +34,16 @@ const createPoviderKey = (name, version) => {
   };
 };
 
+const allowedNetworks = ['ganache'];
+
 module.exports = function(deployer, network, accounts) {
   console.log(`Deploying smart contracts to '${network}'.`)
+  
+  if(allowedNetworks.indexOf(network) == -1) {
+    console.log(`NOT deploying smart contracts to '${network}'.`);
+    return;
+  }
+  
   const envConf = require('../config')(network);
   const kyberConf = envConf.kyber;
   const zeroxConf = envConf.zerox;
@@ -71,6 +84,7 @@ module.exports = function(deployer, network, accounts) {
     // Deploy ZeroxSwappingProvider
     await deployerApp.deploy(
       ZeroxSwappingProvider,
+      stablePayInstance.address,
       zeroxContracts.Erc20Proxy,
       zeroxContracts.Exchange,
       zeroxContracts.Weth9,
@@ -87,8 +101,12 @@ module.exports = function(deployer, network, accounts) {
     deployerApp.addData(zeroxProviderKey.name, zeroxProviderKey.providerKey);
 
     // Deploy KyberSwappingProvider
+    await deployerApp.links(KyberSwappingProvider, [
+      SafeMath
+    ]);
     await deployerApp.deploy(
       KyberSwappingProvider,
+      stablePayInstance.address,
       kyberContracts.KyberNetworkProxy
     );
     const kyberProviderKey = createPoviderKey('KyberNetwork', '1');
@@ -98,10 +116,27 @@ module.exports = function(deployer, network, accounts) {
         kyberProviderKey.providerKey
     );
     deployerApp.addData(kyberProviderKey.name, kyberProviderKey.providerKey);
+
+    const storageInstance = await Storage.deployed();
+    await deployerApp.storeContracts(
+      storageInstance,
+      SafeMath,     Bytes32ArrayLib,    StablePayCommon,
+      Settings,     Upgrade,            StablePay,
+      ZeroxSwappingProvider,            KyberSwappingProvider
+    );
+
+    await storageInstance.setUint(
+        config.web3.utils.soliditySha3('platform.fee'),
+        platformFee
+    );
+
+    deployerApp.addData('platform.fee', platformFee);
+    await deployerApp.setOwner(storageInstance, owner);
+    await deployerApp.finalize(storageInstance);
     
     deployerApp.writeJson();
 
-    if(printDeployCostValue) {
+    if(printDeployCostValue === true) {
       deployerApp.prettyPrint(true);
     }
   });

@@ -2,9 +2,12 @@ pragma solidity 0.4.25;
 pragma experimental ABIEncoderV2;
 
 import "../erc20/ERC20.sol";
+import "../kyber/SimpleNetworkInterface.sol";
+import "../kyber/KyberNetworkProxyInterface.sol";
 import "../kyber/KyberNetworkProxy.sol";
 import "../util/StablePayCommon.sol";
 import "./ISwappingProvider.sol";
+import "../util/SafeMath.sol";
 
 /**
 
@@ -13,26 +16,19 @@ https://developer.kyber.network/docs/VendorsGuide/#converting-from-erc20
 https://developer.kyber.network/docs/KyberNetworkProxy/#getexpectedrate
  */
 contract KyberSwappingProvider is ISwappingProvider {
+    using SafeMath for uint256;
 
     ERC20 constant internal ETH_TOKEN_ADDRESS = ERC20(0x00eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee);
     address public proxy;
 
-    /**** Events ***********/
+    /** Events */
 
-    event PaymentSent(
-        address indexed thisContract,
-        address merchant,
-        address customer,
-        address sourceToken,
-        address targetToken,
-        uint amount
-    );
+    /** Modifiers */
 
-    /*** Modifiers ***************/
+    /** Constructor */
 
-    /*** Constructor ***************/
-
-    constructor(address _proxy) public {
+    constructor(address _stablePay, address _proxy)
+        public ISwappingProvider(_stablePay) {
         proxy = _proxy;
     }
 
@@ -42,85 +38,77 @@ contract KyberSwappingProvider is ISwappingProvider {
 
     /*** Methods ***************/
 
-    event Check (
-        address proxy,
-        address sourceToken,
-        address targetToken,
-        uint256 amount
-    );
-
-    function testGetExpectedRate(uint _amount, address _sourceToken, address _targetToken)
+    function getExpectedRate(ERC20 _sourceToken, ERC20 _targetToken, uint _sourceAmount)
     public
     view
     returns (uint, uint)
     {
-        ERC20 sourceToken = ERC20(_sourceToken);
-        ERC20 targetToken = ERC20(_targetToken);
-        return KyberNetworkProxy(proxy).getExpectedRate(sourceToken, targetToken, _amount);
-    }
-
-    event CheckGetRateExpected(
-        address src, address dest, uint srcQty
-    );
-
-    function getExpectedRate(ERC20 _sourceToken, ERC20 _targetToken, uint _amount)
-    public
-    view
-    returns (uint)
-    {
-        require(_amount > 1000, "Amount > 1000.");
         require(address(_sourceToken) != address(0x0), "sourceToken != 0x0.");
         require(address(_targetToken) != address(0x0), "targetoken != 0x0.");
-        uint minConversionRate;
-        uint slippageRate;
-
-        KyberNetworkProxy networkProxy = KyberNetworkProxy(proxy);
-        (minConversionRate,slippageRate) = networkProxy.getExpectedRate(_sourceToken, _targetToken, _amount);
-        return minConversionRate;
-
+        KyberNetworkProxyInterface networkProxy = KyberNetworkProxyInterface(proxy);
+        return networkProxy.getExpectedRate(_sourceToken, _targetToken, _sourceAmount);
     }
 
-    // TODO Add restriction for StablePay contract.
+    event Remain(
+        uint256 _value1,
+        uint256 _value2,
+        uint256 _value3,
+        uint256 _value4
+    );
+
     function swapToken(StablePayCommon.Order _order)
     public
+    isStablePay(msg.sender)
     returns (bool)
     {
         
-        require(_order.amount > 0, "Amount must be > 0");
+        require(_order.sourceAmount > 0, "Amount must be > 0");
         require(_order.merchantAddress != address(0x0), "Merchant must be != 0x0.");
-        address _seller = _order.merchantAddress;
-        uint256 _amount = _order.amount;
+        //uint256 _sourceAmount = _order.sourceAmount;
+        //uint256 _targetAmount = _order.targetAmount;
 
-        ERC20 sourceToken = ERC20(_order.sourceToken);
-        ERC20 targetToken = ERC20(_order.targetToken);
+        //ERC20 sourceToken = ERC20(_order.sourceToken);
+        //ERC20 targetToken = ERC20(_order.targetToken);
 
-        uint256 thisSourceTokenBalance = sourceToken.balanceOf(address(this));
-        require(thisSourceTokenBalance >= _amount, "Not enough tokens in balance.");
+        uint256 thisSourceInitialTokenBalance = ERC20(_order.sourceToken).balanceOf(address(this));
+        require(thisSourceInitialTokenBalance >= _order.sourceAmount, "Not enough tokens in balance.");
 
         // Mitigate ERC20 Approve front-running attack, by initially setting allowance to 0
-        require(sourceToken.approve(address(proxy), 0), "Error mitigating front-running attack.");
+        require(ERC20(_order.sourceToken).approve(address(proxy), 0), "Error mitigating front-running attack.");
         // Set the spender's token allowance to tokenQty
-        require(sourceToken.approve(address(proxy), _amount), "Error approving tokens for proxy."); // Set max amount.
+        require(ERC20(_order.sourceToken).approve(address(proxy), _order.sourceAmount), "Error approving tokens for proxy."); // Set max amount.
 
         // Get the minimum conversion rate
-        uint minConversionRate = getExpectedRate(sourceToken, targetToken, _amount);
+        uint minConversionRate;
+        uint maxRate;
+        (minConversionRate, maxRate) = getExpectedRate(ERC20(_order.sourceToken), ERC20(_order.targetToken), _order.sourceAmount);
 
         // Swap the ERC20 token to ETH
-        uint destAmount = KyberNetworkProxy(proxy).swapTokenToToken(sourceToken, _amount, targetToken, minConversionRate);
-
-        // Send the swapped tokens to the destination address
-        bool transferResult = targetToken.transfer(_seller, destAmount);
-        require(transferResult, "Transfer invocation was not successful.");
-
-        emit PaymentSent(
-            address(this),
-            _seller,
+        uint remainSourceTokens = KyberNetworkProxy(proxy).trade(
+            ERC20(_order.sourceToken),
+            _order.sourceAmount,
+            ERC20(_order.targetToken),
             msg.sender,
-            address(sourceToken),
-            address(targetToken),
-            destAmount
+            _order.targetAmount,
+            minConversionRate,
+            0
         );
+
+        uint256 thisSourceFinalTokenBalance = ERC20(_order.sourceToken).balanceOf(address(this));
         
+        /*
+        uint256 value = thisSourceInitialTokenBalance.sub(thisSourceFinalTokenBalance);
+        emit Remain(
+            thisSourceInitialTokenBalance,
+            thisSourceFinalTokenBalance,
+            remainSourceTokens,
+            value
+        );
+        */
+
+        bool sourceTransferResult = ERC20(_order.sourceToken).transfer(msg.sender, thisSourceFinalTokenBalance);
+        require(sourceTransferResult, "Source transfer invocation was not successful.");
+
         return true;
     }
 

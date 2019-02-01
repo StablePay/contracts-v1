@@ -2,6 +2,12 @@ pragma solidity 0.4.25;
 
 import "../interface/IStorage.sol";
 
+
+/**
+     
+     
+     @notice Reentrancy Guard: Remco Bloemen <remco@2π.com>: If you mark a function `nonReentrant`, you should also mark it `external`.
+ */
 contract Base {
     /** Constants */
 
@@ -11,8 +17,17 @@ contract Base {
     string constant internal CONTRACT_NAME = "contract.name";
     string constant internal CONTRACT_ADDRESS = "contract.address";
 
+    string constant internal OWNER = "owner";
+    string constant internal ADMIN = "admin";
+    string constant internal ACCESS_ROLE = "access.role";
+
     /** Properties */
     uint8 public version;  // Version of this contract
+
+    /**
+    * @dev We use a single lock for the whole contract.
+    */
+    bool private rentrancy_lock = false;
 
     /**
         @dev The main storage contract where primary persistant storage is maintained    
@@ -20,11 +35,27 @@ contract Base {
     IStorage public _storage = IStorage(0);     
 
     /** Modifiers */
+
+    /**
+    * @dev Prevents a contract from calling itself, directly or indirectly.
+    * @notice If you mark a function `nonReentrant`, you should also
+    * mark it `external`. Calling one nonReentrant function from
+    * another is not supported. Instead, you can implement a
+    * `private` function doing the actual work, and a `external`
+    * wrapper marked as `nonReentrant`.
+    */
+    modifier nonReentrant() {
+        require(!rentrancy_lock);
+        rentrancy_lock = true;
+        _;
+        rentrancy_lock = false;
+    }
+
     /**
     * @dev Throws if called by any account other than the owner.
     */
     modifier onlyOwner() {
-        roleCheck("owner", msg.sender);
+        roleCheck(OWNER, msg.sender);
         _;
     }
 
@@ -32,7 +63,7 @@ contract Base {
     * @dev Modifier to scope access to admins
     */
     modifier onlyAdmin() {
-        roleCheck("admin", msg.sender);
+        roleCheck(ADMIN, msg.sender);
         _;
     }
 
@@ -41,8 +72,8 @@ contract Base {
     */
     modifier onlySuperUser() {
         require(
-            roleHas("owner", msg.sender) == true || 
-            roleHas("admin", msg.sender) == true
+            roleHas(OWNER, msg.sender) == true || 
+            roleHas(ADMIN, msg.sender) == true
         );
         _;
     }
@@ -82,7 +113,7 @@ contract Base {
     * @return bool
     */
     function roleHas(string _role, address _address) internal view returns (bool) {
-        return _storage.getBool(keccak256(abi.encodePacked("access.role", _role, _address)));
+        return _storage.getBool(keccak256(abi.encodePacked(ACCESS_ROLE, _role, _address)));
     }
 
     /**

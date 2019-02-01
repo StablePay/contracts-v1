@@ -186,9 +186,8 @@ DeployerApp.prototype.writeJson = function(outputJson = './build/contracts.json'
 
     for (const key of keys) {
         jsonData.data.push({
-            providerKey: key,
-            providerAddress: this.data.get(key)
-
+            key: key,
+            value: this.data.get(key)
         });
     }
 
@@ -228,6 +227,78 @@ DeployerApp.prototype.prettyPrint = function(printStrategyCosts = false) {
             console.log('\n');
         }
     }
+}
+
+DeployerApp.prototype.getContractData = function(contractName) {
+    for (const contract of this.contracts) {
+        if(contract.name.toLowerCase() === contractName.toLowerCase() ) {
+            return contract;
+        }
+    }
+    return undefined;
+}
+
+DeployerApp.prototype.storeContract = async function(storageInstance, contract) {
+    const contractInfo = this.getContractData(contract.contractName);
+    console.log(`Storing contract info '${contract.contractName}' => ${contract.address}`)
+    const contractNameSha3 = this.web3.utils.soliditySha3('contract.name', contract.contractName);
+    await storageInstance.setAddress(
+        contractNameSha3,
+        contract.address
+    );
+    //console.log(`SHA3 ('contract.name','${contract.contractName}') = '${contractNameSha3}'`);
+
+    const contractAddressSha3 = this.web3.utils.soliditySha3('contract.address', contract.address);
+    await storageInstance.setAddress(
+        contractAddressSha3,
+        contract.address
+    );
+    //console.log(`SHA3 ('contract.address','${contract.address}') = '${contractAddressSha3}'`);
+    contractInfo.data.sha3 = {};
+    contractInfo.data.sha3[`contract_address_${contract.address}`] = contractAddressSha3;
+    contractInfo.data.sha3[`contract_name_${contract.contractName}`] = contractNameSha3;
+}
+
+DeployerApp.prototype.storeContracts = async function(storageInstance, ...contracts) {
+    for (const contract of contracts) {
+        await this.storeContract(storageInstance, contract);
+    }
+}
+
+DeployerApp.prototype.setOwner = async function(storageInstance, ownerAddress) {
+    const contractNameOwnerSha3 = this.web3.utils.soliditySha3('contract.name', 'owner');
+    await storageInstance.setAddress(
+        contractNameOwnerSha3,
+        ownerAddress
+    );
+    this.addData(`contract.name_owner`,{
+        sha3: contractNameOwnerSha3,
+        ownerAddress: ownerAddress
+    });
+    
+    // Register owner in bool
+    const accessRoleOwnerSha3 = this.web3.utils.soliditySha3('access.role', 'owner', ownerAddress);
+    await storageInstance.setBool(
+        accessRoleOwnerSha3,
+        true
+    );
+    this.addData(`access.role_owner_${ownerAddress}`, {
+        sha3: accessRoleOwnerSha3,
+        value: true
+    });
+}
+
+DeployerApp.prototype.finalize = async function(storageInstance) {
+    // Disable direct access to storage now
+    const contractStorageInitialisedSha3 = this.web3.utils.soliditySha3('contract.storage.initialised');
+    await storageInstance.setBool(
+        contractStorageInitialisedSha3,
+        true
+    );
+    this.addData(`contract.storage.initialised`, {
+        sha3: contractStorageInitialisedSha3,
+        value: true
+    });
 }
 
 module.exports = DeployerApp;

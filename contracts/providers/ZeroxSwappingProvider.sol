@@ -22,7 +22,8 @@ contract ZeroxSwappingProvider is ISwappingProvider {
 
     /*** Constructor ***************/
 
-    constructor(address _assetProxy, address _exchange, address _wethErc20) public {
+    constructor(address _stablePay, address _assetProxy, address _exchange, address _wethErc20)
+        public ISwappingProvider(_stablePay) {
         assetProxy = _assetProxy;
         exchange = _exchange;
         wethErc20 = _wethErc20;
@@ -79,18 +80,18 @@ contract ZeroxSwappingProvider is ISwappingProvider {
         checkAllowance(
             _order.sourceToken,
             msg.sender,
-            _order.amount
+            _order.sourceAmount
         );
         
         // Transfer the tokens from seller to this contract.
         transferFromPayer(
             _order.sourceToken,
             msg.sender,
-            _order.amount
+            _order.sourceAmount
         );
         
         // Allow Exchange to the transfer amount.
-        ERC20(_order.sourceToken).approve(assetProxy, _order.amount);
+        ERC20(_order.sourceToken).approve(assetProxy, _order.sourceAmount);
 
         // Call fillOrder function in the IExchange instance.
         LibOrder.Order memory _zeroxOrder = LibOrder.Order({
@@ -109,7 +110,7 @@ contract ZeroxSwappingProvider is ISwappingProvider {
         });
         LibFillResults.FillResults memory fillResults = IExchange(exchange).fillOrder(
             _zeroxOrder,
-            _order.amount,
+            _order.sourceAmount,
             _order.signature
         );
 
@@ -133,10 +134,10 @@ contract ZeroxSwappingProvider is ISwappingProvider {
         //now we have the weth continue with transaction
 
         // Check if this contract has enough balance.
-        require(weth.balanceOf(address(this)) >= _order.amount);
+        require(weth.balanceOf(address(this)) >= _order.sourceAmount);
 
         // Allow Exchange to the transfer amount.
-        weth.approve(assetProxy, _order.amount);
+        weth.approve(assetProxy, _order.sourceAmount);
 
         // Call fillOrder function in the IExchange instance.
         LibOrder.Order memory _zeroxOrder = LibOrder.Order({
@@ -155,7 +156,7 @@ contract ZeroxSwappingProvider is ISwappingProvider {
         });
         LibFillResults.FillResults memory fillResults = IExchange(exchange).fillOrder(
             _zeroxOrder,
-            _order.amount,
+            _order.sourceAmount,
             _order.signature
         );
 
@@ -179,10 +180,10 @@ contract ZeroxSwappingProvider is ISwappingProvider {
         //now we have the weth continue with transaction
 
         // Check if this contract has enough balance.
-        require(weth.balanceOf(address(this)) >= _order.amount);
+        require(weth.balanceOf(address(this)) >= _order.sourceAmount);
 
         // Allow Exchange to the transfer amount.
-        weth.approve(assetProxy, _order.amount);
+        weth.approve(assetProxy, _order.sourceAmount);
 
         // Call fillOrder function in the IExchange instance.
         LibOrder.Order memory _zeroxOrder = LibOrder.Order({
@@ -201,7 +202,7 @@ contract ZeroxSwappingProvider is ISwappingProvider {
         });
         LibFillResults.FillResults memory fillResults = IExchange(exchange).fillOrder(
             _zeroxOrder,
-            _order.amount,
+            _order.sourceAmount,
             _order.signature
         );
 
@@ -213,7 +214,7 @@ contract ZeroxSwappingProvider is ISwappingProvider {
         return true;
     }
 
-    function getExpectedRate(ERC20 _sourceToken, ERC20 _targetToken, uint _amount) public view returns (uint) {
-        return 0;
+    function getExpectedRate(ERC20 _sourceToken, ERC20 _targetToken, uint _amount) public view returns (uint, uint) {
+        return (0, 0);
     }
 }

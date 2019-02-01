@@ -6,6 +6,24 @@ import "../erc20/ERC20.sol";
 
 contract ISwappingProvider {
 
+    /** Events */
+
+    /** Properties */
+    address public stablePay;
+
+    /** Modifiers */
+
+    modifier isStablePay(address _anAddress) {
+        require(stablePay == _anAddress, "Address must be StablePay");
+        _;
+    }
+
+    /** Constructor */
+
+    constructor(address _stablePay) public {
+        stablePay = _stablePay;
+    }
+
     /**
         @dev Perform the swapping between tokens.
         @dev The function must transfer the target tokens to the StablePay smart contract.
@@ -14,9 +32,9 @@ contract ISwappingProvider {
      */
     function swapToken(StablePayCommon.Order order) public returns (bool);
 
-
     function swapEther(StablePayCommon.Order order) public payable returns (bool);
 
-    function getExpectedRate(ERC20 _sourceToken, ERC20 _targetToken, uint _amount) public view returns (uint);
+    function getExpectedRate(ERC20 src, ERC20 dest, uint srcQty) public view returns (uint, uint);
 
+    //function isValidSwapData(StablePayCommon.Order order) public view returns (bool);
 }
