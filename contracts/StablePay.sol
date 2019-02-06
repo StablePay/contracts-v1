@@ -1,14 +1,23 @@
 pragma solidity 0.4.25;
 pragma experimental ABIEncoderV2;
 
+import "./erc20/ERC20.sol";
+import "./base/Base.sol";
 import "./util/SafeMath.sol";
-import "./StablePayCommon.sol";
-import "./ISwappingProvider.sol";
+import "./util/Bytes32ArrayLib.sol";
+import "./util/StablePayCommon.sol";
+import "./util/AddressLib.sol";
+import "./providers/ISwappingProvider.sol";
+import "./interface/IERC1155TokenReceiver.sol";
 
-contract StablePay {
+contract StablePay is Base {
     using SafeMath for uint256;
+    using Bytes32ArrayLib for bytes32[];
+    using AddressLib for address;
 
     /** Properties */
+    // onReceive function signatures                              
+    bytes4 constant public ERC1155_RECEIVED_VALUE = 0xf23a6e61;
 
     address public owner;
 
@@ -17,7 +26,24 @@ contract StablePay {
      */
     mapping (bytes32 => StablePayCommon.SwappingProvider) public providers;
 
-    /**** Events ***********/
+    /**
+        @dev This registry is used to know all the providers created in StablePay.
+     */
+    bytes32[] public providersRegistry;
+
+    /** Events */
+
+    /**
+        @dev This event is emitted when a new payment is sent to an address.
+     */
+    event PaymentSent(
+        address indexed thisContract,
+        address merchant,
+        address customer,
+        address sourceToken,
+        address targetToken,
+        uint amount
+    );
 
     /**
         @dev This event is emitted when a new swapping provider is registered.
@@ -26,7 +52,8 @@ contract StablePay {
         address indexed thisContract,
         bytes32 providerKey,
         address swappingProvider,
-        address owner
+        address owner,
+        uint256 createdAt
     );
 
     /**
@@ -53,7 +80,7 @@ contract StablePay {
     event SwapEthExecutionFailed(
         address indexed thisContract,
         address indexed strategyAddress,
-        bytes32 _providerKey
+        bytes32 providerKey
     );
 
     /**
@@ -62,7 +89,7 @@ contract StablePay {
     event SwapEthExecutionSuccess(
         address indexed thisContract,
         address indexed strategyAddress,
-        bytes32 _providerKey
+        bytes32 providerKey
     );
 
     /**
@@ -85,8 +112,18 @@ contract StablePay {
         _;
     }
 
+    modifier swappingProviderExists(bytes32 _providerKey) {
+        require(providers[_providerKey].exists == true, "Swapping provider must exist.");
+        _;
+    }
+
     modifier isSwappingProviderOwner(bytes32 _providerKey, address _owner) {
         require(providers[_providerKey].ownerAddress == _owner, "Swapping provider owner is not valid.");
+        _;
+    }
+
+    modifier _isSwappingProviderPaused(bytes32 _providerKey) {
+        require(providers[_providerKey].paused == true, "Swapping provider must be paused.");
         _;
     }
 
@@ -101,22 +138,112 @@ contract StablePay {
 
     /*** Constructor ***************/
 
-    constructor() public {
+    constructor(address _storageAddress)
+        public Base(_storageAddress) {
         owner = msg.sender;
     }
+
 
     /*** Fallback Method ***************/
 
     function () public payable {}
 
     /*** Methods ***************/
-    function getSwappingProvider(bytes32 _providerKey)
-        internal
+
+    // TODO Modify to getExpectedAmount ?
+    function getExpectedRate(bytes32 _providerKey, ERC20 _src, ERC20 _dest, uint _srcQty)
+        public
         view
-        returns (StablePayCommon.SwappingProvider){
-            return providers[_providerKey];
+        returns (uint, uint) {
+        require(isSwappingProviderValid(_providerKey), "Provider must exist and be enabled.");
+        StablePayCommon.SwappingProvider memory swappingProvider = providers[_providerKey];
+        ISwappingProvider iSwappingProvider = ISwappingProvider(swappingProvider.providerAddress);
+        return iSwappingProvider.getExpectedRate(_src, _dest, _srcQty);
     }
 
+    function getExpectedRates(ERC20 _src, ERC20 _dest, uint _srcQty)
+        public
+        view
+        returns (StablePayCommon.ExpectedRate[]) {
+            StablePayCommon.ExpectedRate[] expectedRates;
+
+            for (uint256 index = 0; index < providersRegistry.length; index = index.add(1)) {
+                bytes32 _providerKey = providersRegistry[index];
+                if(isSwappingProviderValid(_providerKey)) {
+                    StablePayCommon.SwappingProvider storage swappingProvider = providers[_providerKey];
+                    ISwappingProvider iSwappingProvider = ISwappingProvider(swappingProvider.providerAddress);
+                    uint expectedRate;
+                    uint minRate;
+                    (expectedRate, minRate) = iSwappingProvider.getExpectedRate(_src, _dest, _srcQty);
+                    expectedRates.push(StablePayCommon.ExpectedRate({
+                        providerKey: _providerKey,
+                        minRate: minRate,
+                        maxRate: expectedRate
+                    }));
+                }
+            }
+            return expectedRates;
+    }
+
+    function notifyIfContract(address _to)
+        internal
+        returns (bool) {
+        //Pass data if recipient is contract
+        if (_to.isContract()) {
+            // Call receiver function on recipient
+            //bytes4 retval = IERC1155TokenReceiver(_to).onERC1155Received(msg.sender, _from, _id, _value, _data);
+            //require(retval == ERC1155_RECEIVED_VALUE, "INVALID_ON_RECEIVE_MESSAGE");
+        }
+    }
+
+    function getExpectedRateRange(ERC20 _src, ERC20 _dest, uint _srcQty)
+        public
+        view
+        returns (uint minRate, uint maxRate) {
+            uint minRateResult = 0;
+            uint maxRateResult = 0;
+
+            for (uint256 index = 0; index < providersRegistry.length; index = index.add(1)) {
+                bytes32 _providerKey = providersRegistry[index];
+                if(isSwappingProviderValid(_providerKey)) {
+                    StablePayCommon.SwappingProvider storage swappingProvider = providers[_providerKey];
+                    ISwappingProvider iSwappingProvider = ISwappingProvider(swappingProvider.providerAddress);
+                    uint expectedRateProvider;
+                    uint minRateProvider;
+                    (expectedRateProvider, minRateProvider) = iSwappingProvider.getExpectedRate(_src, _dest, _srcQty);
+                    
+                    if(maxRateResult == 0 || expectedRateProvider > maxRateResult) {
+                        maxRateResult = expectedRateProvider;
+                    }
+
+                    if(minRateResult == 0 || minRateProvider < minRateResult) {
+                        minRateResult = minRateProvider;
+                    }
+                }
+            }
+            return (minRateResult, maxRateResult);
+    }
+
+    function getSwappingProvider(bytes32 _providerKey)
+        public
+        view
+        returns (address providerAddress, address ownerAddress, bool paused, bool exists){
+            StablePayCommon.SwappingProvider memory provider = providers[_providerKey];
+            return (
+                provider.providerAddress,
+                provider.ownerAddress,
+                provider.paused,
+                provider.exists
+            );
+    }
+
+    function isSwappingProviderPaused(bytes32 _providerKey)
+        public
+        view
+        returns (bool){
+            return  providers[_providerKey].exists && 
+                    providers[_providerKey].paused;
+    }
 
     function isSwappingProviderValid(bytes32 _providerKey)
         internal
@@ -125,8 +252,16 @@ contract StablePay {
             return providers[_providerKey].exists && !providers[_providerKey].paused;
     }
 
+    function getProvidersRegistryCount()
+        public
+        view
+        returns (uint256){
+            return providersRegistry.length;
+    }
+
     function pauseSwappingProvider(bytes32 _providerKey)
         public
+        swappingProviderExists(_providerKey)
         isSwappingProviderOwner(_providerKey, msg.sender)
         returns (bool){
 
@@ -141,7 +276,9 @@ contract StablePay {
 
     function unpauseSwappingProvider(bytes32 _providerKey)
         public
+        swappingProviderExists(_providerKey)
         isSwappingProviderOwner(_providerKey, msg.sender)
+        _isSwappingProviderPaused(_providerKey)
         returns (bool){
 
         providers[_providerKey].paused = false;
@@ -167,15 +304,18 @@ contract StablePay {
         providers[_providerKey] = StablePayCommon.SwappingProvider({
             providerAddress: _providerAddress,
             ownerAddress: _owner,
+            createdAt: now,
             paused: false,
             exists: true
         });
+        providersRegistry.add(_providerKey);
 
         emit NewSwappingProviderRegistered(
             address(this),
             _providerKey,
-            _providerAddress,
-            _owner
+            providers[_providerKey].providerAddress,
+            providers[_providerKey].ownerAddress,
+            providers[_providerKey].createdAt
         );
 
         return true;
@@ -192,8 +332,10 @@ contract StablePay {
         return registerSwappingProvider(_providerAddress, _providerKey, msg.sender);
     }
 
-    function payToken(StablePayCommon.Order order, bytes32[] _providerKeys)
+
+    function swapToken(StablePayCommon.Order order, bytes32[] _providerKeys)
     public
+    nonReentrant()
     returns (bool)
     {
         require(_providerKeys.length > 0, "Provider keys must not be empty.");
@@ -201,14 +343,46 @@ contract StablePay {
         for (uint256 index = 0; index < _providerKeys.length; index = index.add(1)) {
             bytes32 _providerKey = _providerKeys[index];
             /*
-                TODO The validation process may be delegated to the SwappingProvider smart contract using a method ```iSwappingProvider.isOrderValid(order);```
-            */ 
+            TODO The validation process may be delegated to the SwappingProvider smart contract using a method ```iSwappingProvider.isOrderValid(order);```
+            */
             if(isSwappingProviderValid(_providerKey)) {
+                require(ERC20(order.sourceToken).allowance(msg.sender, address(this)) >= order.sourceAmount, "Not enough allowed tokens to StablePay.");
+
                 StablePayCommon.SwappingProvider storage swappingProvider = providers[_providerKey];
+
+                require(ERC20(order.sourceToken).transferFrom(msg.sender, swappingProvider.providerAddress, order.sourceAmount), "Transfer from StablePay was not successful.");
+
+                uint stablePayInitialBalance = ERC20(order.targetToken).balanceOf(address(this));
+
                 ISwappingProvider iSwappingProvider = ISwappingProvider(swappingProvider.providerAddress);
 
-                bool result = iSwappingProvider.payToken(order);
-                if(result) {
+                if(iSwappingProvider.swapToken(order)) {
+                    uint stablePaySourceBalance = ERC20(order.sourceToken).balanceOf(address(this));
+                    
+                    require(
+                        ERC20(order.sourceToken).transfer(msg.sender, stablePaySourceBalance),
+                        "Transfer to customer failed."
+                    );
+
+                    uint stablePayTargetBalance = ERC20(order.targetToken).balanceOf(address(this));
+                    //require(stablePayTargetBalance == order.targetAmount, "StablePay target balance is not valid.");
+                    
+                    require(
+                        ERC20(order.targetToken).transfer(order.merchantAddress, stablePayTargetBalance),
+                        "Transfer to merchant failed."
+                    );
+
+                    emit PaymentSent(
+                        address(this),
+                        order.merchantAddress,
+                        msg.sender,
+                        order.sourceToken,
+                        order.targetToken,
+                        stablePayTargetBalance
+                    );
+
+                    notifyIfContract(order.targetToken);
+
                     emit SwapExecutionSuccess(
                         address(this),
                         swappingProvider.providerAddress,
@@ -227,7 +401,7 @@ contract StablePay {
         return false;
     }
 
-    function payEther(StablePayCommon.Order order, bytes32[] _providerKeys)
+    function swapEther(StablePayCommon.Order order, bytes32[] _providerKeys)
     public
     payable
     returns (bool)
@@ -238,12 +412,12 @@ contract StablePay {
             bytes32 _providerKey = _providerKeys[index];
             /*
                 TODO The validation process may be delegated to the SwappingProvider smart contract using a method ```iSwappingProvider.isOrderValid(order);```
-            */ 
+            */
             if(isSwappingProviderValid(_providerKey)) {
                 StablePayCommon.SwappingProvider storage swappingProvider = providers[_providerKey];                
                 ISwappingProvider iSwappingProvider = ISwappingProvider(swappingProvider.providerAddress);
                 
-                bool result = iSwappingProvider.payEther.value(msg.value)(order);
+                bool result = iSwappingProvider.swapEther.value(msg.value)(order);
                 if(result) {
                     emit SwapEthExecutionSuccess(
                         address(this),

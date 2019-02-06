@@ -22,7 +22,6 @@ const DEFAULT_GAS_GWEI_PRICE = '20';
 
 const web3 = new Web3();
 const HDWalletProvider = require('truffle-hdwallet-provider');
-//var ganache = require('ganache-cli');
 
 const addressCountValue = process.env['ADDRESS_COUNT_KEY'] || DEFAULT_ADDRESS_COUNT;
 const mnemonicKeyValue = process.env['MNEMONIC_KEY'] || '';
@@ -37,6 +36,11 @@ const gasPriceKeyValue = process.env['GAS_PRICE_GWEI_KEY'] || DEFAULT_GAS_GWEI_P
 
 module.exports = {
 	web3: Web3,
+	compilers: {
+		solc: {
+			version: "0.4.25",
+		}
+	},
 	networks: {
 		geth: {
 			host: 'localhost',
@@ -47,7 +51,7 @@ module.exports = {
 			host: '127.0.0.1',
 			port: 8545,
 			network_id: 5777,
-			 function() {
+			function() {
 				return new HDWalletProvider(
 					mnemonicKeyValue,
 					`http://localhost:8545`,
@@ -70,7 +74,7 @@ module.exports = {
 			},
 			gas: gasKeyValue,
 			gasPrice: web3.utils.toWei(gasPriceKeyValue, 'gwei'),
-			network_id: '5'
+			network_id: '4'
 		},
 		infuraKovan: {
 			provider: function() {
@@ -83,7 +87,7 @@ module.exports = {
 			},
 			gas: gasKeyValue,
 			gasPrice: web3.utils.toWei(gasPriceKeyValue, 'gwei'),
-			network_id: '4'
+			network_id: '42'
 		},
 		infuraRopsten: {
 			provider: function() {
