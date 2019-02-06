@@ -18,10 +18,12 @@ const Bytes32ArrayLib = artifacts.require("./util/Bytes32ArrayLib.sol");
 
 // Official Smart Contracts
 const Settings = artifacts.require("./base/Settings.sol");
+const Role = artifacts.require("./base/Role.sol");
 const Storage = artifacts.require("./base/Storage.sol");
 const Upgrade = artifacts.require("./base/Upgrade.sol");
 const StablePay = artifacts.require("./StablePay.sol");
 const SafeMath = artifacts.require("./util/SafeMath.sol");
+const AddressLib = artifacts.require("./util/AddressLib.sol");
 const StablePayCommon = artifacts.require("./StablePayCommon.sol");
 const ZeroxSwappingProvider = artifacts.require("./providers/ZeroxSwappingProvider.sol");
 const KyberSwappingProvider = artifacts.require("./providers/KyberSwappingProvider.sol");
@@ -67,15 +69,18 @@ module.exports = function(deployer, network, accounts) {
     await deployerApp.deploys([
       Bytes32ArrayLib,
       Storage,
-      StablePayCommon
+      StablePayCommon,
+      AddressLib
     ]);
 
     await deployerApp.deploy(Settings, Storage.address);
     await deployerApp.deploy(Upgrade, Storage.address);
+    await deployerApp.deploy(Role, Storage.address);
 
     await deployerApp.links(StablePay, [
       Bytes32ArrayLib,
-      SafeMath
+      SafeMath,
+      AddressLib
     ]);
     await deployerApp.deploy(StablePay, Storage.address, {from: owner});
     
@@ -122,7 +127,8 @@ module.exports = function(deployer, network, accounts) {
       storageInstance,
       SafeMath,     Bytes32ArrayLib,    StablePayCommon,
       Settings,     Upgrade,            StablePay,
-      ZeroxSwappingProvider,            KyberSwappingProvider
+      ZeroxSwappingProvider,            KyberSwappingProvider,
+      Role,         AddressLib
     );
 
     await storageInstance.setUint(

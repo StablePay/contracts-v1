@@ -1,4 +1,5 @@
 const BigNumber = require('bignumber.js');
+const AmountsCalculator = require('./expectedRate/AmountsCalculator');
 
 module.exports = {
     getBalances: async function (address, ...erc20s) {
@@ -6,14 +7,12 @@ module.exports = {
             address: address,
             tokens: new Map()
         };
-
         for (const erc20 of erc20s) {
             balances.tokens.set(erc20.name, await erc20.instance.balanceOf(address));
         }
-        console.log(balances);
         return balances;
     },
-    printBalance: function (who, initialBalances, finalBalances) {
+    printBalance: function (who, initialBalances, finalBalances, printBalances = false) {
         const resultBalances = new Map();
         for (var tokenNameInitialTokenBalance of initialBalances.tokens.entries()) {
             const tokenName = tokenNameInitialTokenBalance[0];
@@ -21,7 +20,11 @@ module.exports = {
 
             const finalTokenBalance = finalBalances.tokens.get(tokenName);
             const result = new BigNumber(finalTokenBalance).minus(new BigNumber(initialTokenBalance)).toNumber();
-            console.log(`${who.padEnd(10)} ${tokenName.padEnd(4)}: ${initialTokenBalance}    ->  ${finalTokenBalance} = ${result}`);
+
+            if(printBalances === true) {
+                console.log(`${who.padEnd(10)} ${tokenName.padEnd(4)}: ${initialTokenBalance}    ->  ${finalTokenBalance} = ${result}`);
+            }
+            
             resultBalances.set(tokenName, new BigNumber(result.toString()));
         }
         return resultBalances;

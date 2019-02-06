@@ -6,13 +6,18 @@ import "./base/Base.sol";
 import "./util/SafeMath.sol";
 import "./util/Bytes32ArrayLib.sol";
 import "./util/StablePayCommon.sol";
+import "./util/AddressLib.sol";
 import "./providers/ISwappingProvider.sol";
+import "./interface/IERC1155TokenReceiver.sol";
 
 contract StablePay is Base {
     using SafeMath for uint256;
     using Bytes32ArrayLib for bytes32[];
+    using AddressLib for address;
 
     /** Properties */
+    // onReceive function signatures                              
+    bytes4 constant public ERC1155_RECEIVED_VALUE = 0xf23a6e61;
 
     address public owner;
 
@@ -180,10 +185,21 @@ contract StablePay is Base {
             return expectedRates;
     }
 
+    function notifyIfContract(address _to)
+        internal
+        returns (bool) {
+        //Pass data if recipient is contract
+        if (_to.isContract()) {
+            // Call receiver function on recipient
+            //bytes4 retval = IERC1155TokenReceiver(_to).onERC1155Received(msg.sender, _from, _id, _value, _data);
+            //require(retval == ERC1155_RECEIVED_VALUE, "INVALID_ON_RECEIVE_MESSAGE");
+        }
+    }
+
     function getExpectedRateRange(ERC20 _src, ERC20 _dest, uint _srcQty)
         public
         view
-        returns (uint, uint) {
+        returns (uint minRate, uint maxRate) {
             uint minRateResult = 0;
             uint maxRateResult = 0;
 
@@ -192,16 +208,16 @@ contract StablePay is Base {
                 if(isSwappingProviderValid(_providerKey)) {
                     StablePayCommon.SwappingProvider storage swappingProvider = providers[_providerKey];
                     ISwappingProvider iSwappingProvider = ISwappingProvider(swappingProvider.providerAddress);
-                    uint expectedRate;
-                    uint minRate;
-                    (expectedRate, minRate) = iSwappingProvider.getExpectedRate(_src, _dest, _srcQty);
+                    uint expectedRateProvider;
+                    uint minRateProvider;
+                    (expectedRateProvider, minRateProvider) = iSwappingProvider.getExpectedRate(_src, _dest, _srcQty);
                     
-                    if(maxRateResult == 0 || expectedRate < maxRateResult) {
-                        maxRateResult = expectedRate;
+                    if(maxRateResult == 0 || expectedRateProvider > maxRateResult) {
+                        maxRateResult = expectedRateProvider;
                     }
 
-                    if(minRateResult ==0 || minRate < minRateResult) {
-                        minRateResult = minRate;
+                    if(minRateResult == 0 || minRateProvider < minRateResult) {
+                        minRateResult = minRateProvider;
                     }
                 }
             }
@@ -316,6 +332,7 @@ contract StablePay is Base {
         return registerSwappingProvider(_providerAddress, _providerKey, msg.sender);
     }
 
+
     function swapToken(StablePayCommon.Order order, bytes32[] _providerKeys)
     public
     nonReentrant()
@@ -340,7 +357,6 @@ contract StablePay is Base {
                 ISwappingProvider iSwappingProvider = ISwappingProvider(swappingProvider.providerAddress);
 
                 if(iSwappingProvider.swapToken(order)) {
-                    // TODO Add require for initial/final balances.
                     uint stablePaySourceBalance = ERC20(order.sourceToken).balanceOf(address(this));
                     
                     require(
@@ -349,7 +365,7 @@ contract StablePay is Base {
                     );
 
                     uint stablePayTargetBalance = ERC20(order.targetToken).balanceOf(address(this));
-                    require(stablePayTargetBalance == order.targetAmount, "stablePayTargetBalance == order.targetAmount");
+                    //require(stablePayTargetBalance == order.targetAmount, "StablePay target balance is not valid.");
                     
                     require(
                         ERC20(order.targetToken).transfer(order.merchantAddress, stablePayTargetBalance),
@@ -364,6 +380,8 @@ contract StablePay is Base {
                         order.targetToken,
                         stablePayTargetBalance
                     );
+
+                    notifyIfContract(order.targetToken);
 
                     emit SwapExecutionSuccess(
                         address(this),

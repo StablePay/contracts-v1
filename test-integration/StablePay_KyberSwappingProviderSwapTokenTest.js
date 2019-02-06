@@ -1,6 +1,6 @@
 const chai = require('chai');
 const BigNumber = require('bignumber.js');
-const AmountsCalculator = require('../test/util/expectedRate/AmountsCalculator');
+const RatesCalculator = require('../test/util/expectedRate/RatesCalculator');
 
 const contracts = require('../build/contracts.json');
 const providersMap = new Map();
@@ -22,7 +22,7 @@ const leche = require('leche');
 const withData = leche.withData;
 const t = require('../test/util/TestUtil').title;
 
-const { printBalanceOf, getBalances, printBalance } = require('../test/util/payUtil');
+const { getBalances, printBalance } = require('../test/util/payUtil');
 
 contract('StablePay_KyberSwappingProviderSwapTokenTest', (accounts) => {
     const appConf = require('../config')('ganache');
@@ -70,14 +70,16 @@ contract('StablePay_KyberSwappingProviderSwapTokenTest', (accounts) => {
     });
 
     withData({
-        _1_001_001: ["2000", "100"]
-    }, function(sourceTokenAmount, targetTokenAmount) {
+        //_1_100: ["100", false],
+        _2_200: ["200", false],
+        //_3_300: ["300", false],
+        //_4_400: ["400", false]
+    }, function(targetTokenAmount, printBalances) {
         it(t('anUser', 'swapToken', 'Should be able to swap tokens.'), async function() {
             // Setup
             const sourceToken = {
                 name: 'KNC',
-                instance: sourceErc20,
-                amount: sourceTokenAmount
+                instance: sourceErc20
             };
             const targetToken = {
                 name: 'OMG',
@@ -86,64 +88,47 @@ contract('StablePay_KyberSwappingProviderSwapTokenTest', (accounts) => {
             };
 
             // Get the initial balances (source and target tokens) for customer and merchant.
-            await sourceErc20.transfer(customerAddress, sourceToken.amount, {from: owner});
+            const ratesCalculator = new RatesCalculator(kyberProxy, stablePay);
+            const resultRates = await ratesCalculator.calculateRates(sourceToken.instance.address, targetToken.instance.address, targetTokenAmount);
+            const {minRate, maxRate, minAmount, maxAmount} = resultRates;
 
+            console.log(JSON.stringify(resultRates));
+
+            sourceToken.amount = maxAmount;
+
+            await sourceErc20.transfer(customerAddress, sourceToken.amount, {from: owner});
+            
             const customerAddressInitial = await getBalances(customerAddress, sourceToken, targetToken);
             const merchantAddressInitial = await getBalances(merchantAddress, sourceToken, targetToken);
             const kyberProviderAddressInitial = await getBalances(kyberProvider.address, sourceToken, targetToken);
             const stablePayAddressInitial = await getBalances(stablePay.address, sourceToken, targetToken);
 
-            console.log(`Source Amount:     ${sourceToken.amount}`);
-            console.log(`Target Amount:     ${targetToken.amount}`);
-
-            const getExpectedRateResult_1 = await kyberProxy.getExpectedRate(
-                sourceToken.instance.address,
-                targetToken.instance.address,
-                "1"
-            );
-            const amountsCalculator = new AmountsCalculator(targetToken.amount);
-            const sourceAmountNeeded_1 = amountsCalculator.calculateAmountBased(getExpectedRateResult_1.expectedRate).decimalPlaces(0).toString();
-            console.log(`Expected Rate 1:     ${getExpectedRateResult_1.expectedRate}`);
-            console.log(`Slippage Rate 1:     ${getExpectedRateResult_1.slippageRate}`);
-            console.log(`Source Amount 1:     ${sourceAmountNeeded_1}`);
-
-            const getExpectedRateResult_2 = await kyberProxy.getExpectedRate(
-                sourceToken.instance.address,
-                targetToken.instance.address,
-                sourceAmountNeeded_1
-            );
-            assert(getExpectedRateResult_2);
-
-            const sourceAmountNeeded_2 = amountsCalculator.calculateAmountBased(getExpectedRateResult_2.slippageRate).decimalPlaces(0).toString();
-            console.log(`Expected Rate 2:     ${getExpectedRateResult_2.expectedRate}`);
-            console.log(`Slippage Rate 2:     ${getExpectedRateResult_2.slippageRate}`);
-            console.log(`Source Amount 2:     ${sourceAmountNeeded_2}`);
-
-            console.log(`${sourceAmountNeeded_2.toString()} ${sourceToken.name} => ${targetToken.amount} ${targetToken.name}.`);
+            console.log(`${minAmount.toString()}-${maxAmount.toString()} ${sourceToken.name} => ${targetToken.amount} ${targetToken.name}.`);
 
             await sourceErc20.approve(
                 stablePay.address,
-                sourceAmountNeeded_2.toString(),
+                sourceToken.amount.toString(),
                 {from: customerAddress}
             );
 
             const orderArray = new KyberOrderFactory({
                 sourceToken: sourceToken.instance.address,
                 targetToken: targetToken.instance.address,
-                sourceAmount: sourceAmountNeeded_2.toString(),
+                sourceAmount: sourceToken.amount,
                 targetAmount: targetToken.amount,
-                minRate: getExpectedRateResult_2.expectedRate,
-                maxRate: getExpectedRateResult_2.slippageRate,
+                minRate: minRate,
+                maxRate: maxRate,
                 merchantAddress: merchantAddress
             }).createOrder();
-
             
             const kyberProviderKey = providersMap.get('KyberNetwork_v1');
 
             //Invocation
+            
+            console.log(`111`);
             const result = await stablePay.swapToken(orderArray, [kyberProviderKey], {
                 from: customerAddress,
-                gas: 1100000
+                gas: 2000000
             });
 
             // Assertions
@@ -154,10 +139,10 @@ contract('StablePay_KyberSwappingProviderSwapTokenTest', (accounts) => {
             const kyberProviderAddressFinal = await getBalances(kyberProvider.address, sourceToken, targetToken);
             const stablePayAddressFinal = await getBalances(stablePay.address, sourceToken, targetToken);
 
-            const customerBalances = printBalance("Customer", customerAddressInitial, customerAddressFinal);
-            const merchantBalances = printBalance("Merchant", merchantAddressInitial, merchantAddressFinal);
-            const kyberProviderBalances = printBalance("KyberProvider", kyberProviderAddressInitial, kyberProviderAddressFinal);
-            const stablePayBalances = printBalance("StablePay", stablePayAddressInitial, stablePayAddressFinal);
+            const customerBalances = printBalance("Customer", customerAddressInitial, customerAddressFinal, printBalances);
+            const merchantBalances = printBalance("Merchant", merchantAddressInitial, merchantAddressFinal, printBalances);
+            const kyberProviderBalances = printBalance("KyberProvider", kyberProviderAddressInitial, kyberProviderAddressFinal, printBalances);
+            const stablePayBalances = printBalance("StablePay", stablePayAddressInitial, stablePayAddressFinal, printBalances);
 
             assert.equal(BigNumber(stablePayBalances.get(sourceToken.name).toString()).toString(), 0);
             assert.equal(BigNumber(stablePayBalances.get(targetToken.name).toString()).toString(), 0);
@@ -165,7 +150,8 @@ contract('StablePay_KyberSwappingProviderSwapTokenTest', (accounts) => {
             assert.equal(BigNumber(kyberProviderBalances.get(sourceToken.name).toString()).toString(), 0);
             assert.equal(BigNumber(kyberProviderBalances.get(targetToken.name).toString()).toString(), 0);
 
-            //assert.equal(BigNumber(customerBalances.get(sourceToken.name).toString()).toString(), 0);
+            assert(BigNumber(customerBalances.get(sourceToken.name).toString()).times(-1).gte(minAmount));
+            assert(BigNumber(customerBalances.get(sourceToken.name).toString()).times(-1).lte(maxAmount));
             assert.equal(BigNumber(customerBalances.get(targetToken.name).toString()).toString(), 0);
 
             assert.equal(BigNumber(merchantBalances.get(sourceToken.name).toString()).toString(), 0);

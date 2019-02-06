@@ -61,14 +61,8 @@ contract KyberSwappingProvider is ISwappingProvider {
     isStablePay(msg.sender)
     returns (bool)
     {
-        
         require(_order.sourceAmount > 0, "Amount must be > 0");
         require(_order.merchantAddress != address(0x0), "Merchant must be != 0x0.");
-        //uint256 _sourceAmount = _order.sourceAmount;
-        //uint256 _targetAmount = _order.targetAmount;
-
-        //ERC20 sourceToken = ERC20(_order.sourceToken);
-        //ERC20 targetToken = ERC20(_order.targetToken);
 
         uint256 thisSourceInitialTokenBalance = ERC20(_order.sourceToken).balanceOf(address(this));
         require(thisSourceInitialTokenBalance >= _order.sourceAmount, "Not enough tokens in balance.");
@@ -82,6 +76,8 @@ contract KyberSwappingProvider is ISwappingProvider {
         uint minConversionRate;
         uint maxRate;
         (minConversionRate, maxRate) = getExpectedRate(ERC20(_order.sourceToken), ERC20(_order.targetToken), _order.sourceAmount);
+
+        emit Remain(_order.minRate, minConversionRate, maxRate, _order.maxRate);
 
         // Swap the ERC20 token to ETH
         uint remainSourceTokens = KyberNetworkProxy(proxy).trade(
