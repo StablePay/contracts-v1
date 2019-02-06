@@ -70,8 +70,8 @@ contract('StablePay_KyberSwappingProviderSwapTokenTest', (accounts) => {
     });
 
     withData({
-        //_1_100: ["100", false],
-        _2_200: ["200", false],
+        _1_100: ["100", false]//,
+        //_2_200: ["200", false],
         //_3_300: ["300", false],
         //_4_400: ["400", false]
     }, function(targetTokenAmount, printBalances) {
@@ -156,7 +156,6 @@ contract('StablePay_KyberSwappingProviderSwapTokenTest', (accounts) => {
 
             assert.equal(BigNumber(merchantBalances.get(sourceToken.name).toString()).toString(), 0);
             assert.equal(BigNumber(merchantBalances.get(targetToken.name).toString()).toString(), targetToken.amount);
-            assert(false);
         });
     });
 });
