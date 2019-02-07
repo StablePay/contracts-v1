@@ -1,4 +1,4 @@
-const StablePay = artifacts.require("./StablePay.sol");
+const ZeroxSwappingProvider = artifacts.require("./ZeroxSwappingProvider.sol");
 const ERC20 = artifacts.require("./erc20/ERC20.sol");
 const WETH = artifacts.require("./erc20/WETH9.sol");
 const { BigNumber } = require('0x.js');
@@ -13,7 +13,7 @@ const leche = require('leche');
 const withData = leche.withData;
 const t = require('./util/TestUtil').title;
 
-contract('StablePayPayTokenTest', accounts => {
+contract('ZeroxSwappingProviderPayTokenTest', accounts => {
     const DAITOKEN = DUMMYERC20TOKEN1;
     let owner = accounts[0];
     let maker = accounts[0]; // Maker giving DAI for weth
@@ -28,7 +28,7 @@ contract('StablePayPayTokenTest', accounts => {
     let orderInput;
 
     beforeEach('Deploying contract for each test', async () => {
-        stablePay = await StablePay.new(ERC20PROXY, EXCHANGE, WETH9);
+        stablePay = await ZeroxSwappingProvider.new(ERC20PROXY, EXCHANGE, WETH9);
         daiToken = await ERC20.at(DAITOKEN);
        // zrxToken = await ERC20.at(ZRXTOKEN);
         weth = await WETH.at(WETH9);
@@ -92,14 +92,16 @@ contract('StablePayPayTokenTest', accounts => {
             const initialStablePayWETHBalance = await weth.balanceOf(stablePay.address);
 
             //Invocation
-            const _stablePay = ContractWrapperByAccount(StablePay.abi, stablePay.address, providerEngine, payer);
+            const _stablePay = ContractWrapperByAccount(ZeroxSwappingProvider.abi, stablePay.address, providerEngine, payer);
             const result = await _stablePay.payETH(
                 signedOrder.orderArray,
                 DAITOKEN,
                 seller,
                 amountOfTokens.toString(),
-                signedOrder.signature
-                ,{value: amountOfTokens.toNumber(),  gasLimit: 290227} // 450000??}
+                signedOrder.signature, {
+                    value: amountOfTokens.toNumber(),
+                    gasLimit: 290227
+                }
             );
 
             // Assertions

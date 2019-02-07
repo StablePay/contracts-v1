@@ -1,11 +1,11 @@
-pragma solidity 0.4.24;
+pragma solidity 0.4.25;
 pragma experimental ABIEncoderV2;
 
 
 import "../StablePay.sol";
 
 /**
-    @dev Mock for Stable Pay smart contract.
+
  */
 contract StablePayMock is StablePay {
 
@@ -15,34 +15,45 @@ contract StablePayMock is StablePay {
 
     /*** Constructor ***************/
 
-    constructor(address _assetProxy, address _exchange, address _wethErc20)
-    public StablePay(_assetProxy, _exchange, _wethErc20) {
+    constructor(address _storageAddress)
+        public StablePay(_storageAddress) {
+        version = 1;
     }
 
     /*** Methods ***************/
 
-    function _checkAllowance(
-        address _erc20,
-        address _payer,
-        uint256 _amount
+    function _isSwappingProviderOwner(bytes32 _providerKey, address _sender)
+        public
+        view
+        isSwappingProviderOwner(_providerKey, _sender)
+        returns (bool){
+            return true;
+    }
+
+    function _isSwappingProviderNewOrUpdate(bytes32 _providerKey, address _owner)
+        public
+        view
+        isSwappingProviderNewOrUpdate(_providerKey, _owner)
+        returns (bool){
+            return true;
+    }
+
+    function _registerSwappingProvider(
+        address _providerAddress,
+        bytes32 _providerKey,
+        address _owner,
+        bool _paused,
+        bool _exists
     )
     public
-    view
     returns (bool)
     {
-        return super.checkAllowance(_erc20, _payer, _amount);
+        providers[_providerKey] = StablePayCommon.SwappingProvider({
+            providerAddress: _providerAddress,
+            ownerAddress: _owner,
+            paused: _paused,
+            exists: _exists,
+            createdAt: now
+        });
     }
-
-    function _transferFromPayer(
-        address _erc20,
-        address _payer,
-        uint256 _amount
-    )
-
-    public
-    returns (bool) {
-
-        return super.transferFromPayer(_erc20, _payer, _amount);
-    }
-
 }

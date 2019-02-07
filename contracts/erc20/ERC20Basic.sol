@@ -1,4 +1,4 @@
-pragma solidity 0.4.24;
+pragma solidity 0.4.25;
 
 
 /**
@@ -7,6 +7,7 @@ pragma solidity 0.4.24;
  * @dev see https://github.com/ethereum/EIPs/issues/179
  */
 contract ERC20Basic {
+  function decimals() external view returns(uint digits);
   function totalSupply() public view returns (uint256);
   function balanceOf(address who) public view returns (uint256);
   function transfer(address to, uint256 value) public returns (bool);
