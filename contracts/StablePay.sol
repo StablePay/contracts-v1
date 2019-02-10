@@ -33,6 +33,12 @@ contract StablePay is Base {
 
     /** Events */
 
+    event DepositReceived (
+        address indexed thisContract,
+        address from,
+        uint amount
+    );
+
     /**
         @dev This event is emitted when a new payment is sent to an address.
      */
@@ -146,7 +152,14 @@ contract StablePay is Base {
 
     /*** Fallback Method ***************/
 
-    function () public payable {}
+    function () public payable {
+        require(msg.value > 0, "Msg value > 0");
+        emit DepositReceived(
+            address(this),
+            msg.sender,
+            msg.value
+        );
+    }
 
     /*** Methods ***************/
 

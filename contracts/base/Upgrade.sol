@@ -13,6 +13,14 @@ contract Upgrade is Base {
         string contractName
     );
 
+    event PendingBalance (
+        address indexed contractAddress,
+        address indexed oldContractAddress,
+        address indexed newContractAddress,
+        string contractName,
+        uint balance
+    );
+
     /** Constructor */
 
     constructor(address _storageAddress) Base(_storageAddress) public {
@@ -26,7 +34,17 @@ contract Upgrade is Base {
         
         require(oldContractAddress != 0x0, "Old contract address must not be 0x0.");
         require(oldContractAddress != _upgradedContractAddress, "Old and new contract addresses must not be equals.");
-        require(oldContractAddress.balance == 0, "Old contract balance must be 0.");
+        uint oldContractBalance = oldContractAddress.balance;
+
+        if( oldContractBalance > 0 ) {
+            emit PendingBalance (
+                address(this),
+                oldContractAddress,
+                _upgradedContractAddress,
+                _name,
+                oldContractBalance
+            );
+        }
         
         _storage.setAddress(keccak256(abi.encodePacked(CONTRACT_NAME, _name)), _upgradedContractAddress);
         _storage.setAddress(keccak256(abi.encodePacked(CONTRACT_ADDRESS, _upgradedContractAddress)), _upgradedContractAddress);
