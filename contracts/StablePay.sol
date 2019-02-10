@@ -346,7 +346,7 @@ contract StablePay is Base {
     }
 
 
-    function swapToken(StablePayCommon.Order order, bytes32[] _providerKeys)
+    function payWithToken(StablePayCommon.Order order, bytes32[] _providerKeys)
     public
     nonReentrant()
     returns (bool)
@@ -414,7 +414,7 @@ contract StablePay is Base {
         return false;
     }
 
-    function swapEther(StablePayCommon.Order order, bytes32[] _providerKeys)
+    function payWithEther(StablePayCommon.Order order, bytes32[] _providerKeys)
     public
     payable
     returns (bool)

@@ -126,7 +126,7 @@ contract('StablePay_KyberSwappingProviderSwapTokenTest', (accounts) => {
             //Invocation
             
             console.log(`111`);
-            const result = await stablePay.swapToken(orderArray, [kyberProviderKey], {
+            const result = await stablePay.payWithToken(orderArray, [kyberProviderKey], {
                 from: customerAddress,
                 gas: 2000000
             });
