@@ -8,7 +8,6 @@ import "./util/Bytes32ArrayLib.sol";
 import "./util/StablePayCommon.sol";
 import "./util/AddressLib.sol";
 import "./providers/ISwappingProvider.sol";
-import "./interface/IERC1155TokenReceiver.sol";
 
 contract StablePay is Base {
     using SafeMath for uint256;
@@ -16,8 +15,6 @@ contract StablePay is Base {
     using AddressLib for address;
 
     /** Properties */
-    // onReceive function signatures                              
-    bytes4 constant public ERC1155_RECEIVED_VALUE = 0xf23a6e61;
 
     address public owner;
 
@@ -206,17 +203,6 @@ contract StablePay is Base {
                 }
             }
             return expectedRates;
-    }
-
-    function notifyIfContract(address _to)
-        internal
-        returns (bool) {
-        //Pass data if recipient is contract
-        if (_to.isContract()) {
-            // Call receiver function on recipient
-            //bytes4 retval = IERC1155TokenReceiver(_to).onERC1155Received(msg.sender, _from, _id, _value, _data);
-            //require(retval == ERC1155_RECEIVED_VALUE, "INVALID_ON_RECEIVE_MESSAGE");
-        }
     }
 
     function getExpectedRateRange(ERC20 _src, ERC20 _dest, uint _srcQty)
@@ -444,8 +430,6 @@ contract StablePay is Base {
                         order.targetToken,
                         stablePayTargetBalance
                     );
-
-                    notifyIfContract(order.targetToken);
 
                     emit SwapExecutionSuccess(
                         address(this),
