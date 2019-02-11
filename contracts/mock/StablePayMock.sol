@@ -42,7 +42,8 @@ contract StablePayMock is StablePay {
         address _providerAddress,
         bytes32 _providerKey,
         address _owner,
-        bool _paused,
+        bool _pausedByOwner,
+        bool _pausedByAdmin,
         bool _exists
     )
     public
@@ -51,7 +52,8 @@ contract StablePayMock is StablePay {
         providers[_providerKey] = StablePayCommon.SwappingProvider({
             providerAddress: _providerAddress,
             ownerAddress: _owner,
-            paused: _paused,
+            pausedByOwner: _pausedByOwner,
+            pausedByAdmin: _pausedByAdmin,
             exists: _exists,
             createdAt: now
         });

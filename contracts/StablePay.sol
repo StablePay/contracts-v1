@@ -128,8 +128,18 @@ contract StablePay is Base {
         _;
     }
 
-    modifier _isSwappingProviderPaused(bytes32 _providerKey) {
-        require(providers[_providerKey].paused == true, "Swapping provider must be paused.");
+    modifier isSwappingProviderPausedByOwner(bytes32 _providerKey) {
+        require(providers[_providerKey].pausedByOwner == true, "Swapping provider must be paused.");
+        _;
+    }
+
+    modifier isSwappingProviderPausedByAdmin(bytes32 _providerKey) {
+        require(providers[_providerKey].pausedByAdmin == true, "Swapping provider must be paused.");
+        _;
+    }
+
+    modifier isSwappingProviderNotPausedByAdmin(bytes32 _providerKey) {
+        require(providers[_providerKey].pausedByAdmin == false, "Swapping provider must not be paused.");
         _;
     }
 
@@ -240,12 +250,13 @@ contract StablePay is Base {
     function getSwappingProvider(bytes32 _providerKey)
         public
         view
-        returns (address providerAddress, address ownerAddress, bool paused, bool exists){
+        returns (address providerAddress, address ownerAddress, bool pausedByOwner, bool pausedByAdmin, bool exists){
             StablePayCommon.SwappingProvider memory provider = providers[_providerKey];
             return (
                 provider.providerAddress,
                 provider.ownerAddress,
-                provider.paused,
+                provider.pausedByOwner,
+                provider.pausedByAdmin,
                 provider.exists
             );
     }
@@ -254,15 +265,20 @@ contract StablePay is Base {
         public
         view
         returns (bool){
-            return  providers[_providerKey].exists && 
-                    providers[_providerKey].paused;
+            return  providers[_providerKey].exists &&
+                    (
+                        providers[_providerKey].pausedByOwner ||
+                        providers[_providerKey].pausedByAdmin
+                    );
     }
 
     function isSwappingProviderValid(bytes32 _providerKey)
         internal
         view
         returns (bool){
-            return providers[_providerKey].exists && !providers[_providerKey].paused;
+            return  providers[_providerKey].exists &&
+                    !providers[_providerKey].pausedByOwner &&
+                    !providers[_providerKey].pausedByAdmin ;
     }
 
     function getProvidersRegistryCount()
@@ -272,13 +288,46 @@ contract StablePay is Base {
             return providersRegistry.length;
     }
 
+    function pauseByAdminSwappingProvider(bytes32 _providerKey)
+        public
+        swappingProviderExists(_providerKey)
+        isSwappingProviderNotPausedByAdmin(_providerKey)
+        onlySuperUser()
+        returns (bool){
+
+        providers[_providerKey].pausedByAdmin = true;
+
+        emit SwappingProviderPaused(
+            address(this),
+            providers[_providerKey].providerAddress          
+        );
+        return true;
+    }
+
+    function unpauseByAdminSwappingProvider(bytes32 _providerKey)
+        public
+        swappingProviderExists(_providerKey)
+        isSwappingProviderPausedByAdmin(_providerKey)
+        onlySuperUser()
+        returns (bool){
+
+        providers[_providerKey].pausedByAdmin = false;
+
+        emit SwappingProviderUnpaused(
+            address(this),
+            providers[_providerKey].providerAddress          
+        );
+        return true;
+    }
+
     function pauseSwappingProvider(bytes32 _providerKey)
         public
         swappingProviderExists(_providerKey)
         isSwappingProviderOwner(_providerKey, msg.sender)
+        isSwappingProviderNotPausedByAdmin(_providerKey)
         returns (bool){
 
-        providers[_providerKey].paused = true;
+        providers[_providerKey].pausedByOwner = true;
 
         emit SwappingProviderPaused(
             address(this),
@@ -291,10 +340,11 @@ contract StablePay is Base {
         public
         swappingProviderExists(_providerKey)
         isSwappingProviderOwner(_providerKey, msg.sender)
-        _isSwappingProviderPaused(_providerKey)
+        isSwappingProviderPausedByOwner(_providerKey)
+        isSwappingProviderNotPausedByAdmin(_providerKey)
         returns (bool){
 
-        providers[_providerKey].paused = false;
+        providers[_providerKey].pausedByOwner = false;
 
         emit SwappingProviderUnpaused(
             address(this),
@@ -318,7 +368,8 @@ contract StablePay is Base {
             providerAddress: _providerAddress,
             ownerAddress: _owner,
             createdAt: now,
-            paused: false,
+            pausedByOwner: false,
+            pausedByAdmin: false,
             exists: true
         });
         providersRegistry.add(_providerKey);
