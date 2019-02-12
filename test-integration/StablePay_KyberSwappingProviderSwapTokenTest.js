@@ -13,6 +13,7 @@ for (const key in contracts.data) {
 
 const KyberSwappingProvider = artifacts.require("./providers/KyberSwappingProvider.sol");
 const StablePay = artifacts.require("./StablePay.sol");
+const StablePayStorage = artifacts.require("./base/StablePayStorage.sol");
 const KyberNetworkProxyInterface = artifacts.require("./kyber/KyberNetworkProxyInterface.sol");
 const ERC20 = artifacts.require("./erc20/ERC20.sol");
 
@@ -60,6 +61,10 @@ contract('StablePay_KyberSwappingProviderSwapTokenTest', (accounts) => {
         assert(stablePay);
         assert(stablePay.address);
 
+        stablePayStorage = await StablePayStorage.deployed();
+        assert(stablePayStorage);
+        assert(stablePayStorage.address);
+
         sourceErc20 = await ERC20.at(kncTokenAddress);
         assert(sourceErc20);
         assert(sourceErc20.address);
@@ -88,7 +93,7 @@ contract('StablePay_KyberSwappingProviderSwapTokenTest', (accounts) => {
             };
 
             // Get the initial balances (source and target tokens) for customer and merchant.
-            const ratesCalculator = new RatesCalculator(kyberProxy, stablePay);
+            const ratesCalculator = new RatesCalculator(kyberProxy, stablePayStorage);
             const resultRates = await ratesCalculator.calculateRates(sourceToken.instance.address, targetToken.instance.address, targetTokenAmount);
             const {minRate, maxRate, minAmount, maxAmount} = resultRates;
 

@@ -34,6 +34,29 @@ contract Base {
      */
     IStorage public _storage = IStorage(0);     
 
+    /** Events */
+
+    /**
+        @dev This event is emitted when a deposit is received.
+     */
+    event DepositReceived (
+        address indexed thisContract,
+        address from,
+        uint amount
+    );
+
+    /**
+        @dev This event is emitted when a new payment is sent to an address.
+     */
+    event PaymentSent(
+        address indexed thisContract,
+        address merchant,
+        address customer,
+        address sourceToken,
+        address targetToken,
+        uint amount
+    );
+
     /** Modifiers */
 
     /**

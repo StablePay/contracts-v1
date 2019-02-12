@@ -21,7 +21,7 @@ contract StablePayMock is StablePay {
     }
 
     /*** Methods ***************/
-
+/*
     function _isSwappingProviderOwner(bytes32 _providerKey, address _sender)
         public
         view
@@ -58,4 +58,5 @@ contract StablePayMock is StablePay {
             createdAt: now
         });
     }
+    */
 }
