@@ -21,6 +21,9 @@ contract Base {
     string constant internal ADMIN = "admin";
     string constant internal ACCESS_ROLE = "access.role";
 
+    string constant internal TOKEN_AVAILABLE = "token.available";
+    string constant internal TOKEN_AMOUNT = "token.amount";
+
     /** Properties */
     uint8 public version;  // Version of this contract
 

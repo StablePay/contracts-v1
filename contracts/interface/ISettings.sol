@@ -10,4 +10,10 @@ interface ISettings {
 
     function isPlatformPaused() external view returns (bool);
 
+    function disableTokenAvailability(address _tokenAddress) external returns (bool);
+
+    function getTokenAvailability(address _tokenAddress) external view returns (bool available, uint256 amount);
+
+    function setTokenAvailability(address _tokenAddress, uint256 _amount) external returns (bool);
+
 }

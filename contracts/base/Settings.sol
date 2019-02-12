@@ -22,6 +22,13 @@ contract Settings is Base { // TODO Check failure in deployment with the interfa
         uint16 newPlatformFee
     );
 
+    event TokenAvailabilityUpdated (
+        address indexed thisContract,
+        address tokenAddress,
+        uint256 amount,
+        bool enabled
+    );
+
     /** Constructor */
 
     constructor(address _storageAddress)
@@ -65,5 +72,46 @@ contract Settings is Base { // TODO Check failure in deployment with the interfa
 
     function isPlatformPaused() external view returns (bool) {
         return _storage.getBool(keccak256(abi.encodePacked(STATE_PAUSED)));
+    }
+
+    function disableTokenAvailability(address _tokenAddress)
+    external
+    onlySuperUser
+    returns (bool){
+        _storage.setBool(keccak256(abi.encodePacked(TOKEN_AVAILABLE, _tokenAddress)), false);
+        uint256 amount = _storage.getUint(keccak256(abi.encodePacked(TOKEN_AMOUNT, _tokenAddress)));
+
+        emit TokenAvailabilityUpdated(
+            address(this),
+            _tokenAddress,
+            amount,
+            false
+        );
+        return true;
+    }
+
+    function getTokenAvailability(address _tokenAddress)
+    external
+    view
+    returns (bool available, uint256 amount){
+        available = _storage.getBool(keccak256(abi.encodePacked(TOKEN_AVAILABLE, _tokenAddress)));
+        amount = _storage.getUint(keccak256(abi.encodePacked(TOKEN_AMOUNT, _tokenAddress)));
+        return (available, amount);
+    }
+
+    function setTokenAvailability(address _tokenAddress, uint256 _amount)
+    external
+    onlySuperUser
+    returns (bool) {
+        _storage.setBool(keccak256(abi.encodePacked(TOKEN_AVAILABLE, _tokenAddress)), true);
+        _storage.setUint(keccak256(abi.encodePacked(TOKEN_AMOUNT, _tokenAddress)), _amount);
+
+        emit TokenAvailabilityUpdated(
+            address(this),
+            _tokenAddress,
+            _amount,
+            true
+        );
+        return true;
     }
 }
