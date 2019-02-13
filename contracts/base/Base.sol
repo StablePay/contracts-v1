@@ -11,6 +11,7 @@ import "../interface/IStorage.sol";
 contract Base {
     /** Constants */
 
+    uint256 constant internal AVOID_DECIMALS = 100000000000000;
     string constant internal STATE_PAUSED = "state.paused";
     string constant internal PLATFORM_FEE = "config.platform.fee";
 

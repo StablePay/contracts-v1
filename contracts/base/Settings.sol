@@ -40,6 +40,13 @@ contract Settings is Base { // TODO Check failure in deployment with the interfa
 
     /** Functions */
 
+    function getPlatformFee()
+    external
+    view
+    returns (uint16){
+        return _storage.getUint16(keccak256(abi.encodePacked(PLATFORM_FEE)));
+    }
+
     function setPlatformFee(uint16 _fee)
     external
     onlySuperUser {

@@ -1,0 +1,227 @@
+Starting migrations...
+======================
+> Network name:    'infuraRopsten'
+> Network id:      3
+> Block gas limit: 8000000
+
+
+1_initial_migration.js
+======================
+
+   Replacing 'Migrations'
+   ----------------------
+   > transaction hash:    0x975a2792bd8a1fcaafcc333fa5cdbcfe86d8ca35b81e8686b1dafc6b0c8c6c4b
+- Blocks: 0            Seconds: 0
+   > Blocks: 1            Seconds: 20
+   > contract address:    0xE1f68982Bec0Bf3eF06369684842fc2501898D6C
+   > account:             0x5AA2a57550a393Eef5a2025cc31F00cB7095B464
+   > balance:             10.8710306005
+   > gas used:            277462
+   > gas price:           4.3 gwei
+   > value sent:          0 ETH
+   > total cost:          0.0011930866 ETH
+
+
+- Saving migration to chain.
+   > Saving migration to chain.
+   > Saving artifacts
+   -------------------------------------
+   > Total cost:        0.0011930866 ETH
+
+
+2_deploy.js
+===========
+Deploying smart contracts to 'infuraRopsten'.
+
+   Deploying 'SafeMath'
+   --------------------
+   > transaction hash:    0x293c184873a45c50639768d41510915e28a4f68f53f8b77572f261a9e1a53ed6
+- Blocks: 0            Seconds: 0
+   > Blocks: 2            Seconds: 16
+   > contract address:    0x3cD76c675f5550F6EcC4D0B8f9E0d4010710D3b9
+   > account:             0x5AA2a57550a393Eef5a2025cc31F00cB7095B464
+   > balance:             10.8705285497
+   > gas used:            74748
+   > gas price:           4.3 gwei
+   > value sent:          0 ETH
+   > total cost:          0.0003214164 ETH
+
+
+   Deploying 'Bytes32ArrayLib'
+   ---------------------------
+   > transaction hash:    0x86fc6e9efa5af3cc281627e3cf565aff8d0189d9891799cb86f44b8827cfaa2c
+- Blocks: 0            Seconds: 0
+   > Blocks: 1            Seconds: 41
+   > contract address:    0xF9FfE21f69322A184f607641c942b6d3AC37c273
+   > account:             0x5AA2a57550a393Eef5a2025cc31F00cB7095B464
+   > balance:             10.8702071333
+   > gas used:            74748
+   > gas price:           4.3 gwei
+   > value sent:          0 ETH
+   > total cost:          0.0003214164 ETH
+
+
+   Deploying 'Storage'
+   -------------------
+   > transaction hash:    0x357a9b2c10e6f082da0f9e6ccd6aa0c186859513a5bf076830f283d746a55608
+- Blocks: 0            Seconds: 0
+   > Blocks: 1            Seconds: 8
+   > contract address:    0x3c838db29F98F296F638A21ae05f28DD9113D1F6
+   > account:             0x5AA2a57550a393Eef5a2025cc31F00cB7095B464
+   > balance:             10.8539067277
+   > gas used:            3790792
+   > gas price:           4.3 gwei
+   > value sent:          0 ETH
+   > total cost:          0.0163004056 ETH
+
+
+   Deploying 'StablePayCommon'
+   ---------------------------
+   > transaction hash:    0x3bb2408992881fb78fef63e51c5d97f7fd539c592087f12ae0f51ee4ceb159bf
+- Blocks: 0            Seconds: 0
+   > Blocks: 1            Seconds: 4
+   > contract address:    0xA08479eF6018a40C77F6684E3fB7a17e8873eBB4
+   > account:             0x5AA2a57550a393Eef5a2025cc31F00cB7095B464
+   > balance:             10.8536111887
+   > gas used:            68730
+   > gas price:           4.3 gwei
+   > value sent:          0 ETH
+   > total cost:          0.000295539 ETH
+
+
+   Deploying 'AddressLib'
+   ----------------------
+   > transaction hash:    0x7c27db6f8b45633087c2a5745074e1ae9a7e7fee3ff5ca84236bfb93c25919d6
+- Blocks: 0            Seconds: 0
+   > Blocks: 2            Seconds: 36
+   > contract address:    0xE1cc5B2C2981b5dbC6015D91104d3F631be8b952
+   > account:             0x5AA2a57550a393Eef5a2025cc31F00cB7095B464
+   > balance:             10.8532897723
+   > gas used:            74748
+   > gas price:           4.3 gwei
+   > value sent:          0 ETH
+   > total cost:          0.0003214164 ETH
+
+
+   Deploying 'StablePayStorage'
+   ----------------------------
+   > transaction hash:    0xb607c2262941308e0b513698c561f425bf891133bbe5a56ffaf46c938507c553
+- Blocks: 0            Seconds: 0
+   > Blocks: 0            Seconds: 28
+   > contract address:    0x02E3312BBbdE070808567ab7c200Fd9BdA8AF33d
+   > account:             0x5AA2a57550a393Eef5a2025cc31F00cB7095B464
+   > balance:             10.8405529401
+   > gas used:            2962054
+   > gas price:           4.3 gwei
+   > value sent:          0 ETH
+   > total cost:          0.0127368322 ETH
+
+
+   Deploying 'Settings'
+   --------------------
+   > transaction hash:    0x311c797ce0b9347d9ec13e71d81138c598be41c7dfbf7437c168999835e79ec1
+- Blocks: 0            Seconds: 0
+   > Blocks: 1            Seconds: 24
+   > contract address:    0x15F5A95e5685E0e7a3a74d41F17B8B85425AAb2E
+   > account:             0x5AA2a57550a393Eef5a2025cc31F00cB7095B464
+   > balance:             10.8306735697
+   > gas used:            2297528
+   > gas price:           4.3 gwei
+   > value sent:          0 ETH
+   > total cost:          0.0098793704 ETH
+
+
+   Deploying 'Upgrade'
+   -------------------
+   > transaction hash:    0x9654c2ffe4cebdc16d84b21b01978a0fd2821abf2486797d38695dde4ceac0b3
+- Blocks: 0            Seconds: 0
+   > Blocks: 1            Seconds: 24
+   > contract address:    0xda89688Ef7fF6a08a2F7DA4A011eDF234196A30d
+   > account:             0x5AA2a57550a393Eef5a2025cc31F00cB7095B464
+   > balance:             10.8258645658
+   > gas used:            1118373
+   > gas price:           4.3 gwei
+   > value sent:          0 ETH
+   > total cost:          0.0048090039 ETH
+
+
+   Deploying 'Role'
+   ----------------
+   > transaction hash:    0xb5f9022117b7ccd31742cd46aaca316b6ca1a468ecc0883b5871d4fec6d38265
+- Blocks: 0            Seconds: 0
+   > Blocks: 1            Seconds: 24
+   > contract address:    0xF75583CA183A412627F5e6613a140bEC76C0D97b
+   > account:             0x5AA2a57550a393Eef5a2025cc31F00cB7095B464
+   > balance:             10.8187206189
+   > gas used:            1661383
+   > gas price:           4.3 gwei
+   > value sent:          0 ETH
+   > total cost:          0.0071439469 ETH
+
+
+   Deploying 'StablePay'
+   ---------------------
+   > transaction hash:    0x4dc921085af7c22b9c0403baefa02b9916cc1760a40215e147f0e7ca407266d8
+- Blocks: 0            Seconds: 0
+   > Blocks: 0            Seconds: 16
+   > contract address:    0xd68A1b191F7AcDA3502240315c3ACea09F7E8d58
+   > account:             0x5AA2a57550a393Eef5a2025cc31F00cB7095B464
+   > balance:             10.8088403025
+   > gas used:            2297748
+   > gas price:           4.3 gwei
+   > value sent:          0 ETH
+   > total cost:          0.0098803164 ETH
+
+
+   Deploying 'ZeroxSwappingProvider'
+   ---------------------------------
+   > transaction hash:    0xea8e9f0122d0151a2acfea40e4f12aab7685cd1fd687cd6814f3076b5cc7332e
+- Blocks: 0            Seconds: 0
+   > Blocks: 0            Seconds: 8
+   > contract address:    0x8824F1436C436E29559Ed38fe44da15D9EF69B52
+   > account:             0x5AA2a57550a393Eef5a2025cc31F00cB7095B464
+   > balance:             10.8002671517
+   > gas used:            1993756
+   > gas price:           4.3 gwei
+   > value sent:          0 ETH
+   > total cost:          0.0085731508 ETH
+
+
+   Deploying 'KyberSwappingProvider'
+   ---------------------------------
+   > transaction hash:    0x9b74fe02732c9131f890bfe3b866c4730d366c9c1a2f7dce6f57b82b7b9aef08
+- Blocks: 0            Seconds: 0
+   > Blocks: 1            Seconds: 28
+   > contract address:    0x6d032bA1ecaacE0a781f2EA60C44995dF726e9E2
+   > account:             0x5AA2a57550a393Eef5a2025cc31F00cB7095B464
+   > balance:             10.7928126588
+   > gas used:            1572092
+   > gas price:           4.3 gwei
+   > value sent:          0 ETH
+   > total cost:          0.0067599956 ETH
+
+Storing contract info 'SafeMath' => 0x3cD76c675f5550F6EcC4D0B8f9E0d4010710D3b9
+Storing contract info 'Bytes32ArrayLib' => 0xF9FfE21f69322A184f607641c942b6d3AC37c273
+Storing contract info 'StablePayCommon' => 0xA08479eF6018a40C77F6684E3fB7a17e8873eBB4
+Storing contract info 'Settings' => 0x15F5A95e5685E0e7a3a74d41F17B8B85425AAb2E
+Storing contract info 'Upgrade' => 0xda89688Ef7fF6a08a2F7DA4A011eDF234196A30d
+Storing contract info 'StablePay' => 0xd68A1b191F7AcDA3502240315c3ACea09F7E8d58
+Storing contract info 'ZeroxSwappingProvider' => 0x8824F1436C436E29559Ed38fe44da15D9EF69B52
+Storing contract info 'KyberSwappingProvider' => 0x6d032bA1ecaacE0a781f2EA60C44995dF726e9E2
+Storing contract info 'Role' => 0xF75583CA183A412627F5e6613a140bEC76C0D97b
+Storing contract info 'AddressLib' => 0xE1cc5B2C2981b5dbC6015D91104d3F631be8b952
+Storing contract info 'StablePayStorage' => 0x02E3312BBbdE070808567ab7c200Fd9BdA8AF33d
+
+- Saving migration to chain.
+JSON file created at './build/1549984656042_infuraRopsten.json'.
+   > Saving migration to chain.
+   > Saving artifacts
+   -------------------------------------
+   > Total cost:          0.07734281 ETH
+
+
+Summary
+=======
+> Total deployments:   13
+> Final cost:          0.0785358966 ETH
+

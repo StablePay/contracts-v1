@@ -9,18 +9,25 @@ import "../StablePay.sol";
  */
 contract StablePayMock is StablePay {
 
-    /**** Events ***********/
+    /** Events */
 
-    /*** Modifiers ***************/
+    /** Modifiers */
 
-    /*** Constructor ***************/
+    /** Constructor */
 
     constructor(address _storageAddress)
         public StablePay(_storageAddress) {
         version = 1;
     }
 
-    /*** Methods ***************/
+    /** Methods */
+
+    function _getFeeAmount(StablePayCommon.Order order)
+    public
+    view
+    returns (uint256) {
+        return super.getFeeAmount(order);
+    }
 /*
     function _isSwappingProviderOwner(bytes32 _providerKey, address _sender)
         public

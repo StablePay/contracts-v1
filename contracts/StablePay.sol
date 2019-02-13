@@ -3,6 +3,7 @@ pragma experimental ABIEncoderV2;
 
 import "./erc20/ERC20.sol";
 import "./base/Base.sol";
+import "./base/Settings.sol";
 import "./interface/IProviderRegistry.sol";
 import "./util/SafeMath.sol";
 import "./util/Bytes32ArrayLib.sol";
@@ -75,8 +76,23 @@ contract StablePay is Base {
 
     /*** Methods ***************/
 
+    function getVault()
+        internal
+        view
+        returns (address) {
+        return _storage.getAddress(keccak256(abi.encodePacked('contract.name','Vault')));
+    }
+
+    function getSettings()
+        internal
+        view
+        returns (Settings) {
+        address settingsAddress = _storage.getAddress(keccak256(abi.encodePacked('contract.name','Settings')));
+        return Settings(settingsAddress);
+    }
+
     function getProviderRegistry()
-        public
+        internal
         view
         returns (IProviderRegistry) {
         address stablePayStorageAddress = _storage.getAddress(keccak256(abi.encodePacked('contract.name','StablePayStorage')));
@@ -99,9 +115,7 @@ contract StablePay is Base {
 
         for (uint256 index = 0; index < _providerKeys.length; index = index.add(1)) {
             bytes32 _providerKey = _providerKeys[index];
-            /*
-            TODO The validation process may be delegated to the SwappingProvider smart contract using a method ```iSwappingProvider.isOrderValid(order);```
-            */
+
             if(getProviderRegistry().isSwappingProviderValid(_providerKey)) {
                 require(ERC20(order.sourceToken).allowance(msg.sender, address(this)) >= order.sourceAmount, "Not enough allowed tokens to StablePay.");
 
@@ -123,26 +137,21 @@ contract StablePay is Base {
 
                     uint stablePayTargetBalance = ERC20(order.targetToken).balanceOf(address(this));
                     require(stablePayTargetBalance == order.targetAmount, "StablePay target balance is not valid.");
+
+                    uint256 feeAmount = getFeeAmount(order);
+                    uint256 merchantAmount = order.targetAmount - feeAmount;
+
+                    transferFee(order.targetToken, feeAmount);
                     
                     require(
-                        ERC20(order.targetToken).transfer(order.merchantAddress, stablePayTargetBalance),
+                        ERC20(order.targetToken).transfer(order.merchantAddress, merchantAmount),
                         "Transfer to merchant failed."
                     );
 
-                    emit PaymentSent(
-                        address(this),
-                        order.merchantAddress,
-                        msg.sender,
-                        order.sourceToken,
-                        order.targetToken,
-                        stablePayTargetBalance
-                    );
+                    emitPaymentSentEvent(order, stablePayTargetBalance);
 
-                    emit SwapExecutionSuccess(
-                        address(this),
-                        swappingProvider.providerAddress,
-                        _providerKey
-                    );
+                    emitSwapExecutionSuccessEvent(swappingProvider.providerAddress, _providerKey);
+
                     return true;
                 } else {
                     emit SwapExecutionFailed(
@@ -154,6 +163,57 @@ contract StablePay is Base {
             }
         }
         return false;
+    }
+
+    function emitSwapExecutionSuccessEvent(address _providerAddress, bytes32 _providerKey)
+    internal {
+        emit SwapExecutionSuccess(
+            address(this),
+            _providerAddress,
+            _providerKey
+        );
+    }
+
+    function emitPaymentSentEvent(StablePayCommon.Order order, uint256 amountSent)
+    internal {
+        emit PaymentSent(
+            address(this),
+            order.merchantAddress,
+            msg.sender,
+            order.sourceToken,
+            order.targetToken,
+            amountSent
+        );
+    }
+    
+    /**
+        @dev Calculates the fee amount based on the target amount and the pre configured platform fee value.
+        @dev Uses the AVOID_DECIMALS in order to avoid loss precision in division operations.
+     */
+    function getFeeAmount(StablePayCommon.Order order)
+    internal
+    view
+    returns (uint256) {
+        // In order to support decimals, the platform fee value is multiplied by 100.
+        uint256 platformFee = uint256(getSettings().getPlatformFee());
+
+        // Multiply by high value to avoid decimals, and div by 100 to delete the initial 100 value.
+        uint256 platformFeeAvoidDecimals = platformFee.mul(AVOID_DECIMALS).div(100);
+
+        // Calculating the fee amount with 'avoid decimal'.
+        uint256 feeAmountAvoidDecimals = platformFeeAvoidDecimals.mul(order.targetAmount).div(100);
+
+        // Removing the avoid decimals value.
+        return feeAmountAvoidDecimals.div(AVOID_DECIMALS);
+    }
+
+    function transferFee(address _tokenAddress, uint256 _feeAmount)
+    internal
+    returns (bool)
+    {
+        bool result = ERC20(_tokenAddress).transfer(getVault(), _feeAmount);
+        require(result, "Tokens transfer to vault was invalid.");
+        return true;
     }
 
     function payWithEther(StablePayCommon.Order order, bytes32[] _providerKeys)

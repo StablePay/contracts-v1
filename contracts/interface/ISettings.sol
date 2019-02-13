@@ -4,6 +4,8 @@ interface ISettings {
 
     function setPlatformFee(uint16 _fee) external;
 
+    function getPlatformFee() external view returns (uint16);
+
     function pausePlatform(address _dealContract) external;
 
     function unpausePlatform(address _dealContract) external;

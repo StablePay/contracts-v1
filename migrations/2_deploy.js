@@ -3,9 +3,9 @@ const util = require('ethereumjs-util');
 const DeployerApp = require('./util/DeployerApp');
 
 // Env configuration
-const PLATFORM_FEE_KEY = 'platform.fee';
+const PLATFORM_FEE_KEY = 'config.platform.fee';
 const DEFAULT_PRINT_DEPLOY_COST = false;
-const printDeployCostValue = process.env['PRINT_DEPLOY_COST'] || DEFAULT_PRINT_DEPLOY_COST;
+const printDeployCostValue = process.env['PRINT_DEPLOY_COST'] == true || DEFAULT_PRINT_DEPLOY_COST;
 const platformFee = process.env['PLATFORM_FEE'];
 
 if(platformFee === undefined) {
@@ -13,6 +13,7 @@ if(platformFee === undefined) {
 }
 
 // Mock Smart Contracts
+const StablePayMock = artifacts.require("./mock/StablePayMock.sol");
 
 // Libraries
 const Bytes32ArrayLib = artifacts.require("./util/Bytes32ArrayLib.sol");
@@ -20,6 +21,7 @@ const Bytes32ArrayLib = artifacts.require("./util/Bytes32ArrayLib.sol");
 // Official Smart Contracts
 const Settings = artifacts.require("./base/Settings.sol");
 const Role = artifacts.require("./base/Role.sol");
+const Vault = artifacts.require("./base/Vault.sol");
 const Storage = artifacts.require("./base/Storage.sol");
 const StablePayStorage = artifacts.require("./base/StablePayStorage.sol");
 const Upgrade = artifacts.require("./base/Upgrade.sol");
@@ -63,7 +65,7 @@ module.exports = function(deployer, network, accounts) {
   const owner = accounts[0];
 
   deployer.deploy(SafeMath).then(async (txInfo) => {
-    const deployerApp = new DeployerApp(deployer, web3, owner);
+    const deployerApp = new DeployerApp(deployer, web3, owner, network);
 
     await deployerApp.addContractInfoByTransactionInfo(SafeMath, txInfo);
 
@@ -72,16 +74,19 @@ module.exports = function(deployer, network, accounts) {
       Storage,
       StablePayCommon,
       AddressLib
-    ]);
+    ], {gas: 4000000});
+
+    await deployerApp.deployMockIf(StablePayMock, Storage.address);
 
     await deployerApp.links(StablePayStorage, [
       Bytes32ArrayLib,
       SafeMath
     ]);
-    await deployerApp.deploy(StablePayStorage, Storage.address);
+    await deployerApp.deploy(StablePayStorage, Storage.address, {gas: 4000000});
     await deployerApp.deploy(Settings, Storage.address);
     await deployerApp.deploy(Upgrade, Storage.address);
     await deployerApp.deploy(Role, Storage.address);
+    await deployerApp.deploy(Vault, Storage.address);
 
     await deployerApp.links(StablePay, [
       Bytes32ArrayLib,
@@ -119,7 +124,8 @@ module.exports = function(deployer, network, accounts) {
     await deployerApp.deploy(
       KyberSwappingProvider,
       stablePayInstance.address,
-      kyberContracts.KyberNetworkProxy
+      kyberContracts.KyberNetworkProxy,
+      {gas: 4000000}
     );
     const kyberProviderKey = createPoviderKey('KyberNetwork', '1');
     await stablePayStorageInstance.registerSwappingProvider(
@@ -134,18 +140,18 @@ module.exports = function(deployer, network, accounts) {
       SafeMath,     Bytes32ArrayLib,    StablePayCommon,
       Settings,     Upgrade,            StablePay,
       ZeroxSwappingProvider,            KyberSwappingProvider,
-      Role,         AddressLib,         StablePayStorage
+      Role,         AddressLib,         StablePayStorage,
+      Vault
     );
-    await storageInstance.setUint(
-        config.web3.utils.soliditySha3(PLATFORM_FEE_KEY),
-        platformFee
-    );
-
-    deployerApp.addData(PLATFORM_FEE_KEY, platformFee);
     await deployerApp.setOwner(storageInstance, owner);
     await deployerApp.finalize(storageInstance);
 
+    const settingsInstance = await Settings.deployed();
+    await settingsInstance.setPlatformFee(platformFee, {from: owner});
+    deployerApp.addData(PLATFORM_FEE_KEY, platformFee);
+
     deployerApp.writeJson(`./build/${Date.now()}_${network}.json`);
+    deployerApp.writeJson();
 
     if(printDeployCostValue === true) {
       deployerApp.prettyPrint(true);

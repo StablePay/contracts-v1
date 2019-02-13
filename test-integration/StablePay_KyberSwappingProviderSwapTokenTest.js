@@ -13,6 +13,8 @@ for (const key in contracts.data) {
 
 const KyberSwappingProvider = artifacts.require("./providers/KyberSwappingProvider.sol");
 const StablePay = artifacts.require("./StablePay.sol");
+const Settings = artifacts.require("./base/Settings.sol");
+const Vault = artifacts.require("./base/Vault.sol");
 const StablePayStorage = artifacts.require("./base/StablePayStorage.sol");
 const KyberNetworkProxyInterface = artifacts.require("./kyber/KyberNetworkProxyInterface.sol");
 const ERC20 = artifacts.require("./erc20/ERC20.sol");
@@ -39,6 +41,8 @@ contract('StablePay_KyberSwappingProviderSwapTokenTest', (accounts) => {
     let customerAddress = accounts[1];
     let merchantAddress = accounts[2];
 
+    let vault;
+    let settings;
     let kyberProvider;
     let kyberProxy;
     let stablePay;
@@ -52,6 +56,14 @@ contract('StablePay_KyberSwappingProviderSwapTokenTest', (accounts) => {
         kyberProxy = await KyberNetworkProxyInterface.at(kyberContracts.KyberNetworkProxy);
         assert(kyberProxy);
         assert(kyberProxy.address);
+
+        settings = await Settings.deployed();
+        assert(settings);
+        assert(settings.address);
+
+        vault = await Vault.deployed();
+        assert(vault);
+        assert(vault.address);
 
         kyberProvider = await KyberSwappingProvider.deployed();
         assert(kyberProvider);
@@ -75,13 +87,16 @@ contract('StablePay_KyberSwappingProviderSwapTokenTest', (accounts) => {
     });
 
     withData({
-        _1_100: ["100", false]//,
+        _1_100: ["100", true]//,
         //_2_200: ["200", false],
         //_3_300: ["300", false],
         //_4_400: ["400", false]
     }, function(targetTokenAmount, printBalances) {
         it(t('anUser', 'swapToken', 'Should be able to swap tokens.'), async function() {
             // Setup
+            const platformFeeString = await settings.getPlatformFee();
+            const platformFee = Number(platformFeeString.toString()) / 100;
+
             const sourceToken = {
                 name: 'KNC',
                 instance: sourceErc20
@@ -97,12 +112,11 @@ contract('StablePay_KyberSwappingProviderSwapTokenTest', (accounts) => {
             const resultRates = await ratesCalculator.calculateRates(sourceToken.instance.address, targetToken.instance.address, targetTokenAmount);
             const {minRate, maxRate, minAmount, maxAmount} = resultRates;
 
-            console.log(JSON.stringify(resultRates));
-
             sourceToken.amount = maxAmount;
 
             await sourceErc20.transfer(customerAddress, sourceToken.amount, {from: owner});
             
+            const vaultInitial = await getBalances(vault.address, sourceToken, targetToken);
             const customerAddressInitial = await getBalances(customerAddress, sourceToken, targetToken);
             const merchantAddressInitial = await getBalances(merchantAddress, sourceToken, targetToken);
             const kyberProviderAddressInitial = await getBalances(kyberProvider.address, sourceToken, targetToken);
@@ -129,16 +143,15 @@ contract('StablePay_KyberSwappingProviderSwapTokenTest', (accounts) => {
             const kyberProviderKey = providersMap.get('KyberNetwork_v1');
 
             //Invocation
-            
-            console.log(`111`);
             const result = await stablePay.payWithToken(orderArray, [kyberProviderKey], {
                 from: customerAddress,
-                gas: 2000000
+                gas: 5000000
             });
 
             // Assertions
             assert(result);
 
+            const vaultFinal = await getBalances(vault.address, sourceToken, targetToken);
             const customerAddressFinal = await getBalances(customerAddress, sourceToken, targetToken);
             const merchantAddressFinal = await getBalances(merchantAddress, sourceToken, targetToken);
             const kyberProviderAddressFinal = await getBalances(kyberProvider.address, sourceToken, targetToken);
@@ -148,6 +161,12 @@ contract('StablePay_KyberSwappingProviderSwapTokenTest', (accounts) => {
             const merchantBalances = printBalance("Merchant", merchantAddressInitial, merchantAddressFinal, printBalances);
             const kyberProviderBalances = printBalance("KyberProvider", kyberProviderAddressInitial, kyberProviderAddressFinal, printBalances);
             const stablePayBalances = printBalance("StablePay", stablePayAddressInitial, stablePayAddressFinal, printBalances);
+            const vaultBalances = printBalance("Vault", vaultInitial, vaultFinal, printBalances);
+
+            const stablePayAmount = Number(targetToken.amount) * platformFee / 100;
+
+            assert.equal(BigNumber(vaultBalances.get(sourceToken.name).toString()).toString(), 0);
+            assert.equal(BigNumber(vaultBalances.get(targetToken.name).toString()).toString(), stablePayAmount.toString());
 
             assert.equal(BigNumber(stablePayBalances.get(sourceToken.name).toString()).toString(), 0);
             assert.equal(BigNumber(stablePayBalances.get(targetToken.name).toString()).toString(), 0);
@@ -159,8 +178,9 @@ contract('StablePay_KyberSwappingProviderSwapTokenTest', (accounts) => {
             assert(BigNumber(customerBalances.get(sourceToken.name).toString()).times(-1).lte(maxAmount));
             assert.equal(BigNumber(customerBalances.get(targetToken.name).toString()).toString(), 0);
 
+            const merchantAmount = Number(targetToken.amount) - stablePayAmount;
             assert.equal(BigNumber(merchantBalances.get(sourceToken.name).toString()).toString(), 0);
-            assert.equal(BigNumber(merchantBalances.get(targetToken.name).toString()).toString(), targetToken.amount);
+            assert.equal(BigNumber(merchantBalances.get(targetToken.name).toString()).toString(), merchantAmount);
         });
     });
 });
