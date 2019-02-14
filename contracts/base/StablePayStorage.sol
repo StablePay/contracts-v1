@@ -25,7 +25,7 @@ contract StablePayStorage is Base, IProviderRegistry {
      */
     bytes32[] public providersRegistry;
 
-    /*** Modifiers ***************/
+    /** Modifiers */
 
     modifier swappingProviderExists(bytes32 _providerKey) {
         require(providers[_providerKey].exists == true, "Swapping provider must exist.");
@@ -61,14 +61,14 @@ contract StablePayStorage is Base, IProviderRegistry {
         _;
     }
 
-    /*** Constructor ***************/
+    /** Constructor */
 
     constructor(address _storageAddress)
         public Base(_storageAddress) {
     }
 
 
-    /*** Fallback Method ***************/
+    /** Fallback Method */
 
     function () public payable {
         require(msg.value > 0, "Msg value > 0");
@@ -79,7 +79,7 @@ contract StablePayStorage is Base, IProviderRegistry {
         );
     }
 
-    /*** Methods ***************/
+    /** Functions */
 
     // TODO Modify to getExpectedAmount ?
     function getExpectedRate(bytes32 _providerKey, ERC20 _src, ERC20 _dest, uint _srcQty)

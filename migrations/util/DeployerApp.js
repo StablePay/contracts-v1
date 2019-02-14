@@ -286,6 +286,7 @@ DeployerApp.prototype.storeContracts = async function(storageInstance, ...contra
 }
 
 DeployerApp.prototype.setOwner = async function(storageInstance, ownerAddress) {
+    console.log(`Setting platform owner to address ${ownerAddress}.`);
     const contractNameOwnerSha3 = this.web3.utils.soliditySha3('contract.name', 'owner');
     await storageInstance.setAddress(
         contractNameOwnerSha3,
@@ -310,6 +311,7 @@ DeployerApp.prototype.setOwner = async function(storageInstance, ownerAddress) {
 
 DeployerApp.prototype.finalize = async function(storageInstance) {
     // Disable direct access to storage now
+    console.log(`Disabling direct access to storage.`);
     const contractStorageInitialisedSha3 = this.web3.utils.soliditySha3('contract.storage.initialised');
     await storageInstance.setBool(
         contractStorageInitialisedSha3,

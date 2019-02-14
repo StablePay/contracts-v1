@@ -23,7 +23,8 @@ contract Base {
     string constant internal ACCESS_ROLE = "access.role";
 
     string constant internal TOKEN_AVAILABLE = "token.available";
-    string constant internal TOKEN_AMOUNT = "token.amount";
+    string constant internal TOKEN_MAX_AMOUNT = "token.maxAmount";
+    string constant internal TOKEN_MIN_AMOUNT = "token.minAmount";
 
     /** Properties */
     uint8 public version;  // Version of this contract

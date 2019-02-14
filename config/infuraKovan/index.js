@@ -4,5 +4,6 @@ const kyber = require('./kyber');
 module.exports = {
     network: 'kovan',
     zerox: _0x,
-	kyber: kyber
+	kyber: kyber,
+    stablepay: require('./stablepay')
 };
