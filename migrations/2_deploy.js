@@ -53,10 +53,10 @@ const allowedNetworks = ['ganache'];
 module.exports = function(deployer, network, accounts) {
   console.log(`Deploying smart contracts to '${network}'.`)
   
-  if(allowedNetworks.indexOf(network) == -1) {
-    console.log(`NOT deploying smart contracts to '${network}'.`);
-    return;
-  }
+  //if(allowedNetworks.indexOf(network) == -1) {
+  //  console.log(`NOT deploying smart contracts to '${network}'.`);
+  //  return;
+  //}
   
   const envConf = require('../config')(network);
   const stablePayConf = envConf.stablepay;
@@ -92,16 +92,16 @@ module.exports = function(deployer, network, accounts) {
       SafeMath
     ]);
     await deployerApp.deploy(StablePayStorage, Storage.address, {gas: 4000000});
-    await deployerApp.deploy(Settings, Storage.address);
+    await deployerApp.deploy(Settings, Storage.address, {gas: 4000000});
     await deployerApp.deploy(Upgrade, Storage.address);
-    await deployerApp.deploy(Role, Storage.address);
+    await deployerApp.deploy(Role, Storage.address, {gas: 4000000});
     await deployerApp.deploy(Vault, Storage.address);
     
     await deployerApp.links(StablePay, [
       Bytes32ArrayLib,
       SafeMath
     ]);
-    await deployerApp.deploy(StablePay, Storage.address);
+    await deployerApp.deploy(StablePay, Storage.address, {gas: 4000000});
 
     /***********************************
       Deploy swapping token providers.
