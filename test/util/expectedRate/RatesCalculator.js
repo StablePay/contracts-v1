@@ -2,9 +2,9 @@ const BigNumber = require('bignumber.js');
 const AmountsCalculator = require('./AmountsCalculator');
 
 class RatesCalculator {
-    constructor(kyberProxy, stablePay) {
+    constructor(kyberProxy, providerRegistry) {
         this.kyberProxy = kyberProxy;
-        this.stablePay = stablePay;
+        this.providerRegistry = providerRegistry;
     }
 }
 
@@ -28,8 +28,8 @@ RatesCalculator.prototype.calculateRates = async function(sourceTokenAddress, ta
         const kyberProxyMaxAmount = amountsCalculator.calculateAmountBased(kyberProxyMaxAmountRateRange.slippageRate).decimalPlaces(0);
         const kyberProxyMinAmount = amountsCalculator.calculateAmountBased(kyberProxyMaxAmountRateRange.expectedRate).decimalPlaces(0);
 
-        console.log(kyberProxyMaxAmount.toString());
-        const stablePayMaxAmountRateRange = await this.stablePay.getExpectedRateRange(
+        //console.log(kyberProxyMaxAmount.toString());
+        const stablePayMaxAmountRateRange = await this.providerRegistry.getExpectedRateRange(
             sourceTokenAddress,
             targetTokenAddress,
             kyberProxyMaxAmount.toString()

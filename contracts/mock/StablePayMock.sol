@@ -9,19 +9,26 @@ import "../StablePay.sol";
  */
 contract StablePayMock is StablePay {
 
-    /**** Events ***********/
+    /** Events */
 
-    /*** Modifiers ***************/
+    /** Modifiers */
 
-    /*** Constructor ***************/
+    /** Constructor */
 
     constructor(address _storageAddress)
         public StablePay(_storageAddress) {
         version = 1;
     }
 
-    /*** Methods ***************/
+    /** Methods */
 
+    function _getFeeAmount(StablePayCommon.Order order)
+    public
+    view
+    returns (uint256) {
+        return super.getFeeAmount(order);
+    }
+/*
     function _isSwappingProviderOwner(bytes32 _providerKey, address _sender)
         public
         view
@@ -42,7 +49,8 @@ contract StablePayMock is StablePay {
         address _providerAddress,
         bytes32 _providerKey,
         address _owner,
-        bool _paused,
+        bool _pausedByOwner,
+        bool _pausedByAdmin,
         bool _exists
     )
     public
@@ -51,9 +59,11 @@ contract StablePayMock is StablePay {
         providers[_providerKey] = StablePayCommon.SwappingProvider({
             providerAddress: _providerAddress,
             ownerAddress: _owner,
-            paused: _paused,
+            pausedByOwner: _pausedByOwner,
+            pausedByAdmin: _pausedByAdmin,
             exists: _exists,
             createdAt: now
         });
     }
+    */
 }

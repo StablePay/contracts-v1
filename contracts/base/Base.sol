@@ -11,6 +11,7 @@ import "../interface/IStorage.sol";
 contract Base {
     /** Constants */
 
+    uint256 constant internal AVOID_DECIMALS = 100000000000000;
     string constant internal STATE_PAUSED = "state.paused";
     string constant internal PLATFORM_FEE = "config.platform.fee";
 
@@ -20,6 +21,10 @@ contract Base {
     string constant internal OWNER = "owner";
     string constant internal ADMIN = "admin";
     string constant internal ACCESS_ROLE = "access.role";
+
+    string constant internal TOKEN_AVAILABLE = "token.available";
+    string constant internal TOKEN_MAX_AMOUNT = "token.maxAmount";
+    string constant internal TOKEN_MIN_AMOUNT = "token.minAmount";
 
     /** Properties */
     uint8 public version;  // Version of this contract
@@ -33,6 +38,29 @@ contract Base {
         @dev The main storage contract where primary persistant storage is maintained    
      */
     IStorage public _storage = IStorage(0);     
+
+    /** Events */
+
+    /**
+        @dev This event is emitted when a deposit is received.
+     */
+    event DepositReceived (
+        address indexed thisContract,
+        address from,
+        uint amount
+    );
+
+    /**
+        @dev This event is emitted when a new payment is sent to an address.
+     */
+    event PaymentSent(
+        address indexed thisContract,
+        address merchant,
+        address customer,
+        address sourceToken,
+        address targetToken,
+        uint amount
+    );
 
     /** Modifiers */
 
