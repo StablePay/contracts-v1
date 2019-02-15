@@ -34,7 +34,7 @@ contract ISwappingProvider {
 
     function swapEther(StablePayCommon.Order order) public payable returns (bool);
 
-    function getExpectedRate(ERC20 src, ERC20 dest, uint srcQty) public view returns (uint, uint);
+    function getExpectedRate(ERC20 src, ERC20 dest, uint srcQty) public view returns (bool isSupported, uint minRate, uint maxRate);
 
     //function isValidSwapData(StablePayCommon.Order order) public view returns (bool);
 }

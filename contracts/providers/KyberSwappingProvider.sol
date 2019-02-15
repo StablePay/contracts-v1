@@ -41,12 +41,14 @@ contract KyberSwappingProvider is ISwappingProvider {
     function getExpectedRate(ERC20 _sourceToken, ERC20 _targetToken, uint _sourceAmount)
     public
     view
-    returns (uint, uint)
+    returns (bool isSupported, uint minRate, uint maxRate)
     {
         require(address(_sourceToken) != address(0x0), "sourceToken != 0x0.");
         require(address(_targetToken) != address(0x0), "targetoken != 0x0.");
         KyberNetworkProxyInterface networkProxy = KyberNetworkProxyInterface(proxy);
-        return networkProxy.getExpectedRate(_sourceToken, _targetToken, _sourceAmount);
+        (minRate, maxRate) = networkProxy.getExpectedRate(_sourceToken, _targetToken, _sourceAmount);
+        isSupported = minRate > 0 || maxRate > 0;
+        return (isSupported, minRate, maxRate);
     }
 
     event Remain(
@@ -75,7 +77,7 @@ contract KyberSwappingProvider is ISwappingProvider {
         // Get the minimum conversion rate
         uint minConversionRate;
         uint maxRate;
-        (minConversionRate, maxRate) = getExpectedRate(ERC20(_order.sourceToken), ERC20(_order.targetToken), _order.sourceAmount);
+        ( , minConversionRate, maxRate) = getExpectedRate(ERC20(_order.sourceToken), ERC20(_order.targetToken), _order.sourceAmount);
 
         emit Remain(_order.minRate, minConversionRate, maxRate, _order.maxRate);
 

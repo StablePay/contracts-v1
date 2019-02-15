@@ -81,11 +81,10 @@ contract StablePayStorage is Base, IProviderRegistry {
 
     /** Functions */
 
-    // TODO Modify to getExpectedAmount ?
     function getExpectedRate(bytes32 _providerKey, ERC20 _src, ERC20 _dest, uint _srcQty)
         public
         view
-        returns (uint, uint) {
+        returns (bool isSupported, uint minRate, uint maxRate) {
         require(isSwappingProviderValid(_providerKey), "Provider must exist and be enabled.");
         StablePayCommon.SwappingProvider memory swappingProvider = providers[_providerKey];
         ISwappingProvider iSwappingProvider = ISwappingProvider(swappingProvider.providerAddress);
@@ -105,12 +104,15 @@ contract StablePayStorage is Base, IProviderRegistry {
                     ISwappingProvider iSwappingProvider = ISwappingProvider(swappingProvider.providerAddress);
                     uint expectedRate;
                     uint minRate;
-                    (expectedRate, minRate) = iSwappingProvider.getExpectedRate(_src, _dest, _srcQty);
-                    expectedRates.push(StablePayCommon.ExpectedRate({
-                        providerKey: _providerKey,
-                        minRate: minRate,
-                        maxRate: expectedRate
-                    }));
+                    bool isSupported;
+                    (isSupported, expectedRate, minRate) = iSwappingProvider.getExpectedRate(_src, _dest, _srcQty);
+                    if(isSupported) {
+                        expectedRates.push(StablePayCommon.ExpectedRate({
+                            providerKey: _providerKey,
+                            minRate: minRate,
+                            maxRate: expectedRate
+                        }));
+                    }
                 }
             }
             return expectedRates;
@@ -130,14 +132,16 @@ contract StablePayStorage is Base, IProviderRegistry {
                     ISwappingProvider iSwappingProvider = ISwappingProvider(swappingProvider.providerAddress);
                     uint expectedRateProvider;
                     uint minRateProvider;
-                    (expectedRateProvider, minRateProvider) = iSwappingProvider.getExpectedRate(_src, _dest, _srcQty);
+                    bool isSupported;
+                    (isSupported, expectedRateProvider, minRateProvider) = iSwappingProvider.getExpectedRate(_src, _dest, _srcQty);
                     
-                    if(maxRateResult == 0 || expectedRateProvider > maxRateResult) {
-                        maxRateResult = expectedRateProvider;
-                    }
-
-                    if(minRateResult == 0 || minRateProvider < minRateResult) {
-                        minRateResult = minRateProvider;
+                    if(isSupported) {
+                        if(maxRateResult == 0 || expectedRateProvider > maxRateResult) {
+                            maxRateResult = expectedRateProvider;
+                        }
+                        if(minRateResult == 0 || minRateProvider < minRateResult) {
+                            minRateResult = minRateProvider;
+                        }
                     }
                 }
             }
