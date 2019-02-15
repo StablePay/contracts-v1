@@ -174,9 +174,12 @@ contract StablePay is Base {
 
         for (uint256 index = 0; index < _providerKeys.length; index = index.add(1)) {
             bytes32 _providerKey = _providerKeys[index];
-            doPayWithToken(order, _providerKey);
+            bool swapSuccess = doPayWithToken(order, _providerKey);
+            if(swapSuccess) {
+                return true;
+            }
         }
-        return false;
+        require(false, "Swapping token could not be processed.");
     }
 
     function emitSwapExecutionFailedEvent(address _providerAddress, bytes32 _providerKey)
