@@ -66,6 +66,14 @@ contract KyberSwappingProvider is ISwappingProvider {
         require(_order.sourceAmount > 0, "Amount must be > 0");
         require(_order.merchantAddress != address(0x0), "Merchant must be != 0x0.");
 
+        // Get the minimum conversion rate
+        bool isSupported;
+        uint minConversionRate;
+        uint maxRate;
+        (isSupported, minConversionRate, maxRate) = getExpectedRate(ERC20(_order.sourceToken), ERC20(_order.targetToken), _order.sourceAmount);
+
+        require(isSupported, "Swap not supported. Verify source/target amount.");
+
         uint256 thisSourceInitialTokenBalance = ERC20(_order.sourceToken).balanceOf(address(this));
         require(thisSourceInitialTokenBalance >= _order.sourceAmount, "Not enough tokens in balance.");
 
@@ -73,11 +81,6 @@ contract KyberSwappingProvider is ISwappingProvider {
         require(ERC20(_order.sourceToken).approve(address(proxy), 0), "Error mitigating front-running attack.");
         // Set the spender's token allowance to tokenQty
         require(ERC20(_order.sourceToken).approve(address(proxy), _order.sourceAmount), "Error approving tokens for proxy."); // Set max amount.
-
-        // Get the minimum conversion rate
-        uint minConversionRate;
-        uint maxRate;
-        ( , minConversionRate, maxRate) = getExpectedRate(ERC20(_order.sourceToken), ERC20(_order.targetToken), _order.sourceAmount);
 
         emit Remain(_order.minRate, minConversionRate, maxRate, _order.maxRate);
 

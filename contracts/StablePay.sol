@@ -116,72 +116,6 @@ contract StablePay is Base {
         return getProviderRegistry().getSwappingProvider(_providerKey);
     }
 
-    function doPayWithToken(StablePayCommon.Order order, bytes32 _providerKey)
-    internal
-    returns (bool)
-    {
-        if(getProviderRegistry().isSwappingProviderValid(_providerKey)) {
-            require(ERC20(order.sourceToken).allowance(msg.sender, address(this)) >= order.sourceAmount, "Not enough allowed tokens to StablePay.");
-
-            StablePayCommon.SwappingProvider memory swappingProvider = getSwappingProvider(_providerKey);
-
-            require(ERC20(order.sourceToken).transferFrom(msg.sender, swappingProvider.providerAddress, order.sourceAmount), "Transfer from StablePay was not successful.");
-
-            uint stablePayInitialBalance = ERC20(order.targetToken).balanceOf(address(this));
-
-            ISwappingProvider iSwappingProvider = ISwappingProvider(swappingProvider.providerAddress);
-
-            if(iSwappingProvider.swapToken(order)) {
-                uint stablePaySourceBalance = ERC20(order.sourceToken).balanceOf(address(this));
-                
-                require(
-                    ERC20(order.sourceToken).transfer(msg.sender, stablePaySourceBalance),
-                    "Transfer to customer failed."
-                );
-
-                uint stablePayTargetBalance = ERC20(order.targetToken).balanceOf(address(this));
-                require(stablePayTargetBalance == order.targetAmount, "StablePay target balance is not valid.");
-
-                uint256 feeAmount = getFeeAmount(order);
-                uint256 merchantAmount = order.targetAmount - feeAmount;
-
-                transferFee(order.targetToken, feeAmount);
-                
-                require(
-                    ERC20(order.targetToken).transfer(order.merchantAddress, merchantAmount),
-                    "Transfer to merchant failed."
-                );
-
-                emitPaymentSentEvent(order, stablePayTargetBalance);
-
-                emitSwapExecutionSuccessEvent(swappingProvider.providerAddress, _providerKey);
-
-                return true;
-            } else {
-                emitSwapExecutionFailedEvent(swappingProvider.providerAddress, _providerKey);
-            }
-        }
-        return false;
-    }
-
-    function payWithToken(StablePayCommon.Order order, bytes32[] _providerKeys)
-    public
-    nonReentrant()
-    isTokenAvailable(order.targetToken, order.targetAmount)
-    returns (bool)
-    {
-        require(_providerKeys.length > 0, "Provider keys must not be empty.");
-
-        for (uint256 index = 0; index < _providerKeys.length; index = index.add(1)) {
-            bytes32 _providerKey = _providerKeys[index];
-            bool swapSuccess = doPayWithToken(order, _providerKey);
-            if(swapSuccess) {
-                return true;
-            }
-        }
-        require(false, "Swapping token could not be processed.");
-    }
-
     function emitSwapExecutionFailedEvent(address _providerAddress, bytes32 _providerKey)
     internal {
         emit SwapExecutionFailed(
@@ -242,8 +176,129 @@ contract StablePay is Base {
         return true;
     }
 
+    function doPayWithToken(StablePayCommon.Order order, bytes32 _providerKey)
+    internal
+    returns (bool)
+    {
+        if(getProviderRegistry().isSwappingProviderValid(_providerKey)) {
+            require(ERC20(order.sourceToken).allowance(msg.sender, address(this)) >= order.sourceAmount, "Not enough allowed tokens to StablePay.");
+
+            StablePayCommon.SwappingProvider memory swappingProvider = getSwappingProvider(_providerKey);
+
+            require(ERC20(order.sourceToken).transferFrom(msg.sender, swappingProvider.providerAddress, order.sourceAmount), "Transfer from StablePay was not successful.");
+
+            uint stablePayInitialBalance = ERC20(order.targetToken).balanceOf(address(this));
+
+            ISwappingProvider iSwappingProvider = ISwappingProvider(swappingProvider.providerAddress);
+
+            if(iSwappingProvider.swapToken(order)) {
+                uint stablePaySourceBalance = ERC20(order.sourceToken).balanceOf(address(this));
+                
+                require(
+                    ERC20(order.sourceToken).transfer(msg.sender, stablePaySourceBalance),
+                    "Transfer to customer failed."
+                );
+
+                uint stablePayTargetBalance = ERC20(order.targetToken).balanceOf(address(this));
+                require(stablePayTargetBalance == order.targetAmount, "StablePay target balance is not valid.");
+
+                uint256 feeAmount = getFeeAmount(order);
+                uint256 merchantAmount = order.targetAmount - feeAmount;
+
+                transferFee(order.targetToken, feeAmount);
+                
+                require(
+                    ERC20(order.targetToken).transfer(order.merchantAddress, merchantAmount),
+                    "Transfer to merchant failed."
+                );
+
+                emitPaymentSentEvent(order, stablePayTargetBalance);
+
+                emitSwapExecutionSuccessEvent(swappingProvider.providerAddress, _providerKey);
+
+                return true;
+            } else {
+                emitSwapExecutionFailedEvent(swappingProvider.providerAddress, _providerKey);
+            }
+        }
+        return false;
+    }
+
+    function payWithToken(StablePayCommon.Order order, bytes32[] _providerKeys)
+    public
+    isNotPaused()
+    nonReentrant()
+    isTokenAvailable(order.targetToken, order.targetAmount)
+    returns (bool)
+    {
+        require(_providerKeys.length > 0, "Provider keys must not be empty.");
+
+        for (uint256 index = 0; index < _providerKeys.length; index = index.add(1)) {
+            bytes32 _providerKey = _providerKeys[index];
+            bool swapSuccess = doPayWithToken(order, _providerKey);
+            if(swapSuccess) {
+                return true;
+            }
+        }
+        require(false, "Swapping token could not be processed.");
+    }
+
+    function doPayWithEther(StablePayCommon.Order order, bytes32 _providerKey)
+    internal
+    returns (bool)
+    {
+        if(getProviderRegistry().isSwappingProviderValid(_providerKey)) {
+            require(ERC20(order.sourceToken).allowance(msg.sender, address(this)) >= order.sourceAmount, "Not enough allowed tokens to StablePay.");
+
+            StablePayCommon.SwappingProvider memory swappingProvider = getSwappingProvider(_providerKey);
+
+            require(ERC20(order.sourceToken).transferFrom(msg.sender, swappingProvider.providerAddress, order.sourceAmount), "Transfer from StablePay was not successful.");
+
+            uint stablePayInitialSourceBalance = address(this).balance;
+
+            ISwappingProvider iSwappingProvider = ISwappingProvider(swappingProvider.providerAddress);
+
+            bool result = iSwappingProvider.swapEther.value(msg.value)(order);
+
+            if(result) {
+                uint stablePayFinalSourceBalance = address(this).balance;
+               
+                address(msg.sender).transfer(stablePayFinalSourceBalance);
+                //require(
+                //    ,
+                //    "Transfer to customer failed."
+                //);
+
+                uint stablePayTargetBalance = ERC20(order.targetToken).balanceOf(address(this));
+                require(stablePayTargetBalance == order.targetAmount, "StablePay target balance is not valid.");
+
+                uint256 feeAmount = getFeeAmount(order);
+                uint256 merchantAmount = order.targetAmount - feeAmount;
+
+                transferFee(order.targetToken, feeAmount);
+                
+                require(
+                    ERC20(order.targetToken).transfer(order.merchantAddress, merchantAmount),
+                    "Transfer to merchant failed."
+                );
+
+                emitPaymentSentEvent(order, stablePayTargetBalance);
+
+                emitSwapEthExecutionSuccessEvent(swappingProvider.providerAddress, _providerKey);
+
+                return true;
+            } else {
+                emitSwapEthExecutionFailedEvent(swappingProvider.providerAddress, _providerKey);
+            }
+        }
+        return false;
+    }
+
     function payWithEther(StablePayCommon.Order order, bytes32[] _providerKeys)
     public
+    isNotPaused()
+    nonReentrant()
+    isTokenAvailable(order.targetToken, order.targetAmount)
     payable
     returns (bool)
     {
@@ -251,32 +306,29 @@ contract StablePay is Base {
 
         for (uint256 index = 0; index < _providerKeys.length; index = index.add(1)) {
             bytes32 _providerKey = _providerKeys[index];
-            /*
-                TODO The validation process may be delegated to the SwappingProvider smart contract using a method ```iSwappingProvider.isOrderValid(order);```
-            */
-            if(getProviderRegistry().isSwappingProviderValid(_providerKey)) {
-                StablePayCommon.SwappingProvider memory swappingProvider = getSwappingProvider(_providerKey);
-                ISwappingProvider iSwappingProvider = ISwappingProvider(swappingProvider.providerAddress);
-                
-                bool result = iSwappingProvider.swapEther.value(msg.value)(order);
-                if(result) {
-                    emit SwapEthExecutionSuccess(
-                        address(this),
-                        swappingProvider.providerAddress,
-                        _providerKey
-                    );
-                    return true;
-                } else {
-                    emit SwapEthExecutionFailed(
-                        address(this),
-                        swappingProvider.providerAddress,
-                        _providerKey
-                    );
-                }
+            bool swapSuccess = doPayWithEther(order, _providerKey);
+            if(swapSuccess) {
+                return true;
             }
         }
-        // TODO Does it need a require(false, "Swap could not be performed.") at this point?
-        return false;
+        require(false, "Swap with ether could not be performed..");
     }
 
+    function emitSwapEthExecutionFailedEvent(address _providerAddress, bytes32 _providerKey)
+    internal {
+        emit SwapEthExecutionFailed(
+            address(this),
+            _providerAddress,
+            _providerKey
+        );
+    }
+
+    function emitSwapEthExecutionSuccessEvent(address _providerAddress, bytes32 _providerKey)
+    internal {
+        emit SwapEthExecutionSuccess(
+            address(this),
+            _providerAddress,
+            _providerKey
+        );
+    }
 }

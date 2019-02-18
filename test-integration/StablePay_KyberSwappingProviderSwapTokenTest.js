@@ -87,10 +87,10 @@ contract('StablePay_KyberSwappingProviderSwapTokenTest', (accounts) => {
     });
 
     withData({
-        _1_100: ["100", true]//,
-        //_2_200: ["200", false],
-        //_3_300: ["300", false],
-        //_4_400: ["400", false]
+        _1_100: ["100", true],
+        _2_200: ["200", true],
+        _3_300: ["300", true],
+        _4_400: ["400", true]
     }, function(targetTokenAmount, printBalances) {
         it(t('anUser', 'swapToken', 'Should be able to swap tokens.'), async function() {
             // Setup
@@ -110,25 +110,35 @@ contract('StablePay_KyberSwappingProviderSwapTokenTest', (accounts) => {
             // Get the initial balances (source and target tokens) for customer and merchant.
             const ratesCalculator = new RatesCalculator(kyberProxy, stablePayStorage);
             const resultRates = await ratesCalculator.calculateRates(sourceToken.instance.address, targetToken.instance.address, targetTokenAmount);
+
+            console.log(JSON.stringify(resultRates));
             const {minRate, maxRate, minAmount, maxAmount} = resultRates;
 
             sourceToken.amount = maxAmount;
 
             await sourceErc20.transfer(customerAddress, sourceToken.amount, {from: owner});
-            
+
+
+
             const vaultInitial = await getBalances(vault.address, sourceToken, targetToken);
             const customerAddressInitial = await getBalances(customerAddress, sourceToken, targetToken);
             const merchantAddressInitial = await getBalances(merchantAddress, sourceToken, targetToken);
             const kyberProviderAddressInitial = await getBalances(kyberProvider.address, sourceToken, targetToken);
             const stablePayAddressInitial = await getBalances(stablePay.address, sourceToken, targetToken);
 
+            targetToken.amount = BigNumber(targetToken.amount).times((new BigNumber(10)).pow(18)).toFixed();
+
             console.log(`${minAmount.toString()}-${maxAmount.toString()} ${sourceToken.name} => ${targetToken.amount} ${targetToken.name}.`);
 
             await sourceErc20.approve(
                 stablePay.address,
-                sourceToken.amount.toString(),
+                sourceToken.amount,
                 {from: customerAddress}
             );
+            console.log('Source Amount');
+            console.log(sourceToken.amount);
+            console.log('Target Amount');
+            console.log(targetToken.amount);
 
             const orderArray = new KyberOrderFactory({
                 sourceToken: sourceToken.instance.address,
