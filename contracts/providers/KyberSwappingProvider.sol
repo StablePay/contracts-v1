@@ -41,20 +41,15 @@ contract KyberSwappingProvider is ISwappingProvider {
     function getExpectedRate(ERC20 _sourceToken, ERC20 _targetToken, uint _sourceAmount)
     public
     view
-    returns (uint, uint)
+    returns (bool isSupported, uint minRate, uint maxRate)
     {
-        require(address(_sourceToken) != address(0x0), "sourceToken != 0x0.");
-        require(address(_targetToken) != address(0x0), "targetoken != 0x0.");
+        require(address(_sourceToken) != address(0x0), "Source token != 0x0.");
+        require(address(_targetToken) != address(0x0), "Targe token != 0x0.");
         KyberNetworkProxyInterface networkProxy = KyberNetworkProxyInterface(proxy);
-        return networkProxy.getExpectedRate(_sourceToken, _targetToken, _sourceAmount);
+        (minRate, maxRate) = networkProxy.getExpectedRate(_sourceToken, _targetToken, _sourceAmount);
+        isSupported = minRate > 0 || maxRate > 0;
+        return (isSupported, minRate, maxRate);
     }
-
-    event Remain(
-        uint256 _value1,
-        uint256 _value2,
-        uint256 _value3,
-        uint256 _value4
-    );
 
     function swapToken(StablePayCommon.Order _order)
     public
@@ -64,6 +59,14 @@ contract KyberSwappingProvider is ISwappingProvider {
         require(_order.sourceAmount > 0, "Amount must be > 0");
         require(_order.merchantAddress != address(0x0), "Merchant must be != 0x0.");
 
+        // Get the minimum conversion rate
+        bool isSupported;
+        uint minRate;
+        uint maxRate;
+        (isSupported, minRate, maxRate) = getExpectedRate(ERC20(_order.sourceToken), ERC20(_order.targetToken), _order.sourceAmount);
+
+        require(isSupported, "Swap not supported. Verify source/target amount.");
+
         uint256 thisSourceInitialTokenBalance = ERC20(_order.sourceToken).balanceOf(address(this));
         require(thisSourceInitialTokenBalance >= _order.sourceAmount, "Not enough tokens in balance.");
 
@@ -72,12 +75,7 @@ contract KyberSwappingProvider is ISwappingProvider {
         // Set the spender's token allowance to tokenQty
         require(ERC20(_order.sourceToken).approve(address(proxy), _order.sourceAmount), "Error approving tokens for proxy."); // Set max amount.
 
-        // Get the minimum conversion rate
-        uint minConversionRate;
-        uint maxRate;
-        (minConversionRate, maxRate) = getExpectedRate(ERC20(_order.sourceToken), ERC20(_order.targetToken), _order.sourceAmount);
-
-        emit Remain(_order.minRate, minConversionRate, maxRate, _order.maxRate);
+        emit Remain(_order.minRate, minRate, maxRate, _order.maxRate);
 
         // Swap the ERC20 token to ETH
         uint remainSourceTokens = KyberNetworkProxy(proxy).trade(
@@ -86,21 +84,11 @@ contract KyberSwappingProvider is ISwappingProvider {
             ERC20(_order.targetToken),
             msg.sender,
             _order.targetAmount,
-            minConversionRate,
+            maxRate,
             0
         );
 
         uint256 thisSourceFinalTokenBalance = ERC20(_order.sourceToken).balanceOf(address(this));
-        
-        /*
-        uint256 value = thisSourceInitialTokenBalance.sub(thisSourceFinalTokenBalance);
-        emit Remain(
-            thisSourceInitialTokenBalance,
-            thisSourceFinalTokenBalance,
-            remainSourceTokens,
-            value
-        );
-        */
 
         bool sourceTransferResult = ERC20(_order.sourceToken).transfer(msg.sender, thisSourceFinalTokenBalance);
         require(sourceTransferResult, "Source transfer invocation was not successful.");
@@ -108,11 +96,49 @@ contract KyberSwappingProvider is ISwappingProvider {
         return true;
     }
 
+    event Remain(
+        uint256 _value1,
+        uint256 _value2,
+        uint256 _value3,
+        uint256 _value4
+    );
+
     function swapEther(StablePayCommon.Order _order)
     public
     payable
     returns (bool)
     {
-        return false;
+        require(msg.value > 0, "Msg value must be > 0");
+        require(_order.sourceAmount > 0, "Amount must be > 0");
+        require(msg.value == _order.sourceAmount, "Msg value == source amount");
+        require(_order.merchantAddress != address(0x0), "Merchant must be != 0x0.");
+
+        // Get the minimum conversion rate
+        bool isSupported;
+        uint minRate;
+        uint maxRate;
+        (isSupported, minRate, maxRate) = getExpectedRate(ERC20(_order.sourceToken), ERC20(_order.targetToken), _order.sourceAmount);
+
+        require(isSupported, "Swap not supported. Verify source/target amount.");
+
+        uint256 thisSourceInitialTokenBalance = address(this).balance;
+        require(thisSourceInitialTokenBalance >= _order.sourceAmount, "Not enough ether in balance.");
+
+        emit Remain(_order.minRate, minRate, maxRate, _order.maxRate);
+
+        // Swap the ERC20 token to ETH        
+        uint remainSourceTokens = KyberNetworkProxy(proxy).trade.value(msg.value)(
+            ERC20(_order.sourceToken),
+            _order.sourceAmount,
+            ERC20(_order.targetToken),
+            msg.sender,
+            _order.targetAmount,
+            maxRate,
+            0
+        );
+
+        uint256 thisSourceFinalTokenBalance = address(this).balance;
+        msg.sender.transfer(thisSourceFinalTokenBalance);
+        return true;
     }
 }

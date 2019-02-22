@@ -53,10 +53,10 @@ const allowedNetworks = ['ganache'];
 module.exports = function(deployer, network, accounts) {
   console.log(`Deploying smart contracts to '${network}'.`)
   
-  //if(allowedNetworks.indexOf(network) == -1) {
-  //  console.log(`NOT deploying smart contracts to '${network}'.`);
-  //  return;
-  //}
+  if(allowedNetworks.indexOf(network) == -1) {
+    console.log(`NOT deploying smart contracts to '${network}'.`);
+    return;
+  }
   
   const envConf = require('../config')(network);
   const stablePayConf = envConf.stablepay;

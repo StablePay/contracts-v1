@@ -214,7 +214,7 @@ contract ZeroxSwappingProvider is ISwappingProvider {
         return true;
     }
 
-    function getExpectedRate(ERC20 _sourceToken, ERC20 _targetToken, uint _amount) public view returns (uint, uint) {
-        return (0, 0);
+    function getExpectedRate(ERC20 _sourceToken, ERC20 _targetToken, uint _amount) public view returns (bool isSupported, uint minRate, uint maxRate) {
+        return (false, 0, 0);
     }
 }

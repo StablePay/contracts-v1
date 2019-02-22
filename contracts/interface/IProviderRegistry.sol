@@ -38,7 +38,7 @@ interface IProviderRegistry {
     function getExpectedRate(bytes32 _providerKey, ERC20 _src, ERC20 _dest, uint _srcQty)
         external
         view
-        returns (uint, uint);
+        returns (bool isSupported, uint minRate, uint maxRate);
 
     function getExpectedRates(ERC20 _src, ERC20 _dest, uint _srcQty)
         external
