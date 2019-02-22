@@ -130,17 +130,17 @@ contract StablePayStorage is Base, IProviderRegistry {
                 if(isSwappingProviderValid(_providerKey)) {
                     StablePayCommon.SwappingProvider storage swappingProvider = providers[_providerKey];
                     ISwappingProvider iSwappingProvider = ISwappingProvider(swappingProvider.providerAddress);
-                    uint expectedRateProvider;
                     uint minRateProvider;
+                    uint maxRateProvider;
                     bool isSupported;
-                    (isSupported, expectedRateProvider, minRateProvider) = iSwappingProvider.getExpectedRate(_src, _dest, _srcQty);
+                    (isSupported, minRateProvider, maxRateProvider) = iSwappingProvider.getExpectedRate(_src, _dest, _srcQty);
                     
                     if(isSupported) {
-                        if(maxRateResult == 0 || expectedRateProvider > maxRateResult) {
-                            maxRateResult = expectedRateProvider;
-                        }
-                        if(minRateResult == 0 || minRateProvider < minRateResult) {
+                        if(minRateResult == 0 || minRateProvider > minRateResult) {
                             minRateResult = minRateProvider;
+                        }
+                        if(maxRateResult == 0 || maxRateProvider < maxRateResult) {
+                            maxRateResult = maxRateProvider;
                         }
                     }
                 }

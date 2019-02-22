@@ -248,26 +248,15 @@ contract StablePay is Base {
     returns (bool)
     {
         if(getProviderRegistry().isSwappingProviderValid(_providerKey)) {
-            require(ERC20(order.sourceToken).allowance(msg.sender, address(this)) >= order.sourceAmount, "Not enough allowed tokens to StablePay.");
-
             StablePayCommon.SwappingProvider memory swappingProvider = getSwappingProvider(_providerKey);
-
-            require(ERC20(order.sourceToken).transferFrom(msg.sender, swappingProvider.providerAddress, order.sourceAmount), "Transfer from StablePay was not successful.");
-
             uint stablePayInitialSourceBalance = address(this).balance;
-
             ISwappingProvider iSwappingProvider = ISwappingProvider(swappingProvider.providerAddress);
 
             bool result = iSwappingProvider.swapEther.value(msg.value)(order);
-
             if(result) {
                 uint stablePayFinalSourceBalance = address(this).balance;
                
                 address(msg.sender).transfer(stablePayFinalSourceBalance);
-                //require(
-                //    ,
-                //    "Transfer to customer failed."
-                //);
 
                 uint stablePayTargetBalance = ERC20(order.targetToken).balanceOf(address(this));
                 require(stablePayTargetBalance == order.targetAmount, "StablePay target balance is not valid.");

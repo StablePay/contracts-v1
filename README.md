@@ -1,8 +1,18 @@
-# StablePay Smart Contracts
+# StablePay
+
+## What is StablePay?
+
+StablePay is a decentralized platform which allows people to send and receive cryptocurrency payments converted to USD in the easy way.
+
+StablePay is the secure and decentralized payment platform for the new internet of money.
+
+StablePay was one of the winners in ETHSanFrancisco 2018. See more information about  [StablePay in ETHSanFrancisco 2018](https://devpost.com/software/stablepay).
+To see more information, please visit [StablePay website](https://stablepay.io).
+
 
 ## Description
 
-TODO COMPLETE
+This repository contains the offical StablePay platform smart contracts. 
 
 # Development
 

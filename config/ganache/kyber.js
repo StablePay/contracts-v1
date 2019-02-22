@@ -12,6 +12,7 @@ module.exports = {
         alice: '0x1cF1919d91cebAb2E56a5c0cC7180bB54eD4f3F6'
     },
     tokens: {
+        ETH: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
         KNC: '0x8c13AFB7815f10A8333955854E6ec7503eD841B7',
         OMG: '0x3750bE154260872270EbA56eEf89E78E6E21C1D9',
         SALT: '0x7ADc6456776Ed1e9661B3CEdF028f41BD319Ea52',
