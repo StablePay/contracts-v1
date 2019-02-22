@@ -6,7 +6,7 @@ StablePay is a decentralized platform which allows people to send and receive cr
 
 StablePay is the secure and decentralized payment platform for the new internet of money.
 
-StablePay was one of the winners in ETHSanFrancisco 2018. See more information about  [StablePay in ETHSanFrancisco 2018](https://devpost.com/software/stablepay).
+StablePay was one of the bounty prize winners in ETHSanFrancisco 2018. See more information about  [StablePay in ETHSanFrancisco 2018](https://devpost.com/software/stablepay).
 To see more information, please visit [StablePay website](https://stablepay.io).
 
 
