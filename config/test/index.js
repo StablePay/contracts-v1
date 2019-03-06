@@ -1,8 +1,6 @@
-const _0x = require('./0x');
-const kyber = require('./kyber');
-
 module.exports = {
-    network: 'ganache',
-    zerox: _0x,
-	kyber: kyber
+    network: 'test',
+    zerox: require('./0x'),
+	kyber: require('./kyber'),
+    stablepay: require('./stablepay')
 };

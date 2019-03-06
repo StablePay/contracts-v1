@@ -27,6 +27,9 @@ interface IProviderRegistry {
         address indexed providerAddress
     );
 
+    /**
+        @dev This event is emitted when a specific swapping provider is unpaused.
+     */
     event SwappingProviderUnpaused(
         address indexed thisContract,
         address indexed providerAddress
@@ -34,7 +37,6 @@ interface IProviderRegistry {
 
     /*** Methods ***************/
 
-    // TODO Modify to getExpectedAmount ?
     function getExpectedRate(bytes32 _providerKey, ERC20 _src, ERC20 _dest, uint _srcQty)
         external
         view
