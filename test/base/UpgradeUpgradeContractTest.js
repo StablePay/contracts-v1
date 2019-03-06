@@ -54,22 +54,24 @@ contract('UpgradeUpgradeContractTest', function (accounts) {
     });
 
     it(t('aNewAdmin', 'upgradeContract', 'Should be able to upgrade contract address.'), async function () {
-        let role = await Role.deployed();
         const contractName = 'Vault';
+        const role = await Role.deployed();
         const newContractInstance = await Vault.new(Storage.address);
         const newAdmin = accounts[7];
         const oldVaultAddress = await _storage.getAddress(web3.utils.soliditySha3('contract.name', contractName));
 
         await role.adminRoleAdd('admin', newAdmin ,{from: owner});
 
-        await instance.upgradeContract(contractName, newContractInstance.address,{from: newAdmin});
-/*
-        await assertEvent(instance, {event: 'ContractUpgraded', args: {
-                contractAddress: instance.address,
-                oldContractAddress: oldVaultAddress,
-                newContractAddress: newContractInstance.address
-            }}, 1, emptyCallback);
-*/
+        const result = await instance.upgradeContract(contractName, newContractInstance.address,{from: newAdmin});
+
+        upgrade
+            .contractUpgraded(result)
+            .emitted(
+                instance.address,
+                oldVaultAddress,
+                newContractInstance.address,
+                contractName
+            );
         const newTtValultExpectedByName = await _storage.getAddress(web3.utils.soliditySha3('contract.name', contractName));
         const newTtValultExpectedByAddress = await _storage.getAddress(web3.utils.soliditySha3('contract.address', newContractInstance.address));
 
@@ -80,20 +82,13 @@ contract('UpgradeUpgradeContractTest', function (accounts) {
     it(t('nonOwner', 'upgradeContract', 'Should not be able to upgrade contract address.', true), async function () {
         const contractName = 'Vault';
         const newContractInstance = await Vault.new(_storage.address);
-
         try {
             await instance.upgradeContract(contractName, newContractInstance.address, {from: player});
             fail('It should have failed because a player cannot upgrade contracts.');
         } catch (error) {
-            console.log(error);
             assert(error);
             assert(error.message.includes("revert"));
         }
-        /*
-        await assertEvent(instance, {event: 'ContractUpgraded', args: {
-            contractAddress: instance.address
-        }}, 0, emptyCallback);
-        */
     });
 
     
@@ -105,14 +100,8 @@ contract('UpgradeUpgradeContractTest', function (accounts) {
             await instance.upgradeContract(contractName, newContractInstance.address, {from: player});
             fail('It should have failed because a contract name is invalid.');
         } catch (error) {
-            console.log(error);
             assert(error);
             assert(error.message.includes("revert"));
         }
-/*
-        await assertEvent(instance, {event: 'ContractUpgraded', args: {
-            contractAddress: instance.address
-        }}, 0, emptyCallback);
-        */
     });
 });
