@@ -101,7 +101,8 @@ contract Base {
     modifier onlySuperUser() {
         require(
             roleHas(OWNER, msg.sender) == true || 
-            roleHas(ADMIN, msg.sender) == true
+            roleHas(ADMIN, msg.sender) == true,
+            "Msg sender does not have permission."
         );
         _;
     }

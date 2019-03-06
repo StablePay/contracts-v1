@@ -1,30 +1,27 @@
 const config = require("../truffle");
-const util = require('ethereumjs-util');
-const DeployerApp = require('./util/DeployerApp');
+const appConfig = require('../src/config');
 
-/** Default platform configuration values. */
-const DEFAULT_PRINT_DEPLOY_COST = false;
-const DEFAULT_DAI_MIN_AMOUNT=10
-const DEFAULT_DAI_MAX_AMOUNT=100
+const DeployerApp = require('../src/deployer/DeployerApp');
+const ProviderKeyGenerator = require('../src/utils/ProviderKeyGenerator');
 
-/** Platform configuration keys. */
+/** Platform configuration keys for smart contracts. */
 const PLATFORM_FEE_KEY = 'config.platform.fee';
 
 /** Platform configuration values. */
-const printDeployCostValue = process.env['PRINT_DEPLOY_COST'] == true || DEFAULT_PRINT_DEPLOY_COST;
-const platformFee = process.env['PLATFORM_FEE'];
-const daiMinAmount = process.env['DAI_MIN_AMOUNT'] || DEFAULT_DAI_MIN_AMOUNT;
-const daiMaxAmount = process.env['DAI_MAX_AMOUNT'] || DEFAULT_DAI_MAX_AMOUNT;
-
-if(platformFee === undefined) {
-  throw new Error(`StablePay: Platform fee is not defined in .env file. See details in env.template file.`);
-}
+const printDeployCostValue = appConfig.getPrintDeployCost().get();
+const platformFee = appConfig.getPlatformFee().get();
+const maxGasForDeploying = 4000000;
 
 // Mock Smart Contracts
+const BaseMock = artifacts.require("./mock/BaseMock.sol");
 const StablePayMock = artifacts.require("./mock/StablePayMock.sol");
+const StablePayStorageMock = artifacts.require("./mock/StablePayStorageMock.sol");
+const CustomSwappingProviderMock = artifacts.require("./mock/CustomSwappingProviderMock.sol");
 
 // Libraries
 const Bytes32ArrayLib = artifacts.require("./util/Bytes32ArrayLib.sol");
+const SafeMath = artifacts.require("./util/SafeMath.sol");
+const AddressLib = artifacts.require("./util/AddressLib.sol");
 
 // Official Smart Contracts
 const Settings = artifacts.require("./base/Settings.sol");
@@ -34,21 +31,11 @@ const Storage = artifacts.require("./base/Storage.sol");
 const StablePayStorage = artifacts.require("./base/StablePayStorage.sol");
 const Upgrade = artifacts.require("./base/Upgrade.sol");
 const StablePay = artifacts.require("./StablePay.sol");
-const SafeMath = artifacts.require("./util/SafeMath.sol");
-const AddressLib = artifacts.require("./util/AddressLib.sol");
 const StablePayCommon = artifacts.require("./StablePayCommon.sol");
 const ZeroxSwappingProvider = artifacts.require("./providers/ZeroxSwappingProvider.sol");
 const KyberSwappingProvider = artifacts.require("./providers/KyberSwappingProvider.sol");
 
-const createPoviderKey = (name, version) => {
-  const providerName = `${name}_v${version}`;
-  return {
-    name: providerName,
-    providerKey: util.bufferToHex(util.setLengthRight(providerName, 32))
-  };
-};
-
-const allowedNetworks = ['ganache'];
+const allowedNetworks = ['ganache', 'test'];
 
 module.exports = function(deployer, network, accounts) {
   console.log(`Deploying smart contracts to '${network}'.`)
@@ -57,6 +44,8 @@ module.exports = function(deployer, network, accounts) {
     console.log(`NOT deploying smart contracts to '${network}'.`);
     return;
   }
+
+  const providerKeyGenerator = new ProviderKeyGenerator();
   
   const envConf = require('../config')(network);
   const stablePayConf = envConf.stablepay;
@@ -64,11 +53,8 @@ module.exports = function(deployer, network, accounts) {
   const zeroxConf = envConf.zerox;
   
   const zeroxContracts = zeroxConf.contracts;
-  const zeroxTokens = zeroxConf.tokens;
-
+  
   const kyberContracts = kyberConf.contracts;
-  const kyberWallets = kyberConf.wallets;
-  const kyberPermissions = kyberConf.permissions;
   const kyberTokens = kyberConf.tokens;
 
   const owner = accounts[0];
@@ -83,25 +69,27 @@ module.exports = function(deployer, network, accounts) {
       Storage,
       StablePayCommon,
       AddressLib
-    ], {gas: 4000000});
+    ], {gas: maxGasForDeploying});
     
     await deployerApp.deployMockIf(StablePayMock, Storage.address);
-    
+    await deployerApp.deployMockIf(StablePayStorageMock, Storage.address);
+    await deployerApp.deployMockIf(BaseMock, Storage.address);
+
     await deployerApp.links(StablePayStorage, [
       Bytes32ArrayLib,
       SafeMath
     ]);
-    await deployerApp.deploy(StablePayStorage, Storage.address, {gas: 4000000});
-    await deployerApp.deploy(Settings, Storage.address, {gas: 4000000});
+    await deployerApp.deploy(StablePayStorage, Storage.address, {gas: maxGasForDeploying});
+    await deployerApp.deploy(Settings, Storage.address, {gas: maxGasForDeploying});
     await deployerApp.deploy(Upgrade, Storage.address);
-    await deployerApp.deploy(Role, Storage.address, {gas: 4000000});
+    await deployerApp.deploy(Role, Storage.address, {gas: maxGasForDeploying});
     await deployerApp.deploy(Vault, Storage.address);
     
     await deployerApp.links(StablePay, [
       Bytes32ArrayLib,
       SafeMath
     ]);
-    await deployerApp.deploy(StablePay, Storage.address, {gas: 4000000});
+    await deployerApp.deploy(StablePay, Storage.address, {gas: maxGasForDeploying});
 
     /***********************************
       Deploy swapping token providers.
@@ -109,6 +97,8 @@ module.exports = function(deployer, network, accounts) {
 
     const stablePayInstance = await StablePay.deployed();
     const stablePayStorageInstance = await StablePayStorage.deployed();
+
+    await deployerApp.deployMockIf(CustomSwappingProviderMock, stablePayInstance.address);
 
     /** Deploying 0x swap provider. */
     await deployerApp.deploy(
@@ -121,7 +111,7 @@ module.exports = function(deployer, network, accounts) {
         from: owner
       }
     );
-    const zeroxProviderKey = createPoviderKey('0x','1');
+    const zeroxProviderKey = providerKeyGenerator.generateKey('0x','1');
     await stablePayStorageInstance.registerSwappingProvider(
         ZeroxSwappingProvider.address,
         zeroxProviderKey.providerKey
@@ -136,9 +126,9 @@ module.exports = function(deployer, network, accounts) {
       KyberSwappingProvider,
       stablePayInstance.address,
       kyberContracts.KyberNetworkProxy,
-      {gas: 4000000}
+      {gas: maxGasForDeploying}
     );
-    const kyberProviderKey = createPoviderKey('KyberNetwork', '1');
+    const kyberProviderKey = providerKeyGenerator.generateKey('KyberNetwork', '1');
     await stablePayStorageInstance.registerSwappingProvider(
         KyberSwappingProvider.address,
         kyberProviderKey.providerKey

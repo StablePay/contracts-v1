@@ -32,8 +32,16 @@ contract ISwappingProvider {
      */
     function swapToken(StablePayCommon.Order order) public returns (bool);
 
+    /**
+        @dev Perform the swapping between ether and a token.
+        @dev Before finishing this function must transfer the target tokens to the StablePay smart contract in order to continue with the swapping process.
+        @param order info to perform the swapping. 
+     */
     function swapEther(StablePayCommon.Order order) public payable returns (bool);
 
+    /**
+        @dev Calculate the expected values (min and max) to perform the swapping.
+     */
     function getExpectedRate(ERC20 src, ERC20 dest, uint srcQty) public view returns (bool isSupported, uint minRate, uint maxRate);
 
     //function isValidSwapData(StablePayCommon.Order order) public view returns (bool);

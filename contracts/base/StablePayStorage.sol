@@ -48,7 +48,7 @@ contract StablePayStorage is Base, IProviderRegistry {
     }
 
     modifier isSwappingProviderNotPausedByAdmin(bytes32 _providerKey) {
-        require(providers[_providerKey].pausedByAdmin == false, "Swapping provider must not be paused.");
+        require(providers[_providerKey].pausedByAdmin == false, "Swapping provider must not be paused by admin.");
         _;
     }
 
@@ -95,27 +95,43 @@ contract StablePayStorage is Base, IProviderRegistry {
         public
         view
         returns (StablePayCommon.ExpectedRate[]) {
-            StablePayCommon.ExpectedRate[] expectedRates;
+        uint256 totalProviders = providersRegistry.length;
+        StablePayCommon.ExpectedRate[] memory expectedRates = new StablePayCommon.ExpectedRate[](totalProviders);
 
-            for (uint256 index = 0; index < providersRegistry.length; index = index.add(1)) {
-                bytes32 _providerKey = providersRegistry[index];
-                if(isSwappingProviderValid(_providerKey)) {
-                    StablePayCommon.SwappingProvider storage swappingProvider = providers[_providerKey];
-                    ISwappingProvider iSwappingProvider = ISwappingProvider(swappingProvider.providerAddress);
-                    uint expectedRate;
-                    uint minRate;
-                    bool isSupported;
-                    (isSupported, expectedRate, minRate) = iSwappingProvider.getExpectedRate(_src, _dest, _srcQty);
-                    if(isSupported) {
-                        expectedRates.push(StablePayCommon.ExpectedRate({
-                            providerKey: _providerKey,
-                            minRate: minRate,
-                            maxRate: expectedRate
-                        }));
-                    }
+        for (uint256 index = 0; index < providersRegistry.length; index = index.add(1)) {
+            bytes32 _providerKey = providersRegistry[index];
+            if(isSwappingProviderValid(_providerKey)) {
+                StablePayCommon.SwappingProvider storage swappingProvider = providers[_providerKey];
+                ISwappingProvider iSwappingProvider = ISwappingProvider(swappingProvider.providerAddress);
+                uint expectedRate;
+                uint minRate;
+                bool isSupported;
+                (isSupported, expectedRate, minRate) = iSwappingProvider.getExpectedRate(_src, _dest, _srcQty);
+                if(isSupported) {
+                    expectedRates[index] = StablePayCommon.ExpectedRate({
+                        providerKey: _providerKey,
+                        minRate: minRate,
+                        maxRate: expectedRate,
+                        exists: true
+                    });
+                } else {
+                    expectedRates[index] = StablePayCommon.ExpectedRate({
+                        providerKey: _providerKey,
+                        minRate: 0,
+                        maxRate: 0,
+                        exists: true
+                    });
                 }
+            } else {
+                expectedRates[index] = StablePayCommon.ExpectedRate({
+                    providerKey: bytes32(0x0),
+                    minRate: 0,
+                    maxRate: 0,
+                    exists: false
+                });
             }
-            return expectedRates;
+        }
+        return expectedRates;
     }
 
     function getExpectedRateRange(ERC20 _src, ERC20 _dest, uint _srcQty)

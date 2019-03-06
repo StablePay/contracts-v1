@@ -24,10 +24,10 @@ contract Role is Base {
     /** Modifier */
 
     /**
-        @dev Only allow access from the latest version of the RocketRole contract
+        @dev Only allow access from the latest version of the role contract
      */
     modifier onlyLatestRole() {
-        require(address(this) == _storage.getAddress(keccak256(abi.encodePacked("contract.name", "role"))));
+        require(address(this) == _storage.getAddress(keccak256(abi.encodePacked("contract.name", "Role"))), "Only the latest version contract.");
         _;
     }
   
@@ -78,9 +78,11 @@ contract Role is Base {
    */
     function roleAdd(string _role, address _address) internal {
         // Legit address?
-        require(_address != 0x0);
+        require(_address != 0x0, "Address != 0x0.");
+        require(keccak256(abi.encodePacked(_role)) != keccak256(""), "Role must not be empty.");
+
         // Only one owner to rule them all
-        require(keccak256(abi.encodePacked(_role)) != keccak256("owner"));
+        require(keccak256(abi.encodePacked(_role)) != keccak256("owner"), "Only one owner.");
         // Add it
         _storage.setBool(keccak256(abi.encodePacked("access.role", _role, _address)), true);
         // Log it
@@ -92,7 +94,7 @@ contract Role is Base {
     */
     function roleRemove(string _role, address _address) internal {
         // Only an owner can transfer their access
-        require(!roleHas("owner", _address));
+        require(!roleHas("owner", _address), "Only owner can transfer their access.");
         // Remove from storage
         _storage.deleteBool(keccak256(abi.encodePacked("access.role", _role, _address)));
         // Log it
