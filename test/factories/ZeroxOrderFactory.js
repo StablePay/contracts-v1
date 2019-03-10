@@ -20,7 +20,7 @@ class ZeroxOrderFactory extends BaseOrderFactory {
     }
 }
 
-KyberOrderFactory.prototype.createOrder = function() {
+ZeroxOrderFactory.prototype.createOrder = function() {
     return [
         this.amountWei,
         '0', // Amount of makerAsset being offered by maker. Must be greater than 0.
@@ -45,4 +45,4 @@ KyberOrderFactory.prototype.createOrder = function() {
     ];
 }
 
-module.exports = KyberOrderFactory;
+module.exports = ZeroxOrderFactory;
