@@ -24,4 +24,10 @@ contract StablePayMock is StablePay {
     returns (uint256) {
         return super.getFeeAmount(order);
     }
+
+    function _isTransferTokens(StablePayCommon.Order order)
+    public
+    returns (bool){
+        return super.isTransferTokens(order);
+    }
 }

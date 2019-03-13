@@ -10,10 +10,8 @@ import "./ISwappingProvider.sol";
 import "../util/SafeMath.sol";
 
 /**
-
-
-https://developer.kyber.network/docs/VendorsGuide/#converting-from-erc20
-https://developer.kyber.network/docs/KyberNetworkProxy/#getexpectedrate
+    https://developer.kyber.network/docs/VendorsGuide/#converting-from-erc20
+    https://developer.kyber.network/docs/KyberNetworkProxy/#getexpectedrate
  */
 contract KyberSwappingProvider is ISwappingProvider {
     using SafeMath for uint256;
@@ -32,11 +30,11 @@ contract KyberSwappingProvider is ISwappingProvider {
         proxy = _proxy;
     }
 
-    /*** Fallback Method ***************/
+    /** Fallback Method */
 
     function () external payable {}
 
-    /*** Methods ***************/
+    /** Methods */
 
     function getExpectedRate(ERC20 _sourceToken, ERC20 _targetToken, uint _sourceAmount)
     public
@@ -75,10 +73,8 @@ contract KyberSwappingProvider is ISwappingProvider {
         // Set the spender's token allowance to tokenQty
         require(ERC20(_order.sourceToken).approve(address(proxy), _order.sourceAmount), "Error approving tokens for proxy."); // Set max amount.
 
-        emit Remain(_order.minRate, minRate, maxRate, _order.maxRate);
-
         // Swap the ERC20 token to ETH
-        uint remainSourceTokens = KyberNetworkProxy(proxy).trade(
+        KyberNetworkProxy(proxy).trade(
             ERC20(_order.sourceToken),
             _order.sourceAmount,
             ERC20(_order.targetToken),
@@ -95,13 +91,6 @@ contract KyberSwappingProvider is ISwappingProvider {
 
         return true;
     }
-
-    event Remain(
-        uint256 _value1,
-        uint256 _value2,
-        uint256 _value3,
-        uint256 _value4
-    );
 
     function swapEther(StablePayCommon.Order _order)
     public
@@ -124,10 +113,8 @@ contract KyberSwappingProvider is ISwappingProvider {
         uint256 thisSourceInitialTokenBalance = address(this).balance;
         require(thisSourceInitialTokenBalance >= _order.sourceAmount, "Not enough ether in balance.");
 
-        emit Remain(_order.minRate, minRate, maxRate, _order.maxRate);
-
         // Swap the ERC20 token to ETH        
-        uint remainSourceTokens = KyberNetworkProxy(proxy).trade.value(msg.value)(
+        KyberNetworkProxy(proxy).trade.value(msg.value)(
             ERC20(_order.sourceToken),
             _order.sourceAmount,
             ERC20(_order.targetToken),
