@@ -15,7 +15,9 @@ contract StandardToken is ERC20, BasicToken {
 
   mapping (address => mapping (address => uint256)) internal allowed;
 
-
+  function decimals() external view returns(uint digits) {
+    return 18;
+  }
 
   function addBalance( address _to, uint256 _value) public returns (bool) {
     require(_to != address(0));

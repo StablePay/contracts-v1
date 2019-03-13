@@ -224,6 +224,18 @@ contract StablePay is Base {
         return false;
     }
 
+    function isTransferTokens(StablePayCommon.Order order)
+    internal
+    returns (bool){
+        bool isTransferTokens = order.sourceToken == order.targetToken;
+        if(isTransferTokens) {
+            require(ERC20(order.sourceToken).allowance(msg.sender, address(this)) >= order.sourceAmount, "Not enough allowed tokens to StablePay.");
+            require(ERC20(order.sourceToken).transferFrom(msg.sender, order.merchantAddress, order.sourceAmount), "Transfer from StablePay was not successful.");
+            emitPaymentSentEvent(order, order.sourceAmount);
+        }
+        return isTransferTokens;
+    }
+
     function payWithToken(StablePayCommon.Order order, bytes32[] _providerKeys)
     public
     isNotPaused()
@@ -231,6 +243,9 @@ contract StablePay is Base {
     isTokenAvailable(order.targetToken, order.targetAmount)
     returns (bool)
     {
+        if(isTransferTokens(order)) {
+            return true;
+        }
         require(_providerKeys.length > 0, "Provider keys must not be empty.");
 
         for (uint256 index = 0; index < _providerKeys.length; index = index.add(1)) {

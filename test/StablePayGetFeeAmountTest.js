@@ -8,15 +8,7 @@ const StablePayMock = artifacts.require("./mock/StablePayMock.sol");
 const Storage = artifacts.require("./base/Storage.sol");
 const Settings = artifacts.require("./base/Settings.sol");
 
-// Utils
-/*
-const {
-    assertEvent
-} = require("./util/event/utils");
-const stablePayEvents = require('./util/event/assertEvents').stablePay;
-*/
-
-contract('StablePayTest', accounts => {
+contract('StablePayGetFeeAmountTest', accounts => {
     const owner = accounts[0];
     const account1 = accounts[1];
     const token1 = accounts[7];
