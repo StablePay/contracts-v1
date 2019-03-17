@@ -27,9 +27,9 @@ contract UniswapSwappingProvider is ISwappingProvider {
         uint256 provider
     );
 
-    constructor(address _stablePay, address _exchange)
+    constructor(address _stablePay, address _factory)
         public ISwappingProvider(_stablePay){
-        uniswapFactory = _exchange;
+        uniswapFactory = _factory;
     }
 
     function tokenToEth(address exchange, address token, uint256 amount)

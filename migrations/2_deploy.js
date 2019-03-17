@@ -36,6 +36,8 @@ const StablePayCommon = artifacts.require("./StablePayCommon.sol");
 const ZeroxSwappingProvider = artifacts.require("./providers/ZeroxSwappingProvider.sol");
 const KyberSwappingProvider = artifacts.require("./providers/KyberSwappingProvider.sol");
 
+const UniswapSwappingProvider = artifacts.require("./providers/UniswapSwappingProvider.sol");
+
 const allowedNetworks = ['ganache', 'test'];
 
 module.exports = function(deployer, network, accounts) {
@@ -53,11 +55,15 @@ module.exports = function(deployer, network, accounts) {
   const stablePayConf = envConf.stablepay;
   const kyberConf = envConf.kyber;
   const zeroxConf = envConf.zerox;
-  
+  const uniswapConf = envConf.uniswap;
+
   const zeroxContracts = zeroxConf.contracts;
   
   const kyberContracts = kyberConf.contracts;
   const kyberTokens = kyberConf.tokens;
+
+  const uniswapContracts = uniswapConf.contracts;
+  const uniswapTokens = uniswapConf.tokens;
 
   const owner = accounts[0];
 
@@ -120,6 +126,23 @@ module.exports = function(deployer, network, accounts) {
         kyberProviderKey.providerKey
     );
     deployerApp.addData(kyberProviderKey.name, kyberProviderKey.providerKey);
+
+    /** Deploying Uniswap swap provider. */
+    await deployerApp.links(UniswapSwappingProvider, [
+      SafeMath
+    ]);
+    await deployerApp.deploy(
+        UniswapSwappingProvider,
+        stablePayInstance.address,
+        uniswapContracts.factory,
+        {gas: maxGasForDeploying}
+    );
+    const uniswapProviderKey = providerKeyGenerator.generateKey('Uniswap', '1');
+    await stablePayStorageInstance.registerSwappingProvider(
+        UniswapSwappingProvider.address,
+        uniswapProviderKey.providerKey
+    );
+    deployerApp.addData(uniswapProviderKey.name, uniswapProviderKey.providerKey);
 
 
     /***************************************************************
