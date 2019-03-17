@@ -14,17 +14,17 @@ const Token2 = artifacts.require("./erc20/EIP20.sol");
 const t = require('../util/TestUtil').title;
 
 
-const supply = web3.utils.toBN(new BigNumber(10000000000000000000000000000000000000000000000000000000000000000000000000000000000000000));
-const approved = web3.utils.toBN(new BigNumber(10000000000000000000000000000000000000000000000000000));
-const initialLiquidity = web3.utils.toBN(new BigNumber(10000000000000000000000000000000000000000));
+const DECIMALS = (new BigNumber(10)).pow(18);
+const supply =  (new BigNumber(10).pow(10)).times(DECIMALS).toFixed();//web3.utils.toBN(new BigNumber(10000000000000000000000000000000000000000000000000000000000000000000000000000000000000000));
+const approved = (new BigNumber(10).pow(8)).times(DECIMALS).toFixed();
+const initialLiquidity = (new BigNumber(10).pow(8)).times(DECIMALS).toFixed();
 
-// const Web3 = require('web3');
-//
-// const web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
+console.log(supply)
+
 
 contract('deploy', function (accounts) {
     const owner = accounts[0];
-    //console.log('fff', factory);
+
 
     let uniswapFactory;
     let exchangeTemplate;
@@ -83,7 +83,7 @@ contract('deploy', function (accounts) {
         console.log('token1Exchange =>>>', await token1Exchange.factoryAddress());
         await token1.approve(token1ExchangeAddress, approved);
 
-        const initialLiquidity = web3.utils.toBN(new BigNumber(10000000000000000000000000000000000000000));
+       // const initialLiquidity = web3.utils.toBN(new BigNumber(10000000000000000000000000000000000000000));
         const current_block = await web3.eth.getBlock(await web3.eth.getBlockNumber());
         //console.log('getEthToTokenOutputPrice =>>>', await token1Exchange.getEthToTokenOutputPrice(1000000000));
         await token1Exchange.addLiquidity(initialLiquidity, initialLiquidity, current_block.timestamp + 300, {value:100000000000000});
