@@ -1,12 +1,13 @@
 //
-const exchange = artifacts.require("./uniswap/UniswapExchangeInterface.sol");
-const factory = artifacts.require("./uniswap/UniswapFactoryInterface.sol");
+
+const ERC20 = artifacts.require("./erc20/ERC20.sol");
 const { BigNumber } = require('bignumber.js');
 
+const { providerEngine } = require('../test/util/provider_engine');
+const { ContractWrapperByAccount } = require('../test/util/contractWrapper');
 
 const UniswapSwappingProvider = artifacts.require("./providers/UniswapSwappingProvider.sol");
-const Token1 = artifacts.require("./erc20/EIP20.sol");
-const Token2 = artifacts.require("./erc20/EIP20.sol");
+
 
 const UniswapOrderFactory = require('../test/factories/UniswapOrderFactory');
 
@@ -16,6 +17,13 @@ const t = require('../test/util/TestUtil').title;
 const { printBalanceOf } = require('../test/util/payUtil');
 
 contract('UniswapSwappingProviderSwapTokenTest', (accounts) => {
+    const appConf = require('../config')('ganache');
+
+    const uniswapConf = appConf.kyber;
+   // const uniswapContracts = uniswapConf.contracts;
+    const uniswapTokens = uniswapConf.tokens;
+    const kncTokenAddress = uniswapTokens.KNC;
+    const omgTokenAddress = uniswapTokens.OMG;
 
     let owner = accounts[0];
 
@@ -24,73 +32,44 @@ contract('UniswapSwappingProviderSwapTokenTest', (accounts) => {
 
 
     let uniswapProvider;
-    let uniswapFactory;
 
 
     let sourceErc20;
-    let targetErc20 ;
-
-    const DECIMALS = (new BigNumber(10)).pow(18);
-    const supply =  (new BigNumber(10).pow(10)).times(DECIMALS).toFixed();
-    const approved = (new BigNumber(10).pow(8)).times(DECIMALS).toFixed();
-    const initialLiquidity = (new BigNumber(10).pow(8)).times(DECIMALS).toFixed();
+    let targetErc20;
 
     beforeEach('Deploying contract for each test', async () => {
+        // kyberProxy = await KyberNetworkProxy.at(uniswapContracts.KyberNetworkProxy);
+        // assert(kyberProxy);
+        // assert(kyberProxy.address);
 
         uniswapProvider = await UniswapSwappingProvider.deployed();
         assert(uniswapProvider);
         assert(uniswapProvider.address);
 
-        const fact = await uniswapProvider.uniswapFactory.call();
-        console.log('fact -> ' + fact);
-        uniswapFactory = await factory.at(fact);
-
-        sourceErc20 = await Token1.new(supply, "KNC", 18, "KNC");
+        sourceErc20 = await ERC20.at(kncTokenAddress);
         assert(sourceErc20);
         assert(sourceErc20.address);
 
-        targetErc20 =  await Token2.new(supply, "OMG", 18, "OMG");
+        targetErc20 = await ERC20.at(omgTokenAddress);
         assert(targetErc20);
         assert(targetErc20.address);
-
-        console.log('template address', await uniswapFactory.exchangeTemplate.call());
-
-        await uniswapFactory.createExchange(sourceErc20.address);
-        await uniswapFactory.createExchange(targetErc20.address);
-        assert.equal(await uniswapFactory.tokenCount(), 2);
-
-
-        let sourceErc20ExchangeAddress = await uniswapFactory.getExchange(sourceErc20.address);
-        let sourceErc20Exchange = await exchange.at(sourceErc20ExchangeAddress);
-        await sourceErc20.approve(sourceErc20ExchangeAddress, approved);
-
-        let targetErc20ExchangeAddress = await uniswapFactory.getExchange(targetErc20.address);
-        let targetErc20Exchange = await exchange.at(targetErc20ExchangeAddress);
-        await targetErc20.approve(targetErc20ExchangeAddress, approved);
-
-        const current_block = await web3.eth.getBlock(await web3.eth.getBlockNumber());
-
-        await sourceErc20Exchange.addLiquidity(initialLiquidity, initialLiquidity, current_block.timestamp + 300, {value:100000000000000});
-        await targetErc20Exchange.addLiquidity(initialLiquidity, initialLiquidity, current_block.timestamp + 300, {value:100000000000000});
-
-        console.log('getEthToTokenOutputPrice =>>>', await sourceErc20Exchange.getEthToTokenOutputPrice(1000000000));
     });
 
 
     withData({
-        _1_smallAmount: [10000000]
+        _1_zeroAmount: [5]
     }, function(unitsOfTokens) {
         it(t('anUser', 'swapToken', 'Should be able to swap any token.'), async function() {
             // Setup
             const sourceToken = {
                 name: 'KNC',
                 instance: sourceErc20,
-                amountWei: 10000000
+                amountWei: "10000"
             };
             const targetToken = {
                 name: 'OMG',
                 instance: targetErc20,
-                amountWei: 10000000
+                amountWei: "10000"
             };
 
             // Get the initial balances (source and target tokens) for customer and merchant.
@@ -103,13 +82,11 @@ contract('UniswapSwappingProviderSwapTokenTest', (accounts) => {
             const initialMerchantSourceBalance = await sourceErc20.balanceOf(merchantAddress);
             const initialMerchantTargetBalance = await targetErc20.balanceOf(merchantAddress);
 
-            //
             await sourceErc20.transfer(
                 uniswapProvider.address,
                 sourceToken.amountWei,
                 {from: customerAddress}
             );
-
 
             const initialSwappingProviderSourceBalance = await sourceErc20.balanceOf(uniswapProvider.address);
             assert.equal(initialSwappingProviderSourceBalance, sourceToken.amountWei);
@@ -117,11 +94,9 @@ contract('UniswapSwappingProviderSwapTokenTest', (accounts) => {
             const orderArray = new UniswapOrderFactory({
                 sourceToken: sourceToken.instance.address,
                 targetToken: targetToken.instance.address,
-                sourceAmount: targetToken.amountWei,
+                amountWei: targetToken.amountWei,
                 merchantAddress: merchantAddress
             }).createOrder();
-
-            console.log('orderArray', orderArray);
 
             //Invocation
            /* const _uniswapProvider = ContractWrapperByAccount(
@@ -137,8 +112,8 @@ contract('UniswapSwappingProviderSwapTokenTest', (accounts) => {
             //console.log(proxyResult);
             //console.log('_kyberProvider.proxy', `"${proxyResult}"`);
 
-            // assert.equal(proxyResult, kyberProxy.address);
-            // assert(proxyResult === kyberProxy.address);
+            assert.equal(proxyResult, kyberProxy.address);
+            assert(proxyResult === kyberProxy.address);
 
             //console.log('kyberProxy.address', `"${kyberProxy.address}"`);
             const er = await uniswapProvider.getExpectedRate(
