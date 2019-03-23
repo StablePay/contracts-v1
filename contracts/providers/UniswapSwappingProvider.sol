@@ -89,11 +89,24 @@ contract UniswapSwappingProvider is ISwappingProvider {
 
         require(uFactory.getExchange(_order.sourceToken) != 0x0, "Exchange not found for source token");
         require(uFactory.getExchange(_order.targetToken) != 0x0, "Exchange not found for target token");
-        require(ERC20(_order.sourceToken).allowance(msg.sender, address(this)) >= _order.sourceAmount, "Not enough allowed tokens.");
+        //require(ERC20(_order.sourceToken).allowance(msg.sender, address(this)) >= _order.sourceAmount, "-Not enough allowed tokens.");
 
         // move tokens to provider address
-        require(ERC20(_order.sourceToken).transferFrom(msg.sender, address(this), _order.sourceAmount), "TransferFrom invocation was not successful.");
-        
+        //require(ERC20(_order.sourceToken).transferFrom(msg.sender, address(this), _order.sourceAmount), "TransferFrom invocation was not successful.");
+
+        uint256 thisSourceInitialTokenBalance = ERC20(_order.sourceToken).balanceOf(address(this));
+        require(thisSourceInitialTokenBalance >= _order.sourceAmount, "--Not enough tokens in balance.");
+
+        // Mitigate ERC20 Approve front-running attack, by initially setting allowance to 0
+        require(ERC20(_order.sourceToken).approve(address(uFactory.getExchange(_order.sourceToken)), 0), "Error mitigating front-running attack.");
+        // Set the spender's token allowance to tokenQty
+        require(ERC20(_order.sourceToken).approve(address(uFactory.getExchange(_order.sourceToken)), _order.sourceAmount), "Error approving tokens for proxy."); // Set max amount.
+
+        require(ERC20(_order.sourceToken).approve(address(uFactory.getExchange(_order.targetToken)), 0), "Error mitigating front-running attack.");
+        // Set the spender's token allowance to tokenQty
+        require(ERC20(_order.sourceToken).approve(address(uFactory.getExchange(_order.targetToken)), outputAmountB), "Error approving tokens for proxy."); // Set max amount.
+
+
         UniswapExchangeInterface uExchange = UniswapExchangeInterface(uFactory.getExchange(_order.sourceToken));
 
         // TokenA (ERC20) to ETH conversion
@@ -102,7 +115,7 @@ contract UniswapSwappingProvider is ISwappingProvider {
         // ETH to TokenB conversion 
         uint256 outputAmountB = ethToToken(uFactory.getExchange(_order.targetToken), ERC20(_order.targetToken), outputAmountA);
 
-        //TODO review swap with transfer
+
         uint tokens_bought = uExchange.tokenToTokenSwapInput(
             _order.sourceAmount,
             outputAmountB,
@@ -110,12 +123,11 @@ contract UniswapSwappingProvider is ISwappingProvider {
             (block.number * 900) + 300,
             _order.targetToken
         );
-        
-        // Send the swapped tokens to the destination address
-        bool transferResult = ERC20(_order.targetToken).transfer(msg.sender, tokens_bought);
-        require(transferResult, "Transfer invocation was not successful.");
 
-        return true;
+//        bool sourceTransferResult = ERC20(_order.sourceToken).transfer(msg.sender, ERC20(_order.sourceToken).balanceOf(address(this)));
+//        require(sourceTransferResult, "Source transfer invocation was not successful.");
+
+    return true;
     }
     function swapEther(StablePayCommon.Order _order)
         public isStablePay(msg.sender)
@@ -137,11 +149,9 @@ contract UniswapSwappingProvider is ISwappingProvider {
             amountTokens,        
             (block.number * 900) + 300
         );
-        
-        // Send the swapped tokens to the destination address
-        bool transferResult = ERC20(_order.targetToken).transfer(msg.sender, tokens_bought);
-        require(transferResult, "Transfer invocation was not successful.");
 
+        //uint256 thisSourceFinalTokenBalance = ;
+        msg.sender.transfer(address(this).balance);
         return true;
         
     }

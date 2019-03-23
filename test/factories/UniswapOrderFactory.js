@@ -1,4 +1,4 @@
-const { NULL_ADDRESS, ZERO } =require('../util/constants');
+const { NULL_ADDRESS} =require('../util/constants');
 const util = require('ethereumjs-util');
 const BaseOrderFactory = require('./BaseOrderFactory');
 const EMPTY_BYTES_32 = util.bufferToHex(util.setLengthRight(``, 32));
@@ -16,7 +16,7 @@ class UniswapOrderFactory extends BaseOrderFactory {
         this.sourceToken = sourceToken;
         this.targetToken = targetToken;
         this.sourceAmount = sourceAmount;
-        this.targetAmount = 0;
+        this.targetAmount = sourceAmount;
         this.merchantAddress = merchantAddress;
     }
 }
@@ -31,6 +31,8 @@ UniswapOrderFactory.prototype.createOrder = function() {
         '0', // Amount of ZRX paid to feeRecipient by taker when order is filled. If set to 0, no transfer of ZRX from taker to feeRecipient will be attempted.
         '0', // Timestamp in seconds at which order expires.
         '0', // Arbitrary number to facilitate uniqueness of the order's hash.
+        '0',
+        '0',
 
         this.sourceToken,
         this.targetToken,

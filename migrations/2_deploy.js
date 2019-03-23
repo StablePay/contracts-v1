@@ -130,8 +130,6 @@ module.exports = function(deployer, network, accounts) {
     await deployerApp.deployMockIf(StablePayStorageMock, Storage.address);
     await deployerApp.deployMockIf(BaseMock, Storage.address);
 
-    await deployerApp.deployMockIf(BaseMock, Storage.address);
-
     await deployerApp.links(StablePayStorage, [
       Bytes32ArrayLib,
       SafeMath

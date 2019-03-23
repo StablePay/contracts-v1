@@ -4,8 +4,7 @@ const factory = artifacts.require("./uniswap/UniswapFactoryInterface.sol");
 const { BigNumber } = require('bignumber.js');
 const { getBalances, printBalance } = require('../test/util/payUtil');
 
-const IStablePay = artifacts.require("./interface/IStablePay.sol");
-const StablePayProxy = artifacts.require("./StablePay.sol");
+const StablePay = artifacts.require("./StablePay.sol");
 const Settings = artifacts.require("./base/Settings.sol");
 const Vault = artifacts.require("./base/Vault.sol");
 const StablePayStorage = artifacts.require("./base/StablePayStorage.sol");
@@ -29,9 +28,7 @@ for (const key in contracts.data) {
         providersMap.set(element.key, element.value);
     }
 }
-function toDecimal(value) {
-    return new BigNumber(value).toFixed();
-}
+
 contract('StablePay_UniswapSwappingProviderSwapTokenTest', (accounts) => {
 
     let owner = accounts[0];
@@ -49,9 +46,8 @@ contract('StablePay_UniswapSwappingProviderSwapTokenTest', (accounts) => {
 
     let vault;
     let settings;
-    let istablePay;
+    let stablePay;
     let stablePayStorage;
-    let proxy;
 
     const DECIMALS = (new BigNumber(10)).pow(18);
     const supply =  (new BigNumber(10).pow(10)).times(DECIMALS).toFixed();
@@ -59,12 +55,6 @@ contract('StablePay_UniswapSwappingProviderSwapTokenTest', (accounts) => {
     const initialLiquidity = (new BigNumber(10).pow(8)).times(DECIMALS).toFixed();
 
     const min = (new BigNumber(10).pow(2)).times(DECIMALS).toFixed();
-    const onetoken = (new BigNumber(1)).times(DECIMALS).toFixed();
-    const twotokens = (new BigNumber(2)).times(DECIMALS).toFixed();
-    const alice = accounts[2];
-    const bob = accounts[3];
-    const halftoken = (new BigNumber(0.5)).times(DECIMALS).toFixed();
-    const quartertoken = (new BigNumber(0.25)).times(DECIMALS).toFixed();
 
     beforeEach('Deploying contract for each test', async () => {
 
@@ -75,14 +65,9 @@ contract('StablePay_UniswapSwappingProviderSwapTokenTest', (accounts) => {
         vault = await Vault.deployed();
         assert(vault);
         assert(vault.address);
-
-        proxy = await StablePayProxy.deployed();
-        assert(proxy);
-        assert(proxy.address);
-
-        istablePay = await IStablePay.at(proxy.address);
-        assert(istablePay);
-        assert(istablePay.address);
+        stablePay = await StablePay.deployed();
+        assert(stablePay);
+        assert(stablePay.address);
 
         stablePayStorage = await StablePayStorage.deployed();
         assert(stablePayStorage);
@@ -119,12 +104,12 @@ contract('StablePay_UniswapSwappingProviderSwapTokenTest', (accounts) => {
         let targetErc20Exchange = await exchange.at(targetErc20ExchangeAddress);
         await targetErc20.approve(targetErc20ExchangeAddress, approved);
 
+        const current_block = await web3.eth.getBlock(await web3.eth.getBlockNumber());
 
-        const deadLine = (await web3.eth.getBlock(await web3.eth.getBlockNumber())).timestamp + 300;
-        await sourceErc20Exchange.addLiquidity(1, twotokens, deadLine, {value: web3.utils.toWei('1', 'ether')});
-        await targetErc20Exchange.addLiquidity(1, twotokens, deadLine, {value: web3.utils.toWei('1', 'ether')});
+        await sourceErc20Exchange.addLiquidity(initialLiquidity, initialLiquidity, current_block.timestamp + 300, {value:100000000000000});
+        await targetErc20Exchange.addLiquidity(initialLiquidity, initialLiquidity, current_block.timestamp + 300, {value:100000000000000});
 
-
+        console.log('getEthToTokenOutputPrice =>>>', await sourceErc20Exchange.getEthToTokenOutputPrice(1000000000));
 
         const platformFeeString = await settings.getPlatformFee();
         const platformFee = Number(platformFeeString.toString()) / 100;
@@ -143,31 +128,33 @@ contract('StablePay_UniswapSwappingProviderSwapTokenTest', (accounts) => {
             const sourceToken = {
                 name: 'KNC',
                 instance: sourceErc20,
-                amount: 0
+                amount: BigNumber(1).times((new BigNumber(10)).pow(18)).toFixed()
             };
             const targetToken = {
                 name: 'OMG',
                 instance: targetErc20,
-                amount: quartertoken
+                amount: BigNumber(1).times((new BigNumber(10)).pow(18)).toFixed()
             };
 
             // Get the initial balances (source and target tokens) for customer and merchant.
-            await sourceErc20.transfer(customerAddress, onetoken, {from: owner});
+            await sourceErc20.transfer(customerAddress, sourceToken.amount, {from: owner});
 
             const availability = await settings.getTokenAvailability(targetErc20.address);
+            console.log('availability', availability);
+
+            const vaultInitial = await getBalances(vault.address, sourceToken, targetToken);
+            const customerAddressInitial = await getBalances(customerAddress, sourceToken, targetToken);
+            const merchantAddressInitial = await getBalances(merchantAddress, sourceToken, targetToken);
+            const uniswapProviderAddressInitial = await getBalances(uniswapProvider.address, sourceToken, targetToken);
+            const stablePayAddressInitial = await getBalances(stablePay.address, sourceToken, targetToken);
 
 
-            const costs = await uniswapProvider.getExpectedRate.call(sourceErc20.address, targetErc20.address, quartertoken);
-            const ethToBuyTargetToken = toDecimal(costs[1])
-            const sourceTokensTosell = toDecimal(costs[2]);
+            //targetToken.amount = BigNumber(targetToken.amount).times((new BigNumber(10)).pow(18)).toFixed();
 
-            console.log('result =>>>', (costs[0]));
-            console.log('ethToBuyTargetToken =>>>', ethToBuyTargetToken);
-            console.log('sourceTokensTosell =>>>', sourceTokensTosell);
+            console.log(`-${sourceToken.name} => ${targetToken.amount} ${targetToken.name}.`);
 
-            sourceToken.amount = sourceTokensTosell;
             await sourceErc20.approve(
-                istablePay.address,
+                stablePay.address,
                 sourceToken.amount,
                 {from: customerAddress}
             );
@@ -182,27 +169,23 @@ contract('StablePay_UniswapSwappingProviderSwapTokenTest', (accounts) => {
             const orderArray = new UniswapOrderFactory({
                 sourceToken: sourceToken.instance.address,
                 targetToken: targetToken.instance.address,
-                sourceAmount: sourceToken.amount,
-                targetAmount: targetToken.amount,
+                sourceAmount: targetToken.amount,
                 merchantAddress: merchantAddress
             }).createOrder();
             console.log('orderArray', orderArray);
 
-            const initialTargetBalance = new BigNumber(await targetToken.instance.balanceOf(merchantAddress)).toFixed();
-            console.log('initialTargetBalance=>>>', initialTargetBalance);
-
             //Invocation
-            const result = await istablePay.payWithToken(orderArray, [uniswapProviderKey], {
+            const result = await stablePay.payWithToken(orderArray, [uniswapProviderKey], {
                 from: customerAddress,
                 gas: 5000000
             });
 
             // Assertions
-
-            const finalTargetBalance = new BigNumber(await targetToken.instance.balanceOf(merchantAddress)).toFixed();
-            console.log('finalTargetBalance=>>>', finalTargetBalance);
+            assert(result);
 
 
+
+            console.log('orderArray', orderArray);
 
 
 
