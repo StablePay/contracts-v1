@@ -1,9 +1,9 @@
 pragma solidity 0.4.25;
 pragma experimental ABIEncoderV2;
 
-import "../StablePay.sol";
+import "../base/StablePayBase.sol";
 
-contract StablePayMock is StablePay {
+contract StablePayMock is StablePayBase {
 
     /** Events */
 
@@ -12,7 +12,7 @@ contract StablePayMock is StablePay {
     /** Constructor */
 
     constructor(address _storageAddress)
-        public StablePay(_storageAddress) {
+        public StablePayBase(_storageAddress) {
         version = 1;
     }
 

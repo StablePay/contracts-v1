@@ -106,7 +106,7 @@ const createCostDataByAccountBalance = function(initialAccountBalance, finalAcco
     );
 }
 
-DeployerApp.prototype.deploy = async function(contract, ...params) {
+DeployerApp.prototype.deployWith = async function(contractName, contract, ...params) {
     const initialAccountBalance = await this.web3.eth.getBalance(this.account);
     // https://ethereum.stackexchange.com/questions/42950/how-to-get-the-transaction-cost-in-a-truffle-unit-test
     const txInfo = await this.deployer.deploy(contract, ...params);
@@ -115,7 +115,7 @@ DeployerApp.prototype.deploy = async function(contract, ...params) {
         this.web3,
         this.contracts.length + 1,
         contract.address,
-        contract.contractName
+        contractName
     );
     await newContractInfo.addCostByEstimation(contract, ...params);
     await newContractInfo.addCostByTransactionInfo(txInfo);
@@ -123,6 +123,10 @@ DeployerApp.prototype.deploy = async function(contract, ...params) {
     newContractInfo.addCostByAccountBalance(initialAccountBalance, finalAccountBalance);
 
     this.contracts.push(newContractInfo);
+}
+
+DeployerApp.prototype.deploy = async function(contract, ...params) {
+    await this.deployWith(contract.contractName, contract, ...params);
 }
 
 DeployerApp.prototype.totalDeployCost = function(unitName = 'ether') {
@@ -287,29 +291,29 @@ DeployerApp.prototype.getContractData = function(contractName) {
     return undefined;
 }
 
-DeployerApp.prototype.storeContract = async function(storageInstance, contract) {
-    const contractInfo = this.getContractData(contract.contractName);
-    console.log(`Storing contract info '${contract.contractName}' => ${contract.address}`)
-    const contractNameSha3 = this.web3.utils.soliditySha3('contract.name', contract.contractName);
+DeployerApp.prototype.storeContract = async function(storageInstance, contractInfo) {
+    //const contractInfo = this.getContractData(contract.contractName);
+    console.log(`Storing contract info '${contractInfo.name}' => ${contractInfo.address}`)
+    const contractNameSha3 = this.web3.utils.soliditySha3('contract.name', contractInfo.name);
     await storageInstance.setAddress(
         contractNameSha3,
-        contract.address
+        contractInfo.address
     );
     //console.log(`SHA3 ('contract.name','${contract.contractName}') = '${contractNameSha3}'`);
 
-    const contractAddressSha3 = this.web3.utils.soliditySha3('contract.address', contract.address);
+    const contractAddressSha3 = this.web3.utils.soliditySha3('contract.address', contractInfo.address);
     await storageInstance.setAddress(
         contractAddressSha3,
-        contract.address
+        contractInfo.address
     );
     //console.log(`SHA3 ('contract.address','${contract.address}') = '${contractAddressSha3}'`);
     contractInfo.data.sha3 = {};
-    contractInfo.data.sha3[`contract_address_${contract.address}`] = contractAddressSha3;
-    contractInfo.data.sha3[`contract_name_${contract.contractName}`] = contractNameSha3;
+    contractInfo.data.sha3[`contract_address_${contractInfo.address}`] = contractAddressSha3;
+    contractInfo.data.sha3[`contract_name_${contractInfo.name}`] = contractNameSha3;
 }
 
 DeployerApp.prototype.storeContracts = async function(storageInstance, ...contracts) {
-    for (const contract of contracts) {
+    for (const contract of this.contracts) {
         await this.storeContract(storageInstance, contract);
     }
 }
