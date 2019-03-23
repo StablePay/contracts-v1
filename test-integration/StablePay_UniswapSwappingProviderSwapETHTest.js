@@ -18,7 +18,7 @@ const UniswapOrderFactory = require('../test/factories/UniswapOrderFactory');
 const leche = require('leche');
 const withData = leche.withData;
 const t = require('../test/util/TestUtil').title;
-
+const NULL_ADDRESS = '0x0000000000000000000000000000000000000000';
 
 const contracts = require('../build/contracts.json');
 const providersMap = new Map();
@@ -150,7 +150,7 @@ contract('StablePay_UniswapSwappingProviderSwapTokenTest', (accounts) => {
             const availability = await settings.getTokenAvailability(targetErc20.address);
 
 
-            const costs = await uniswapProvider.getExpectedRate.call(sourceErc20.address, targetErc20.address, quartertoken);
+            const costs = await uniswapProvider.getExpectedRate.call(targetErc20.address, targetErc20.address, quartertoken);
             const ethToBuyTargetToken = toDecimal(costs[1])
             const sourceTokensTosell = toDecimal(costs[2]);
 
@@ -158,12 +158,12 @@ contract('StablePay_UniswapSwappingProviderSwapTokenTest', (accounts) => {
             console.log('ethToBuyTargetToken =>>>', ethToBuyTargetToken);
             console.log('sourceTokensTosell =>>>', sourceTokensTosell);
 
-            sourceToken.amount = sourceTokensTosell;
-            await sourceErc20.approve(
-                stablePay.address,
-                sourceToken.amount,
-                {from: customerAddress}
-            );
+            //sourceToken.amount = sourceTokensTosell;
+            // await sourceErc20.approve(
+            //     stablePay.address,
+            //     sourceToken.amount,
+            //     {from: customerAddress}
+            // );
 
             console.log('Source Amount');
             console.log(sourceToken.amount);
@@ -173,9 +173,9 @@ contract('StablePay_UniswapSwappingProviderSwapTokenTest', (accounts) => {
             const uniswapProviderKey = providersMap.get('Uniswap_v1');
 
             const orderArray = new UniswapOrderFactory({
-                sourceToken: sourceToken.instance.address,
+                sourceToken: NULL_ADDRESS,
                 targetToken: targetToken.instance.address,
-                sourceAmount: sourceToken.amount,
+                sourceAmount: 0,
                 targetAmount: targetToken.amount,
                 merchantAddress: merchantAddress
             }).createOrder();
@@ -183,11 +183,11 @@ contract('StablePay_UniswapSwappingProviderSwapTokenTest', (accounts) => {
 
             const initialTargetBalance = new BigNumber(await targetToken.instance.balanceOf(merchantAddress)).toFixed();
             console.log('initialTargetBalance=>>>', initialTargetBalance);
-
+            const val = (new BigNumber(ethToBuyTargetToken)).times(4);
             //Invocation
-            const result = await stablePay.payWithToken(orderArray, [uniswapProviderKey], {
+            const result = await stablePay.payWithEther(orderArray, [uniswapProviderKey], {
                 from: customerAddress,
-                gas: 5000000
+                value: val
             });
 
             // Assertions
