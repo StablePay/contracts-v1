@@ -38,6 +38,9 @@ const KyberSwappingProvider = artifacts.require("./providers/KyberSwappingProvid
 
 const UniswapSwappingProvider = artifacts.require("./providers/UniswapSwappingProvider.sol");
 
+const UniswapFactoryInterface = artifacts.require("./uniswap/UniswapFactoryInterface.sol");
+const UniswapTemplateExchangeInterface = artifacts.require("./uniswap/UniswapExchangeInterface.sol");
+
 const allowedNetworks = ['ganache', 'test'];
 
 module.exports = function(deployer, network, accounts) {
@@ -63,11 +66,46 @@ module.exports = function(deployer, network, accounts) {
   const kyberTokens = kyberConf.tokens;
 
   const uniswapContracts = uniswapConf.contracts;
-  const uniswapTokens = uniswapConf.tokens;
+
 
   const owner = accounts[0];
+  let uniswapFactory;
+  let exchangeTemplate;
 
   deployer.deploy(SafeMath).then(async (txInfo) => {
+
+    let factoryABI = new web3.eth.Contract(JSON.parse(uniswapConf.factory.abi));
+    let exchangeBI = new web3.eth.Contract(JSON.parse(uniswapConf.exchange.abi));
+
+    const factoryResult = await factoryABI.deploy({
+      data: uniswapConf.factory.bytecode
+    })
+        .send({
+          from: owner,
+          gas: 1500000,
+          gasPrice: 90000 * 2
+        });
+    uniswapFactory = await UniswapFactoryInterface.at(factoryResult.options.address);
+    console.log('uniswapFactory', uniswapFactory.address);
+    const exchangeTemplateResult = await exchangeBI.deploy({
+      data: uniswapConf.exchange.bytecode
+    })
+        .send({
+          from: owner,
+          gas: 5500000,
+          gasPrice: 90000 * 2
+        });
+
+    exchangeTemplate = await UniswapTemplateExchangeInterface.at(exchangeTemplateResult.options.address);
+    let templ =  await uniswapFactory.exchangeTemplate.call();
+    console.log('ttt', templ);
+
+    await uniswapFactory.initializeFactory(exchangeTemplate.address, {from: owner});
+    let templ2 =  await uniswapFactory.exchangeTemplate.call();
+    console.log('ttt', templ2);
+
+
+
     const deployerApp = new DeployerApp(deployer, web3, owner, network);
     
     await deployerApp.addContractInfoByTransactionInfo(SafeMath, txInfo);
@@ -81,6 +119,8 @@ module.exports = function(deployer, network, accounts) {
     
     await deployerApp.deployMockIf(StablePayMock, Storage.address);
     await deployerApp.deployMockIf(StablePayStorageMock, Storage.address);
+    await deployerApp.deployMockIf(BaseMock, Storage.address);
+
     await deployerApp.deployMockIf(BaseMock, Storage.address);
 
     await deployerApp.links(StablePayStorage, [
@@ -134,7 +174,7 @@ module.exports = function(deployer, network, accounts) {
     await deployerApp.deploy(
         UniswapSwappingProvider,
         stablePayInstance.address,
-        uniswapContracts.factory,
+        uniswapFactory.address,
         {gas: maxGasForDeploying}
     );
     const uniswapProviderKey = providerKeyGenerator.generateKey('Uniswap', '1');
@@ -177,6 +217,7 @@ module.exports = function(deployer, network, accounts) {
       } else {
         await settingsInstance.setTokenAvailability(tokenAddress, minAmount, maxAmount, {from: owner});
         deployerApp.addData(`Token_${tokenAvailability.name}_Kyber_${tokenAddress}`, {minAmount: minAmount, maxAmount: maxAmount});
+        console.log(`DEPLOYED: Token '${tokenAvailability.name}' availability not configured: Address: '${tokenAddress}' - MinAmount: '${minAmount}' - MaxAmount: '${maxAmount}'.`);
       }
     }
 
