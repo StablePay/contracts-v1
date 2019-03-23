@@ -196,5 +196,55 @@ module.exports = {
                 notEmitted: (assertFunction = () => {} ) => notEmitted(tx, name, assertFunction)
             };
         }
+    },
+    stablePayBase: {
+        swapExecutionFailed: tx => {
+            const name = 'SwapExecutionFailed';
+            return {
+                name: name,
+                emitted: (thisContract, providerAddress, providerKey) => emitted(tx, name, ev => {
+                    assert.equal(ev.thisContract, thisContract);
+                    assert.equal(ev.providerAddress, providerAddress);
+                    assert.equal(ev.providerKey, providerKey);
+                }),
+                notEmitted: (assertFunction = () => {} ) => notEmitted(tx, name, assertFunction)
+            };
+        },
+        swapExecutionSuccess: tx => {
+            const name = 'SwapExecutionSuccess';
+            return {
+                name: name,
+                emitted: (thisContract, providerAddress, providerKey) => emitted(tx, name, ev => {
+                    assert.equal(ev.thisContract, thisContract);
+                    assert.equal(ev.providerAddress, providerAddress);
+                    assert.equal(ev.providerKey, providerKey);
+                }),
+                notEmitted: (assertFunction = () => {} ) => notEmitted(tx, name, assertFunction)
+            };
+        },
+        swapEthExecutionFailed: tx => {
+            const name = 'SwapEthExecutionFailed';
+            return {
+                name: name,
+                emitted: (thisContract, strategyAddress, providerKey) => emitted(tx, name, ev => {
+                    assert.equal(ev.thisContract, thisContract);
+                    assert.equal(ev.strategyAddress, strategyAddress);
+                    assert.equal(ev.providerKey, providerKey);
+                }),
+                notEmitted: (assertFunction = () => {} ) => notEmitted(tx, name, assertFunction)
+            };
+        },
+        swapEthExecutionSuccess: tx => {
+            const name = 'SwapEthExecutionSuccess';
+            return {
+                name: name,
+                emitted: (thisContract, strategyAddress, providerKey) => emitted(tx, name, ev => {
+                    assert.equal(ev.thisContract, thisContract);
+                    assert.equal(ev.strategyAddress, strategyAddress);
+                    assert.equal(ev.providerKey, providerKey);
+                }),
+                notEmitted: (assertFunction = () => {} ) => notEmitted(tx, name, assertFunction)
+            };
+        }
     }
 }

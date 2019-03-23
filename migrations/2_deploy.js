@@ -10,7 +10,7 @@ const PLATFORM_FEE_KEY = 'config.platform.fee';
 /** Platform configuration values. */
 const printDeployCostValue = appConfig.getPrintDeployCost().get();
 const platformFee = appConfig.getPlatformFee().get();
-const maxGasForDeploying = 4000000;
+const maxGasForDeploying = 4500000;
 
 // Mock Smart Contracts
 const BaseMock = artifacts.require("./mock/BaseMock.sol");
@@ -31,6 +31,7 @@ const Storage = artifacts.require("./base/Storage.sol");
 const StablePayStorage = artifacts.require("./base/StablePayStorage.sol");
 const Upgrade = artifacts.require("./base/Upgrade.sol");
 const StablePay = artifacts.require("./StablePay.sol");
+const StablePayBase = artifacts.require("./base/StablePayBase.sol");
 const StablePayCommon = artifacts.require("./StablePayCommon.sol");
 const ZeroxSwappingProvider = artifacts.require("./providers/ZeroxSwappingProvider.sol");
 const KyberSwappingProvider = artifacts.require("./providers/KyberSwappingProvider.sol");
@@ -40,7 +41,8 @@ const allowedNetworks = ['ganache', 'test'];
 module.exports = function(deployer, network, accounts) {
   console.log(`Deploying smart contracts to '${network}'.`)
   
-  if(allowedNetworks.indexOf(network) == -1) {
+  const networkIndex = allowedNetworks.indexOf(network);
+  if(networkIndex === -1) {
     console.log(`NOT deploying smart contracts to '${network}'.`);
     return;
   }
@@ -85,38 +87,22 @@ module.exports = function(deployer, network, accounts) {
     await deployerApp.deploy(Role, Storage.address, {gas: maxGasForDeploying});
     await deployerApp.deploy(Vault, Storage.address);
     
-    await deployerApp.links(StablePay, [
+    await deployerApp.deployWith("StablePayProxy", StablePay, Storage.address, {gas: maxGasForDeploying});
+
+    await deployerApp.links(StablePayBase, [
       Bytes32ArrayLib,
       SafeMath
     ]);
-    await deployerApp.deploy(StablePay, Storage.address, {gas: maxGasForDeploying});
+    await deployerApp.deployWith("StablePay", StablePayBase, Storage.address, {gas: maxGasForDeploying});
 
     /***********************************
       Deploy swapping token providers.
      ***********************************/
 
-    const stablePayInstance = await StablePay.deployed();
+    const stablePayInstance = await StablePayBase.deployed();
     const stablePayStorageInstance = await StablePayStorage.deployed();
 
     await deployerApp.deployMockIf(CustomSwappingProviderMock, stablePayInstance.address);
-
-    /** Deploying 0x swap provider. */
-    await deployerApp.deploy(
-      ZeroxSwappingProvider,
-      stablePayInstance.address,
-      zeroxContracts.Erc20Proxy,
-      zeroxContracts.Exchange,
-      zeroxContracts.Weth9,
-      {
-        from: owner
-      }
-    );
-    const zeroxProviderKey = providerKeyGenerator.generateKey('0x','1');
-    await stablePayStorageInstance.registerSwappingProvider(
-        ZeroxSwappingProvider.address,
-        zeroxProviderKey.providerKey
-    );
-    deployerApp.addData(zeroxProviderKey.name, zeroxProviderKey.providerKey);
 
     /** Deploying Kyber swap provider. */
     await deployerApp.links(KyberSwappingProvider, [
@@ -143,12 +129,7 @@ module.exports = function(deployer, network, accounts) {
 
     /** Storing smart contracts data. */
     await deployerApp.storeContracts(
-      storageInstance,
-      SafeMath,     Bytes32ArrayLib,    StablePayCommon,
-      Settings,     Upgrade,            StablePay,
-      ZeroxSwappingProvider,            KyberSwappingProvider,
-      Role,         AddressLib,         StablePayStorage,
-      Vault
+      storageInstance
     );
 
     /** Setting ownership for specific account. */

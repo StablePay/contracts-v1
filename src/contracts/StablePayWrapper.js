@@ -19,12 +19,12 @@ StablePayWrapper.prototype.payWithToken = async function(data, ...params) {
     try {
         console.log(`Params:    ${JSON.stringify(params)}`);
         const calculatedSourceAmount = order[0];
-
         await this.sourceErc20.approve(
             this.stablePay.address,
             calculatedSourceAmount,
             ...params
         );
+
         //logIf(this.verbose, '------------------------------------------------');
         //logIf(this.verbose, `Execution: ${message}`);
         logIf(this.verbose, '------------------------------------------------');
@@ -35,7 +35,7 @@ StablePayWrapper.prototype.payWithToken = async function(data, ...params) {
         logIf(this.verbose, `Source Token:          ${order[10]}.`);
         logIf(this.verbose, `Target Token:          ${order[11]}.`);
         logIf(this.verbose, `Merchant Address:      ${order[12]}.`);
-        logIf(this.verbose, `Customer Address:      ${params}.`);
+        //logIf(this.verbose, `Customer Address:      ${params}.`);
 
         const result = await this.stablePay.payWithToken(order, providers, ...params);
         // Assertions
