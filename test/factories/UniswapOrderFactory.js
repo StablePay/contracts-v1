@@ -11,12 +11,13 @@ class UniswapOrderFactory extends BaseOrderFactory {
             sourceToken,
             targetToken,
             sourceAmount,
+            targetAmount,
             merchantAddress
         } = data;
         this.sourceToken = sourceToken;
         this.targetToken = targetToken;
         this.sourceAmount = sourceAmount;
-        this.targetAmount = sourceAmount;
+        this.targetAmount =  targetAmount;
         this.merchantAddress = merchantAddress;
     }
 }
