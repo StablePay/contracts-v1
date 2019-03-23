@@ -65,7 +65,7 @@ module.exports = function(deployer, network, accounts) {
   const kyberContracts = kyberConf.contracts;
   const kyberTokens = kyberConf.tokens;
 
-  const uniswapContracts = uniswapConf.contracts;
+  //const uniswapContracts = uniswapConf.contracts;
 
 
   const owner = accounts[0];
