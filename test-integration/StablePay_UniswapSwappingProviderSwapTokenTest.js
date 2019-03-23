@@ -28,7 +28,9 @@ for (const key in contracts.data) {
         providersMap.set(element.key, element.value);
     }
 }
-
+function toDecimal(value) {
+    return new BigNumber(value).toFixed();
+}
 contract('StablePay_UniswapSwappingProviderSwapTokenTest', (accounts) => {
 
     let owner = accounts[0];
@@ -55,6 +57,12 @@ contract('StablePay_UniswapSwappingProviderSwapTokenTest', (accounts) => {
     const initialLiquidity = (new BigNumber(10).pow(8)).times(DECIMALS).toFixed();
 
     const min = (new BigNumber(10).pow(2)).times(DECIMALS).toFixed();
+    const onetoken = (new BigNumber(1)).times(DECIMALS).toFixed();
+    const twotokens = (new BigNumber(2)).times(DECIMALS).toFixed();
+    const alice = accounts[2];
+    const bob = accounts[3];
+    const halftoken = (new BigNumber(0.5)).times(DECIMALS).toFixed();
+    const quartertoken = (new BigNumber(0.25)).times(DECIMALS).toFixed();
 
     beforeEach('Deploying contract for each test', async () => {
 
@@ -104,12 +112,12 @@ contract('StablePay_UniswapSwappingProviderSwapTokenTest', (accounts) => {
         let targetErc20Exchange = await exchange.at(targetErc20ExchangeAddress);
         await targetErc20.approve(targetErc20ExchangeAddress, approved);
 
-        const current_block = await web3.eth.getBlock(await web3.eth.getBlockNumber());
 
-        await sourceErc20Exchange.addLiquidity(initialLiquidity, initialLiquidity, current_block.timestamp + 300, {value:100000000000000});
-        await targetErc20Exchange.addLiquidity(initialLiquidity, initialLiquidity, current_block.timestamp + 300, {value:100000000000000});
+        const deadLine = (await web3.eth.getBlock(await web3.eth.getBlockNumber())).timestamp + 300;
+        await sourceErc20Exchange.addLiquidity(1, twotokens, deadLine, {value: web3.utils.toWei('1', 'ether')});
+        await targetErc20Exchange.addLiquidity(1, twotokens, deadLine, {value: web3.utils.toWei('1', 'ether')});
 
-        console.log('getEthToTokenOutputPrice =>>>', await sourceErc20Exchange.getEthToTokenOutputPrice(1000000000));
+
 
         const platformFeeString = await settings.getPlatformFee();
         const platformFee = Number(platformFeeString.toString()) / 100;
@@ -128,7 +136,7 @@ contract('StablePay_UniswapSwappingProviderSwapTokenTest', (accounts) => {
             const sourceToken = {
                 name: 'KNC',
                 instance: sourceErc20,
-                amount: BigNumber(1).times((new BigNumber(10)).pow(18)).toFixed()
+                amount: quartertoken
             };
             const targetToken = {
                 name: 'OMG',
@@ -137,7 +145,7 @@ contract('StablePay_UniswapSwappingProviderSwapTokenTest', (accounts) => {
             };
 
             // Get the initial balances (source and target tokens) for customer and merchant.
-            await sourceErc20.transfer(customerAddress, sourceToken.amount, {from: owner});
+            await sourceErc20.transfer(customerAddress, onetoken, {from: owner});
 
             const availability = await settings.getTokenAvailability(targetErc20.address);
             console.log('availability', availability);
@@ -155,7 +163,7 @@ contract('StablePay_UniswapSwappingProviderSwapTokenTest', (accounts) => {
 
             await sourceErc20.approve(
                 stablePay.address,
-                sourceToken.amount,
+                halftoken,
                 {from: customerAddress}
             );
 
