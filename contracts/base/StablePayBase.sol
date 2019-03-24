@@ -263,6 +263,7 @@ contract StablePayBase is Base, IStablePay {
 
                 uint stablePayTargetBalance = ERC20(order.targetToken).balanceOf(address(this));
                 testEvent(stablePayTargetBalance,stablePayInitialSourceBalance, order.targetAmount);
+                //TODO: add final balance validation and remove test events
 //                uint stablePayCurrentBalance = stablePayTargetBalance.sub(stablePayInitialSourceBalance);
 //                require(stablePayCurrentBalance == order.targetAmount, "StablePay target balance is not valid.");
 //
