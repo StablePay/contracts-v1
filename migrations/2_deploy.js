@@ -87,19 +87,19 @@ module.exports = function(deployer, network, accounts) {
     await deployerApp.deploy(Role, Storage.address, {gas: maxGasForDeploying});
     await deployerApp.deploy(Vault, Storage.address);
     
-    await deployerApp.deployWith("StablePayProxy", StablePay, Storage.address, {gas: maxGasForDeploying});
+    await deployerApp.deploy(StablePay, Storage.address, {gas: maxGasForDeploying});
 
     await deployerApp.links(StablePayBase, [
       Bytes32ArrayLib,
       SafeMath
     ]);
-    await deployerApp.deployWith("StablePay", StablePayBase, Storage.address, {gas: maxGasForDeploying});
+    await deployerApp.deploy(StablePayBase, Storage.address, {gas: maxGasForDeploying});
 
     /***********************************
       Deploy swapping token providers.
      ***********************************/
 
-    const stablePayInstance = await StablePayBase.deployed();
+    const stablePayInstance = await StablePay.deployed();
     const stablePayStorageInstance = await StablePayStorage.deployed();
 
     await deployerApp.deployMockIf(CustomSwappingProviderMock, stablePayInstance.address);
@@ -120,7 +120,6 @@ module.exports = function(deployer, network, accounts) {
         kyberProviderKey.providerKey
     );
     deployerApp.addData(kyberProviderKey.name, kyberProviderKey.providerKey);
-
 
     /***************************************************************
       Saving smart contract permissions/roles and closing platform.
