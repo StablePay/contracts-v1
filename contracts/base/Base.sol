@@ -73,7 +73,7 @@ contract Base {
     * wrapper marked as `nonReentrant`.
     */
     modifier nonReentrant() {
-        require(!rentrancy_lock);
+        require(!rentrancy_lock, "rentrancy_lock");
         rentrancy_lock = true;
         _;
         rentrancy_lock = false;
@@ -149,6 +149,6 @@ contract Base {
     * @dev Check if an address has this role, reverts if it doesn't
     */
     function roleCheck(string _role, address _address) internal view {
-        require(roleHas(_role, _address) == true);
+        require(roleHas(_role, _address) == true, "Invalid role");
     }
 }
