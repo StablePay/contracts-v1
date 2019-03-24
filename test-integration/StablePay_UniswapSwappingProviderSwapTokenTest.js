@@ -198,7 +198,6 @@ contract('StablePay_UniswapSwappingProviderSwapTokenTest', (accounts) => {
             });
 
             // Assertions
-            //assert(false);
 
             const finalTargetBalance = new BigNumber(await targetToken.instance.balanceOf(merchantAddress)).toFixed();
             console.log('finalTargetBalance=>>>', finalTargetBalance);
