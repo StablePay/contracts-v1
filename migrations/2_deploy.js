@@ -145,7 +145,8 @@ module.exports = function(deployer, network, accounts) {
       Deploy swapping token providers.
      ***********************************/
 
-    const stablePayInstance = await StablePayBase.deployed();
+
+    const stablePayInstance = await StablePay.deployed();
     const stablePayStorageInstance = await StablePayStorage.deployed();
 
     await deployerApp.deployMockIf(CustomSwappingProviderMock, stablePayInstance.address);
@@ -156,7 +157,7 @@ module.exports = function(deployer, network, accounts) {
     ]);
     await deployerApp.deploy(
       KyberSwappingProvider,
-      stablePayInstance.address,
+        stablePayInstance.address,
       kyberContracts.KyberNetworkProxy,
       {gas: maxGasForDeploying}
     );
@@ -168,9 +169,7 @@ module.exports = function(deployer, network, accounts) {
     deployerApp.addData(kyberProviderKey.name, kyberProviderKey.providerKey);
 
     /** Deploying Uniswap swap provider. */
-    await deployerApp.links(UniswapSwappingProvider, [
-      SafeMath
-    ]);
+
     await deployerApp.deploy(
         UniswapSwappingProvider,
         stablePayInstance.address,

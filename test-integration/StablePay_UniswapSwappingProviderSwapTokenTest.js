@@ -4,7 +4,7 @@ const factory = artifacts.require("./uniswap/UniswapFactoryInterface.sol");
 const { BigNumber } = require('bignumber.js');
 const { getBalances, printBalance } = require('../test/util/payUtil');
 
-const StablePay = artifacts.require("./interface/IStablePay.sol");
+const IStablePay = artifacts.require("./interface/IStablePay.sol");
 const StablePayProxy = artifacts.require("./StablePay.sol");
 const Settings = artifacts.require("./base/Settings.sol");
 const Vault = artifacts.require("./base/Vault.sol");
@@ -49,7 +49,7 @@ contract('StablePay_UniswapSwappingProviderSwapTokenTest', (accounts) => {
 
     let vault;
     let settings;
-    let stablePay;
+    let istablePay;
     let stablePayStorage;
     let proxy;
 
@@ -80,9 +80,9 @@ contract('StablePay_UniswapSwappingProviderSwapTokenTest', (accounts) => {
         assert(proxy);
         assert(proxy.address);
 
-        stablePay = await StablePay.at(proxy.address);
-        assert(stablePay);
-        assert(stablePay.address);
+        istablePay = await IStablePay.at(proxy.address);
+        assert(istablePay);
+        assert(istablePay.address);
 
         stablePayStorage = await StablePayStorage.deployed();
         assert(stablePayStorage);
@@ -167,7 +167,7 @@ contract('StablePay_UniswapSwappingProviderSwapTokenTest', (accounts) => {
 
             sourceToken.amount = sourceTokensTosell;
             await sourceErc20.approve(
-                stablePay.address,
+                istablePay.address,
                 sourceToken.amount,
                 {from: customerAddress}
             );
@@ -192,13 +192,13 @@ contract('StablePay_UniswapSwappingProviderSwapTokenTest', (accounts) => {
             console.log('initialTargetBalance=>>>', initialTargetBalance);
 
             //Invocation
-            const result = await stablePay.payWithToken(orderArray, [uniswapProviderKey], {
+            const result = await istablePay.payWithToken(orderArray, [uniswapProviderKey], {
                 from: customerAddress,
                 gas: 5000000
             });
 
             // Assertions
-            assert(result);
+            //assert(false);
 
             const finalTargetBalance = new BigNumber(await targetToken.instance.balanceOf(merchantAddress)).toFixed();
             console.log('finalTargetBalance=>>>', finalTargetBalance);
