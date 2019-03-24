@@ -4,7 +4,8 @@ const factory = artifacts.require("./uniswap/UniswapFactoryInterface.sol");
 const { BigNumber } = require('bignumber.js');
 const { getBalances, printBalance } = require('../test/util/payUtil');
 
-const StablePay = artifacts.require("./StablePay.sol");
+const IStablePay = artifacts.require("./interface/IStablePay.sol");
+const StablePayProxy = artifacts.require("./StablePay.sol");
 const Settings = artifacts.require("./base/Settings.sol");
 const Vault = artifacts.require("./base/Vault.sol");
 const StablePayStorage = artifacts.require("./base/StablePayStorage.sol");
@@ -48,8 +49,9 @@ contract('StablePay_UniswapSwappingProviderSwapTokenTest', (accounts) => {
 
     let vault;
     let settings;
-    let stablePay;
+    let istablePay;
     let stablePayStorage;
+    let proxy;
 
     const DECIMALS = (new BigNumber(10)).pow(18);
     const supply =  (new BigNumber(10).pow(10)).times(DECIMALS).toFixed();
@@ -73,9 +75,14 @@ contract('StablePay_UniswapSwappingProviderSwapTokenTest', (accounts) => {
         vault = await Vault.deployed();
         assert(vault);
         assert(vault.address);
-        stablePay = await StablePay.deployed();
-        assert(stablePay);
-        assert(stablePay.address);
+
+        proxy = await StablePayProxy.deployed();
+        assert(proxy);
+        assert(proxy.address);
+
+        istablePay = await IStablePay.at(proxy.address);
+        assert(istablePay);
+        assert(istablePay.address);
 
         stablePayStorage = await StablePayStorage.deployed();
         assert(stablePayStorage);
@@ -185,7 +192,7 @@ contract('StablePay_UniswapSwappingProviderSwapTokenTest', (accounts) => {
             console.log('initialTargetBalance=>>>', initialTargetBalance);
             const val = (new BigNumber(ethToBuyTargetToken)).times(4);
             //Invocation
-            const result = await stablePay.payWithEther(orderArray, [uniswapProviderKey], {
+            const result = await istablePay.payWithEther(orderArray, [uniswapProviderKey], {
                 from: customerAddress,
                 value: val
             });
