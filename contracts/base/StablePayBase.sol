@@ -251,7 +251,7 @@ contract StablePayBase is Base, IStablePay {
     {
         if(getProviderRegistry().isSwappingProviderValid(_providerKey)) {
             StablePayCommon.SwappingProvider memory swappingProvider = getSwappingProvider(_providerKey);
-            uint stablePayInitialSourceBalance = address(this).balance;
+            uint stablePayInitialSourceBalance =  ERC20(order.targetToken).balanceOf(address(this));
             ISwappingProvider iSwappingProvider = ISwappingProvider(swappingProvider.providerAddress);
 
             bool result = iSwappingProvider.swapEther.value(msg.value)(order);
@@ -263,9 +263,9 @@ contract StablePayBase is Base, IStablePay {
 
                 uint stablePayTargetBalance = ERC20(order.targetToken).balanceOf(address(this));
                 testEvent(stablePayTargetBalance,stablePayInitialSourceBalance, order.targetAmount);
-                //TODO: add final balance validation and remove test events
-//                uint stablePayCurrentBalance = stablePayTargetBalance.sub(stablePayInitialSourceBalance);
-//                require(stablePayCurrentBalance == order.targetAmount, "StablePay target balance is not valid.");
+                //validate final balance
+                uint stablePayCurrentBalance = stablePayTargetBalance.sub(stablePayInitialSourceBalance);
+                require(stablePayCurrentBalance == order.targetAmount, "StablePay target balance is not valid.");
 //
                 uint256 feeAmount = getFeeAmount(order);
                 uint256 merchantAmount = order.targetAmount - feeAmount;
