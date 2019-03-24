@@ -17,20 +17,18 @@ contract UniswapSwappingProvider is ISwappingProvider {
 
 
 
-    event PaymentSent(
-        address indexed thisContract,
-        address merchant,
-        address customer,
-        address sourceToken,
-        address targetToken,
-        uint256 amount,
-        uint256 provider
+    event testEvent(
+        address stablepay,
+        address factory,
+        address sender
+
     );
 
     constructor(address _stablePay, address _factory)
-        public /*ISwappingProvider(_stablePay)*/
+        public ISwappingProvider(_stablePay)
     {
         uniswapFactory = _factory;
+
     }
 
 
@@ -39,7 +37,7 @@ contract UniswapSwappingProvider is ISwappingProvider {
     public isStablePay(msg.sender)
     returns (bool)
     {
-
+        emit testEvent(stablePay,uniswapFactory,msg.sender);
 
         UniswapFactoryInterface uFactory = UniswapFactoryInterface(uniswapFactory);
         UniswapExchangeInterface sourceExchange = UniswapExchangeInterface(uFactory.getExchange(_order.sourceToken));
@@ -78,7 +76,7 @@ contract UniswapSwappingProvider is ISwappingProvider {
         return true;
     }
     function swapEther(StablePayCommon.Order memory  _order)
-    public /*isStablePay(msg.sender)*/
+    public isStablePay(msg.sender)
     payable
     returns (bool)
     {
