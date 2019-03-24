@@ -17,12 +17,7 @@ contract UniswapSwappingProvider is ISwappingProvider {
 
 
 
-    event testEvent(
-        address stablepay,
-        address factory,
-        address sender
 
-    );
 
     constructor(address _stablePay, address _factory)
         public ISwappingProvider(_stablePay)
@@ -37,7 +32,6 @@ contract UniswapSwappingProvider is ISwappingProvider {
     public isStablePay(msg.sender)
     returns (bool)
     {
-        emit testEvent(stablePay,uniswapFactory,msg.sender);
 
         UniswapFactoryInterface uFactory = UniswapFactoryInterface(uniswapFactory);
         UniswapExchangeInterface sourceExchange = UniswapExchangeInterface(uFactory.getExchange(_order.sourceToken));
@@ -89,7 +83,7 @@ contract UniswapSwappingProvider is ISwappingProvider {
         UniswapExchangeInterface targetExchange = UniswapExchangeInterface(uFactory.getExchange(_order.targetToken));
         uint256 ethToBuyTargetToken = targetExchange.getEthToTokenOutputPrice(_order.targetAmount);
         require(msg.value >= ethToBuyTargetToken, "Not enough value");
-        require(address(this).balance >= ethToBuyTargetToken, "Not enough balance");
+        //require(address(this).balance >= ethToBuyTargetToken, "Not enough balance");
 
         uint eth_sold = targetExchange.ethToTokenSwapOutput.value(ethToBuyTargetToken)(
             _order.targetAmount,

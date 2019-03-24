@@ -186,7 +186,7 @@ contract('StablePay_UniswapSwappingProviderSwapTokenTest', (accounts) => {
                 targetAmount: targetToken.amount,
                 merchantAddress: merchantAddress
             }).createOrder();
-            console.log('orderArray', orderArray);
+            //console.log('orderArray', orderArray);
 
             const initialTargetBalance = new BigNumber(await targetToken.instance.balanceOf(merchantAddress)).toFixed();
             console.log('initialTargetBalance=>>>', initialTargetBalance);
@@ -194,17 +194,21 @@ contract('StablePay_UniswapSwappingProviderSwapTokenTest', (accounts) => {
             //Invocation
             const result = await istablePay.payWithEther(orderArray, [uniswapProviderKey], {
                 from: customerAddress,
-                value: val
+                value: val,
+                gas: 5000000
             });
 
-            // Assertions
-            assert(result);
+
+
+            const finalistablePayTargetBalance = new BigNumber(await targetToken.instance.balanceOf(vault.address)).toFixed();
+            console.log('finalistablePayTargetBalance=>>>', finalistablePayTargetBalance);
 
             const finalTargetBalance = new BigNumber(await targetToken.instance.balanceOf(merchantAddress)).toFixed();
-            console.log('finalTargetBalance=>>>', finalTargetBalance);
+            console.log('finalTargetBalance          =>>>', finalTargetBalance);
 
 
-
+            // Assertions
+            assert(false);
 
 
         });
