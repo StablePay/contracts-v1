@@ -28,7 +28,8 @@ contract UniswapSwappingProvider is ISwappingProvider {
     );
 
     constructor(address _stablePay, address _factory)
-        public ISwappingProvider(_stablePay){
+        public /*ISwappingProvider(_stablePay)*/
+    {
         uniswapFactory = _factory;
     }
 
@@ -77,7 +78,7 @@ contract UniswapSwappingProvider is ISwappingProvider {
         return true;
     }
     function swapEther(StablePayCommon.Order memory  _order)
-    public isStablePay(msg.sender)
+    public /*isStablePay(msg.sender)*/
     payable
     returns (bool)
     {
