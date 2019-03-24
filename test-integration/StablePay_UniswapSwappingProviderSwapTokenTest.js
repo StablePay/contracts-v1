@@ -4,7 +4,8 @@ const factory = artifacts.require("./uniswap/UniswapFactoryInterface.sol");
 const { BigNumber } = require('bignumber.js');
 const { getBalances, printBalance } = require('../test/util/payUtil');
 
-const StablePay = artifacts.require("./StablePay.sol");
+const StablePay = artifacts.require("./interface/IStablePay.sol");
+const StablePayProxy = artifacts.require("./StablePay.sol");
 const Settings = artifacts.require("./base/Settings.sol");
 const Vault = artifacts.require("./base/Vault.sol");
 const StablePayStorage = artifacts.require("./base/StablePayStorage.sol");
@@ -50,6 +51,7 @@ contract('StablePay_UniswapSwappingProviderSwapTokenTest', (accounts) => {
     let settings;
     let stablePay;
     let stablePayStorage;
+    let proxy;
 
     const DECIMALS = (new BigNumber(10)).pow(18);
     const supply =  (new BigNumber(10).pow(10)).times(DECIMALS).toFixed();
@@ -73,7 +75,12 @@ contract('StablePay_UniswapSwappingProviderSwapTokenTest', (accounts) => {
         vault = await Vault.deployed();
         assert(vault);
         assert(vault.address);
-        stablePay = await StablePay.deployed();
+
+        proxy = await StablePayProxy.deployed();
+        assert(proxy);
+        assert(proxy.address);
+
+        stablePay = await StablePay.at(proxy.address);
         assert(stablePay);
         assert(stablePay.address);
 
