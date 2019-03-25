@@ -1,4 +1,4 @@
-const { BigNumber } = require( '0x.js');
+const { BigNumber } = require( 'bignumber.js');
 
 // tslint:disable-next-line:custom-no-magic-numbers
 const ONE_SECOND_MS = 1000;

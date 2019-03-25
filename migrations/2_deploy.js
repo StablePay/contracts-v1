@@ -36,6 +36,11 @@ const StablePayCommon = artifacts.require("./StablePayCommon.sol");
 const ZeroxSwappingProvider = artifacts.require("./providers/ZeroxSwappingProvider.sol");
 const KyberSwappingProvider = artifacts.require("./providers/KyberSwappingProvider.sol");
 
+const UniswapSwappingProvider = artifacts.require("./providers/UniswapSwappingProvider.sol");
+
+const UniswapFactoryInterface = artifacts.require("./uniswap/UniswapFactoryInterface.sol");
+const UniswapTemplateExchangeInterface = artifacts.require("./uniswap/UniswapExchangeInterface.sol");
+
 const allowedNetworks = ['ganache', 'test'];
 
 module.exports = function(deployer, network, accounts) {
@@ -48,20 +53,64 @@ module.exports = function(deployer, network, accounts) {
   }
 
   const providerKeyGenerator = new ProviderKeyGenerator();
-  
+
   const envConf = require('../config')(network);
   const stablePayConf = envConf.stablepay;
   const kyberConf = envConf.kyber;
   const zeroxConf = envConf.zerox;
-  
+  const uniswapConf = envConf.uniswap;
+
   const zeroxContracts = zeroxConf.contracts;
-  
+
   const kyberContracts = kyberConf.contracts;
   const kyberTokens = kyberConf.tokens;
 
+  const uniswapContracts = uniswapConf.contracts;
+
+
   const owner = accounts[0];
+  let uniswapFactory;
+  let exchangeTemplate;
 
   deployer.deploy(SafeMath).then(async (txInfo) => {
+    if(allowedNetworks.includes(network)){
+      console.log('deploying uniswap contracts');
+
+      let factoryABI = new web3.eth.Contract(JSON.parse(uniswapConf.factory.abi));
+      let exchangeBI = new web3.eth.Contract(JSON.parse(uniswapConf.exchange.abi));
+
+      const factoryResult = await factoryABI.deploy({
+        data: uniswapConf.factory.bytecode
+      })
+          .send({
+            from: owner,
+            gas: 1500000,
+            gasPrice: 90000 * 2
+          });
+      uniswapFactory = await UniswapFactoryInterface.at(factoryResult.options.address);
+      console.log('uniswapFactory', uniswapFactory.address);
+      const exchangeTemplateResult = await exchangeBI.deploy({
+        data: uniswapConf.exchange.bytecode
+      })
+          .send({
+            from: owner,
+            gas: 5500000,
+            gasPrice: 90000 * 2
+          });
+
+      exchangeTemplate = await UniswapTemplateExchangeInterface.at(exchangeTemplateResult.options.address);
+
+      await uniswapFactory.initializeFactory(exchangeTemplate.address, {from: owner});
+
+
+      console.log('setting up uniswap contracts addresses');
+      uniswapContracts.factory = uniswapFactory.address;
+
+    }
+
+
+
+
     const deployerApp = new DeployerApp(deployer, web3, owner, network);
     
     await deployerApp.addContractInfoByTransactionInfo(SafeMath, txInfo);
@@ -86,7 +135,7 @@ module.exports = function(deployer, network, accounts) {
     await deployerApp.deploy(Upgrade, Storage.address);
     await deployerApp.deploy(Role, Storage.address, {gas: maxGasForDeploying});
     await deployerApp.deploy(Vault, Storage.address);
-    
+
     await deployerApp.deploy(StablePay, Storage.address, {gas: maxGasForDeploying});
 
     await deployerApp.links(StablePayBase, [
@@ -96,8 +145,9 @@ module.exports = function(deployer, network, accounts) {
     await deployerApp.deploy(StablePayBase, Storage.address, {gas: maxGasForDeploying});
 
     /***********************************
-      Deploy swapping token providers.
+     Deploy swapping token providers.
      ***********************************/
+
 
     const stablePayInstance = await StablePay.deployed();
     const stablePayStorageInstance = await StablePayStorage.deployed();
@@ -109,10 +159,10 @@ module.exports = function(deployer, network, accounts) {
       SafeMath
     ]);
     await deployerApp.deploy(
-      KyberSwappingProvider,
-      stablePayInstance.address,
-      kyberContracts.KyberNetworkProxy,
-      {gas: maxGasForDeploying}
+        KyberSwappingProvider,
+        stablePayInstance.address,
+        kyberContracts.KyberNetworkProxy,
+        {gas: maxGasForDeploying}
     );
     const kyberProviderKey = providerKeyGenerator.generateKey('KyberNetwork', '1');
     await stablePayStorageInstance.registerSwappingProvider(
@@ -121,14 +171,30 @@ module.exports = function(deployer, network, accounts) {
     );
     deployerApp.addData(kyberProviderKey.name, kyberProviderKey.providerKey);
 
+    /** Deploying Uniswap swap provider. */
+
+    await deployerApp.deploy(
+        UniswapSwappingProvider,
+        stablePayInstance.address,
+        uniswapContracts.factory,
+        {gas: maxGasForDeploying}
+    );
+    const uniswapProviderKey = providerKeyGenerator.generateKey('Uniswap', '1');
+    await stablePayStorageInstance.registerSwappingProvider(
+        UniswapSwappingProvider.address,
+        uniswapProviderKey.providerKey
+    );
+    deployerApp.addData(uniswapProviderKey.name, uniswapProviderKey.providerKey);
+
+
     /***************************************************************
-      Saving smart contract permissions/roles and closing platform.
+     Saving smart contract permissions/roles and closing platform.
      ***************************************************************/
     const storageInstance = await Storage.deployed();
 
     /** Storing smart contracts data. */
     await deployerApp.storeContracts(
-      storageInstance
+        storageInstance
     );
 
     /** Setting ownership for specific account. */
@@ -137,7 +203,7 @@ module.exports = function(deployer, network, accounts) {
     await deployerApp.finalize(storageInstance);
 
     /****************************************
-      Setting platform configuration values.
+     Setting platform configuration values.
      ****************************************/
     const settingsInstance = await Settings.deployed();
     await settingsInstance.setPlatformFee(platformFee, {from: owner});
@@ -153,6 +219,7 @@ module.exports = function(deployer, network, accounts) {
       } else {
         await settingsInstance.setTokenAvailability(tokenAddress, minAmount, maxAmount, {from: owner});
         deployerApp.addData(`Token_${tokenAvailability.name}_Kyber_${tokenAddress}`, {minAmount: minAmount, maxAmount: maxAmount});
+        console.log(` Token '${tokenAvailability.name}' availability  configured: Address: '${tokenAddress}' - MinAmount: '${minAmount}' - MaxAmount: '${maxAmount}'.`);
       }
     }
 

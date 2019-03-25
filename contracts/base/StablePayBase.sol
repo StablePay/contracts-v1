@@ -32,8 +32,13 @@ contract StablePayBase is Base, IStablePay {
         _;
     }
 
-    modifier areOrderAmountsValid(StablePayCommon.Order _order) {
+    modifier areOrderAmountsValidToken(StablePayCommon.Order _order) {
         require(_order.sourceAmount > 0, "Source amount > 0.");
+        require(_order.targetAmount > 0, "Target amount > 0.");
+        _;
+    }
+    modifier areOrderAmountsValidETH(StablePayCommon.Order _order) {
+
         require(_order.targetAmount > 0, "Target amount > 0.");
         _;
     }
@@ -213,7 +218,7 @@ contract StablePayBase is Base, IStablePay {
     isNotPaused()
     nonReentrant()
     isTokenAvailable(order.targetToken, order.targetAmount)
-    areOrderAmountsValid(order)
+    areOrderAmountsValidToken(order)
     returns (bool)
     {
         if(isTransferTokens(order)) {
@@ -231,22 +236,25 @@ contract StablePayBase is Base, IStablePay {
         require(false, "Swapping token could not be processed.");
     }
 
+
     function doPayWithEther(StablePayCommon.Order order, bytes32 _providerKey)
     internal
     returns (bool)
     {
         if(getProviderRegistry().isSwappingProviderValid(_providerKey)) {
             StablePayCommon.SwappingProvider memory swappingProvider = getSwappingProvider(_providerKey);
-            uint stablePayInitialSourceBalance = address(this).balance;
+            uint stablePayInitialSourceBalance =  ERC20(order.targetToken).balanceOf(address(this));
             ISwappingProvider iSwappingProvider = ISwappingProvider(swappingProvider.providerAddress);
 
             bool result = iSwappingProvider.swapEther.value(msg.value)(order);
             if(result) {
                 uint stablePayFinalSourceBalance = address(this).balance;
-               
+
+
                 address(msg.sender).transfer(stablePayFinalSourceBalance);
 
                 uint stablePayTargetBalance = ERC20(order.targetToken).balanceOf(address(this));
+                //validate final balance
                 uint stablePayCurrentBalance = stablePayTargetBalance.sub(stablePayInitialSourceBalance);
                 require(stablePayCurrentBalance == order.targetAmount, "StablePay target balance is not valid.");
 
@@ -254,7 +262,7 @@ contract StablePayBase is Base, IStablePay {
                 uint256 merchantAmount = order.targetAmount - feeAmount;
 
                 transferFee(order.targetToken, feeAmount);
-                
+
                 require(
                     ERC20(order.targetToken).transfer(order.merchantAddress, merchantAmount),
                     "Transfer to merchant failed."
@@ -277,7 +285,7 @@ contract StablePayBase is Base, IStablePay {
     isNotPaused()
     nonReentrant()
     isTokenAvailable(order.targetToken, order.targetAmount)
-    areOrderAmountsValid(order)
+    areOrderAmountsValidETH(order)
     payable
     returns (bool)
     {
@@ -291,6 +299,7 @@ contract StablePayBase is Base, IStablePay {
             }
         }
         require(false, "Swap with ether could not be performed..");
+        return true;
     }
 
     function emitSwapEthExecutionFailedEvent(address _providerAddress, bytes32 _providerKey)

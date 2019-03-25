@@ -44,7 +44,7 @@ contract Role is Base {
     */
     function transferOwnership(address _newOwner) public onlyLatestRole onlyOwner {
         // Legit address?
-        require(_newOwner != 0x0);
+        require(_newOwner != 0x0,"Address != 0x0.");
         // Check the role exists 
         roleCheck("owner", msg.sender);
         // Remove current role

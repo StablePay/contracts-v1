@@ -5,5 +5,6 @@ module.exports = {
     network: 'mainnet',
     zerox: _0x,
 	kyber: kyber,
+    uniswap: require('./uniswap'),
     stablepay: require('./stablepay')
 };

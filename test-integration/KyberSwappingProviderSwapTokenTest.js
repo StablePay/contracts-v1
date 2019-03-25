@@ -1,7 +1,7 @@
 const KyberSwappingProvider = artifacts.require("./providers/KyberSwappingProvider.sol");
 const KyberNetworkProxy = artifacts.require("./kyber/KyberNetworkProxy.sol");
 const ERC20 = artifacts.require("./erc20/ERC20.sol");
-const { BigNumber } = require('0x.js');
+const { BigNumber } = require('bignumber.js');
 const { createOrder, getRandomFutureDateInSeconds } = require('../test/util/orderUtil');
 const { providerEngine } = require('../test/util/provider_engine');
 const { ContractWrapperByAccount } = require('../test/util/contractWrapper');
