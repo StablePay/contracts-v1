@@ -43,8 +43,6 @@ contract UniswapSwappingProvider is ISwappingProvider {
 
         require(_order.targetAmount > 0 , "Target amount cannot be zero");
 
-
-        //uint256 thisSourceInitialTokenBalance = ERC20(_order.sourceToken).balanceOf(address(this));
         require(ERC20(_order.sourceToken).balanceOf(address(this)) >= _order.sourceAmount, "Not enough tokens in balance.");
 
         uint256 ethToBuyTargetToken = targetExchange.getEthToTokenOutputPrice(_order.targetAmount);
@@ -83,7 +81,6 @@ contract UniswapSwappingProvider is ISwappingProvider {
         UniswapExchangeInterface targetExchange = UniswapExchangeInterface(uFactory.getExchange(_order.targetToken));
         uint256 ethToBuyTargetToken = targetExchange.getEthToTokenOutputPrice(_order.targetAmount);
         require(msg.value >= ethToBuyTargetToken, "Not enough value");
-        //require(address(this).balance >= ethToBuyTargetToken, "Not enough balance");
 
         uint eth_sold = targetExchange.ethToTokenSwapOutput.value(ethToBuyTargetToken)(
             _order.targetAmount,
