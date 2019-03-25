@@ -45,7 +45,7 @@ const allowedNetworks = ['ganache', 'test'];
 
 module.exports = function(deployer, network, accounts) {
   console.log(`Deploying smart contracts to '${network}'.`)
-  
+
   const networkIndex = allowedNetworks.indexOf(network);
   if(networkIndex === -1) {
     console.log(`NOT deploying smart contracts to '${network}'.`);
@@ -53,7 +53,7 @@ module.exports = function(deployer, network, accounts) {
   }
 
   const providerKeyGenerator = new ProviderKeyGenerator();
-  
+
   const envConf = require('../config')(network);
   const stablePayConf = envConf.stablepay;
   const kyberConf = envConf.kyber;
@@ -61,7 +61,7 @@ module.exports = function(deployer, network, accounts) {
   const uniswapConf = envConf.uniswap;
 
   const zeroxContracts = zeroxConf.contracts;
-  
+
   const kyberContracts = kyberConf.contracts;
   const kyberTokens = kyberConf.tokens;
 
@@ -74,7 +74,7 @@ module.exports = function(deployer, network, accounts) {
 
   deployer.deploy(SafeMath).then(async (txInfo) => {
     if(allowedNetworks.includes(network)){
-        console.log('deploying uniswap contracts');
+      console.log('deploying uniswap contracts');
 
       let factoryABI = new web3.eth.Contract(JSON.parse(uniswapConf.factory.abi));
       let exchangeBI = new web3.eth.Contract(JSON.parse(uniswapConf.exchange.abi));
@@ -116,16 +116,16 @@ module.exports = function(deployer, network, accounts) {
 
 
     const deployerApp = new DeployerApp(deployer, web3, owner, network);
-    
+
     await deployerApp.addContractInfoByTransactionInfo(SafeMath, txInfo);
-    
+
     await deployerApp.deploys([
       Bytes32ArrayLib,
       Storage,
       StablePayCommon,
       AddressLib
     ], {gas: maxGasForDeploying});
-    
+
     await deployerApp.deployMockIf(StablePayMock, Storage.address);
     await deployerApp.deployMockIf(StablePayStorageMock, Storage.address);
     await deployerApp.deployMockIf(BaseMock, Storage.address);
@@ -141,18 +141,19 @@ module.exports = function(deployer, network, accounts) {
     await deployerApp.deploy(Upgrade, Storage.address);
     await deployerApp.deploy(Role, Storage.address, {gas: maxGasForDeploying});
     await deployerApp.deploy(Vault, Storage.address);
-    
-    await deployerApp.deploy(StablePay, Storage.address, {gas: maxGasForDeploying});
+
+    await deployerApp.deployWith("StablePayProxy", StablePay, Storage.address, {gas: maxGasForDeploying});
 
     await deployerApp.links(StablePayBase, [
       Bytes32ArrayLib,
       SafeMath
     ]);
-    await deployerApp.deploy(StablePayBase, Storage.address, {gas: maxGasForDeploying});
+    await deployerApp.deployWith("StablePay", StablePayBase, Storage.address, {gas: maxGasForDeploying});
 
     /***********************************
-      Deploy swapping token providers.
+     Deploy swapping token providers.
      ***********************************/
+
 
     const stablePayInstance = await StablePay.deployed();
     const stablePayStorageInstance = await StablePayStorage.deployed();
@@ -164,10 +165,10 @@ module.exports = function(deployer, network, accounts) {
       SafeMath
     ]);
     await deployerApp.deploy(
-      KyberSwappingProvider,
-      stablePayInstance.address,
-      kyberContracts.KyberNetworkProxy,
-      {gas: maxGasForDeploying}
+        KyberSwappingProvider,
+        stablePayInstance.address,
+        kyberContracts.KyberNetworkProxy,
+        {gas: maxGasForDeploying}
     );
     const kyberProviderKey = providerKeyGenerator.generateKey('KyberNetwork', '1');
     await stablePayStorageInstance.registerSwappingProvider(
@@ -193,13 +194,13 @@ module.exports = function(deployer, network, accounts) {
 
 
     /***************************************************************
-      Saving smart contract permissions/roles and closing platform.
+     Saving smart contract permissions/roles and closing platform.
      ***************************************************************/
     const storageInstance = await Storage.deployed();
 
     /** Storing smart contracts data. */
     await deployerApp.storeContracts(
-      storageInstance
+        storageInstance
     );
 
     /** Setting ownership for specific account. */
@@ -208,7 +209,7 @@ module.exports = function(deployer, network, accounts) {
     await deployerApp.finalize(storageInstance);
 
     /****************************************
-      Setting platform configuration values.
+     Setting platform configuration values.
      ****************************************/
     const settingsInstance = await Settings.deployed();
     await settingsInstance.setPlatformFee(platformFee, {from: owner});
