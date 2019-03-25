@@ -300,7 +300,7 @@ contract StablePayBase is Base, IStablePay {
     returns (bool)
     {
         require(_providerKeys.length > 0, "Provider keys must not be empty.");
-//
+
         for (uint256 index = 0; index < _providerKeys.length; index = index.add(1)) {
             bytes32 _providerKey = _providerKeys[index];
             bool swapSuccess = doPayWithEther(order, _providerKey);
