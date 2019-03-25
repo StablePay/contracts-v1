@@ -99,12 +99,8 @@ module.exports = function(deployer, network, accounts) {
           });
 
       exchangeTemplate = await UniswapTemplateExchangeInterface.at(exchangeTemplateResult.options.address);
-      let templ =  await uniswapFactory.exchangeTemplate.call();
-      console.log('ttt', templ);
 
       await uniswapFactory.initializeFactory(exchangeTemplate.address, {from: owner});
-      let templ2 =  await uniswapFactory.exchangeTemplate.call();
-      console.log('ttt', templ2);
 
 
       console.log('setting up uniswap contracts addresses');

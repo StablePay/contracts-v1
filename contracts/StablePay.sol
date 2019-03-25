@@ -5,7 +5,7 @@ import "./base/proxy/ProxyBase.sol";
 contract StablePay is ProxyBase {
     
     /** Constants */
-    string constant public STABLE_PAY = "StablePay";
+    string constant public STABLE_PAY = "StablePayBase";
 
     /** Variables */
 

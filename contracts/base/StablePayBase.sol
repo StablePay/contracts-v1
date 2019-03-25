@@ -237,21 +237,13 @@ contract StablePayBase is Base, IStablePay {
     }
 
 
-    event testEvent(
-        uint stablePayTargetBalance,
-        uint stablePayInitialSourceBalance,
-        uint targetAmount
-
-
-    );
-
     function doPayWithEther(StablePayCommon.Order order, bytes32 _providerKey)
     internal
     returns (bool)
     {
         if(getProviderRegistry().isSwappingProviderValid(_providerKey)) {
             StablePayCommon.SwappingProvider memory swappingProvider = getSwappingProvider(_providerKey);
-            uint stablePayInitialSourceBalance =  ERC20(order.targetToken).balanceOf(address(this));
+            uint stablePayInitialSourceBalance =  address(this).balance;
             ISwappingProvider iSwappingProvider = ISwappingProvider(swappingProvider.providerAddress);
 
             bool result = iSwappingProvider.swapEther.value(msg.value)(order);
@@ -261,15 +253,13 @@ contract StablePayBase is Base, IStablePay {
 
                 address(msg.sender).transfer(stablePayFinalSourceBalance);
 
-                uint stablePayTargetBalance = ERC20(order.targetToken).balanceOf(address(this));
-                testEvent(stablePayTargetBalance,stablePayInitialSourceBalance, order.targetAmount);
+                uint stablePayTargetBalance = address(this).balance;
                 //validate final balance
                 uint stablePayCurrentBalance = stablePayTargetBalance.sub(stablePayInitialSourceBalance);
                 require(stablePayCurrentBalance == order.targetAmount, "StablePay target balance is not valid.");
-//
+
                 uint256 feeAmount = getFeeAmount(order);
                 uint256 merchantAmount = order.targetAmount - feeAmount;
-                testEvent(feeAmount, merchantAmount, order.targetAmount);
 
                 transferFee(order.targetToken, feeAmount);
 
@@ -278,7 +268,7 @@ contract StablePayBase is Base, IStablePay {
                     "Transfer to merchant failed."
                 );
 
-                emitPaymentSentEvent(order, stablePayTargetBalance);
+                emitPaymentSentEvent(order, stablePayCurrentBalance);
 
                 emitSwapEthExecutionSuccessEvent(swappingProvider.providerAddress, _providerKey);
 
