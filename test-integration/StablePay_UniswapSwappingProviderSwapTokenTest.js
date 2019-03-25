@@ -197,10 +197,16 @@ contract('StablePay_UniswapSwappingProviderSwapTokenTest', (accounts) => {
                 gas: 5000000
             });
 
-            // Assertions
 
-            const finalTargetBalance = new BigNumber(await targetToken.instance.balanceOf(merchantAddress)).toFixed();
-            console.log('finalTargetBalance=>>>', finalTargetBalance);
+            const finalistablePayTargetBalance = new BigNumber(await targetToken.instance.balanceOf(vault.address));
+            console.log('finalistablePayTargetBalance=>>>', finalistablePayTargetBalance);
+
+            const finalTargetBalance = new BigNumber(await targetToken.instance.balanceOf(merchantAddress));
+            console.log('finalTargetBalance          =>>>', finalTargetBalance);
+            const sum = finalistablePayTargetBalance.plus(finalTargetBalance);
+
+            // Assertions
+            assert.equal(sum, targetToken.amount);
 
 
 
