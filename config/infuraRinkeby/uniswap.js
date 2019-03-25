@@ -1,0 +1,7 @@
+module.exports = {
+
+    contracts: {
+        factory: "0xf5D915570BC477f9B8D6C0E980aA81757A3AaC36",
+        exchangeTemplate: ""
+    }
+};

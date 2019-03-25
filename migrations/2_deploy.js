@@ -65,7 +65,7 @@ module.exports = function(deployer, network, accounts) {
   const kyberContracts = kyberConf.contracts;
   const kyberTokens = kyberConf.tokens;
 
-  //const uniswapContracts = uniswapConf.contracts;
+  const uniswapContracts = uniswapConf.contracts;
 
 
   const owner = accounts[0];
@@ -73,36 +73,45 @@ module.exports = function(deployer, network, accounts) {
   let exchangeTemplate;
 
   deployer.deploy(SafeMath).then(async (txInfo) => {
+    if(allowedNetworks.includes(network)){
+        console.log('deploying uniswap contracts');
 
-    let factoryABI = new web3.eth.Contract(JSON.parse(uniswapConf.factory.abi));
-    let exchangeBI = new web3.eth.Contract(JSON.parse(uniswapConf.exchange.abi));
+      let factoryABI = new web3.eth.Contract(JSON.parse(uniswapConf.factory.abi));
+      let exchangeBI = new web3.eth.Contract(JSON.parse(uniswapConf.exchange.abi));
 
-    const factoryResult = await factoryABI.deploy({
-      data: uniswapConf.factory.bytecode
-    })
-        .send({
-          from: owner,
-          gas: 1500000,
-          gasPrice: 90000 * 2
-        });
-    uniswapFactory = await UniswapFactoryInterface.at(factoryResult.options.address);
-    console.log('uniswapFactory', uniswapFactory.address);
-    const exchangeTemplateResult = await exchangeBI.deploy({
-      data: uniswapConf.exchange.bytecode
-    })
-        .send({
-          from: owner,
-          gas: 5500000,
-          gasPrice: 90000 * 2
-        });
+      const factoryResult = await factoryABI.deploy({
+        data: uniswapConf.factory.bytecode
+      })
+          .send({
+            from: owner,
+            gas: 1500000,
+            gasPrice: 90000 * 2
+          });
+      uniswapFactory = await UniswapFactoryInterface.at(factoryResult.options.address);
+      console.log('uniswapFactory', uniswapFactory.address);
+      const exchangeTemplateResult = await exchangeBI.deploy({
+        data: uniswapConf.exchange.bytecode
+      })
+          .send({
+            from: owner,
+            gas: 5500000,
+            gasPrice: 90000 * 2
+          });
 
-    exchangeTemplate = await UniswapTemplateExchangeInterface.at(exchangeTemplateResult.options.address);
-    let templ =  await uniswapFactory.exchangeTemplate.call();
-    console.log('ttt', templ);
+      exchangeTemplate = await UniswapTemplateExchangeInterface.at(exchangeTemplateResult.options.address);
+      let templ =  await uniswapFactory.exchangeTemplate.call();
+      console.log('ttt', templ);
 
-    await uniswapFactory.initializeFactory(exchangeTemplate.address, {from: owner});
-    let templ2 =  await uniswapFactory.exchangeTemplate.call();
-    console.log('ttt', templ2);
+      await uniswapFactory.initializeFactory(exchangeTemplate.address, {from: owner});
+      let templ2 =  await uniswapFactory.exchangeTemplate.call();
+      console.log('ttt', templ2);
+
+
+      console.log('setting up uniswap contracts addresses');
+      uniswapContracts.factory = uniswapFactory.address;
+
+    }
+
 
 
 
@@ -172,7 +181,7 @@ module.exports = function(deployer, network, accounts) {
     await deployerApp.deploy(
         UniswapSwappingProvider,
         stablePayInstance.address,
-        uniswapFactory.address,
+        uniswapContracts.factory,
         {gas: maxGasForDeploying}
     );
     const uniswapProviderKey = providerKeyGenerator.generateKey('Uniswap', '1');
