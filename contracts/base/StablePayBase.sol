@@ -308,7 +308,7 @@ contract StablePayBase is Base, IStablePay {
                 return true;
             }
         }
-//        require(false, "Swap with ether could not be performed..");
+        require(false, "Swap with ether could not be performed..");
         return true;
     }
 
