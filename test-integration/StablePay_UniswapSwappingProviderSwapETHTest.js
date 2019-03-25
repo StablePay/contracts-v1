@@ -165,12 +165,6 @@ contract('StablePay_UniswapSwappingProviderSwapTokenTest', (accounts) => {
             console.log('ethToBuyTargetToken =>>>', ethToBuyTargetToken);
             console.log('sourceTokensTosell =>>>', sourceTokensTosell);
 
-            //sourceToken.amount = sourceTokensTosell;
-            // await sourceErc20.approve(
-            //     stablePay.address,
-            //     sourceToken.amount,
-            //     {from: customerAddress}
-            // );
 
             console.log('Source Amount');
             console.log(sourceToken.amount);
@@ -201,15 +195,16 @@ contract('StablePay_UniswapSwappingProviderSwapTokenTest', (accounts) => {
 
 
 
-            const finalistablePayTargetBalance = new BigNumber(await targetToken.instance.balanceOf(vault.address)).toFixed();
+            const finalistablePayTargetBalance = new BigNumber(await targetToken.instance.balanceOf(vault.address));
             console.log('finalistablePayTargetBalance=>>>', finalistablePayTargetBalance);
 
-            const finalTargetBalance = new BigNumber(await targetToken.instance.balanceOf(merchantAddress)).toFixed();
+            const finalTargetBalance = new BigNumber(await targetToken.instance.balanceOf(merchantAddress));
             console.log('finalTargetBalance          =>>>', finalTargetBalance);
-
+            const sum = finalistablePayTargetBalance.plus(finalTargetBalance);
 
             // Assertions
-            //assert(false);
+            assert.equal(sum, targetToken.amount);
+
 
 
         });
