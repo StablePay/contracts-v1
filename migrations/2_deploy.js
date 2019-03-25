@@ -219,7 +219,7 @@ module.exports = function(deployer, network, accounts) {
       } else {
         await settingsInstance.setTokenAvailability(tokenAddress, minAmount, maxAmount, {from: owner});
         deployerApp.addData(`Token_${tokenAvailability.name}_Kyber_${tokenAddress}`, {minAmount: minAmount, maxAmount: maxAmount});
-        console.log(`DEPLOYED: Token '${tokenAvailability.name}' availability not configured: Address: '${tokenAddress}' - MinAmount: '${minAmount}' - MaxAmount: '${maxAmount}'.`);
+        console.log(` Token '${tokenAvailability.name}' availability  configured: Address: '${tokenAddress}' - MinAmount: '${minAmount}' - MaxAmount: '${maxAmount}'.`);
       }
     }
 
