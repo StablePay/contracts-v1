@@ -47,10 +47,10 @@ module.exports = function(deployer, network, accounts) {
   console.log(`Deploying smart contracts to '${network}'.`)
   
   const networkIndex = allowedNetworks.indexOf(network);
-  if(networkIndex === -1) {
-    console.log(`NOT deploying smart contracts to '${network}'.`);
-    return;
-  }
+  //if(networkIndex === -1) {
+  //  console.log(`NOT deploying smart contracts to '${network}'.`);
+  //  return;
+  //}
 
   const providerKeyGenerator = new ProviderKeyGenerator();
 
@@ -69,6 +69,7 @@ module.exports = function(deployer, network, accounts) {
 
 
   const owner = accounts[0];
+  console.log(`Platform Owner: ${owner}`);
   let uniswapFactory;
   let exchangeTemplate;
 
@@ -142,7 +143,7 @@ module.exports = function(deployer, network, accounts) {
       Bytes32ArrayLib,
       SafeMath
     ]);
-    await deployerApp.deploy(StablePayBase, Storage.address, {gas: maxGasForDeploying});
+    await deployerApp.deploy(StablePayBase, Storage.address, {gas: 5500000});
 
     /***********************************
      Deploy swapping token providers.
@@ -162,7 +163,7 @@ module.exports = function(deployer, network, accounts) {
         KyberSwappingProvider,
         stablePayInstance.address,
         kyberContracts.KyberNetworkProxy,
-        {gas: maxGasForDeploying}
+        {gas: 5500000}
     );
     const kyberProviderKey = providerKeyGenerator.generateKey('KyberNetwork', '1');
     await stablePayStorageInstance.registerSwappingProvider(
@@ -177,7 +178,7 @@ module.exports = function(deployer, network, accounts) {
         UniswapSwappingProvider,
         stablePayInstance.address,
         uniswapContracts.factory,
-        {gas: maxGasForDeploying}
+        {gas: 5500000}
     );
     const uniswapProviderKey = providerKeyGenerator.generateKey('Uniswap', '1');
     await stablePayStorageInstance.registerSwappingProvider(
