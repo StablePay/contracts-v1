@@ -15,18 +15,11 @@ contract UniswapSwappingProvider is ISwappingProvider {
 
     address public uniswapFactory;
 
-
-
-
-
     constructor(address _stablePay, address _factory)
-        public ISwappingProvider(_stablePay)
+    public ISwappingProvider(_stablePay)
     {
         uniswapFactory = _factory;
-
     }
-
-
 
     function swapToken(StablePayCommon.Order memory  _order)
     public isStablePay(msg.sender)
@@ -72,8 +65,6 @@ contract UniswapSwappingProvider is ISwappingProvider {
     payable
     returns (bool)
     {
-
-
         UniswapFactoryInterface uFactory = UniswapFactoryInterface(uniswapFactory);
 
         require(uFactory.getExchange(_order.targetToken) != 0x0, "Exchange not found for target token");
@@ -87,25 +78,26 @@ contract UniswapSwappingProvider is ISwappingProvider {
             block.timestamp + 300
         );
 
-
         require(ERC20(_order.targetToken).transfer(msg.sender,  _order.targetAmount), "Source transfer invocation was not successful.");
         return true;
-
     }
 
     function getExpectedRate(ERC20 _sourceToken, ERC20 _targetToken, uint _sourceAmount)
     public
     view
-    returns (bool, uint, uint)
+    returns (bool isSupported, uint minRate, uint maxRate)
     {
         UniswapFactoryInterface uFactory = UniswapFactoryInterface(uniswapFactory);
         UniswapExchangeInterface sourceExchange = UniswapExchangeInterface(uFactory.getExchange(_sourceToken));
         UniswapExchangeInterface targetExchange = UniswapExchangeInterface(uFactory.getExchange(_targetToken));
 
-        uint256 ethToBuyTargetToken = targetExchange.getEthToTokenOutputPrice(_sourceAmount);
-        uint256 sourceTokensTosell = sourceExchange.getTokenToEthOutputPrice(ethToBuyTargetToken);
+        isSupported = sourceExchange != address(0x0) && targetExchange != address(0x0);
+        uint rate = 0;
+        if(isSupported) {
+            uint256 ethToBuyTargetToken = targetExchange.getEthToTokenOutputPrice(_sourceAmount);
+            rate = sourceExchange.getTokenToEthOutputPrice(ethToBuyTargetToken);
+        }
 
-        return (true, ethToBuyTargetToken, sourceTokensTosell);
+        return (isSupported, rate, rate);
     }
-
 }

@@ -24,7 +24,6 @@ contract BaseMock is Base {
     /** Functions */
     function _nonReentrant()
         public
-        view
         nonReentrant()
         {}
 

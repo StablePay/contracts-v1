@@ -15,7 +15,8 @@ ByApiOrderDataBuilder.prototype.build = async function(data) {
         sourceAddress,
         targetAmount,
         targetAddress,
-        merchantAddress
+        merchantAddress,
+        customerAddress
     } = data;
     const apiResult = await axios.post(
         this.url, {
@@ -23,6 +24,7 @@ ByApiOrderDataBuilder.prototype.build = async function(data) {
         sourceTokenAddress: sourceAddress,
         targetTokenAddress: targetAddress,
         merchantAddress: merchantAddress,
+        customerAddress: customerAddress,
         verbose: true,
         safeMargin: "0.000000000"
     });

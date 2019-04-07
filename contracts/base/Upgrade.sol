@@ -30,7 +30,7 @@ contract Upgrade is Base {
     /** Functions */
 
     function upgradeContract(string _name, address _upgradedContractAddress)  external onlySuperUser {
-        address oldContractAddress = _storage.getAddress(keccak256(abi.encodePacked("contract.name", _name)));
+        address oldContractAddress = _storage.getAddress(keccak256(abi.encodePacked(CONTRACT_NAME, _name)));
         
         require(oldContractAddress != 0x0, "Old contract address must not be 0x0.");
         require(oldContractAddress != _upgradedContractAddress, "Old and new contract addresses must not be equals.");

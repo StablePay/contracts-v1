@@ -58,7 +58,7 @@ module.exports = {
 			provider: function() {
 				return new HDWalletProvider(
 					mnemonicKeyValue,
-					`https://rinkeby.infura.io/${infuraKeyValue}`,
+					`https://rinkeby.infura.io/v3/${infuraKeyValue}`,
 					defaultAddressIndex,
 					addressCountValue
 				);
@@ -71,7 +71,7 @@ module.exports = {
 			provider: function() {
 				return new HDWalletProvider(
 					mnemonicKeyValue,
-					`https://kovan.infura.io/${infuraKeyValue}`,
+					`https://kovan.infura.io/v3/${infuraKeyValue}`,
 					defaultAddressIndex,
 					addressCountValue
 				);
@@ -84,7 +84,7 @@ module.exports = {
 			provider: function() {
 				return new HDWalletProvider(
 					mnemonicKeyValue,
-					`https://ropsten.infura.io/${infuraKeyValue}`,
+					`https://ropsten.infura.io/v3/${infuraKeyValue}`,
 					defaultAddressIndex,
 					addressCountValue
 				);
@@ -97,7 +97,7 @@ module.exports = {
 			provider: function() {
 				return new HDWalletProvider(
 					mnemonicKeyValue,
-					`https://mainnet.infura.io/${infuraKeyValue}`,
+					`https://mainnet.infura.io/v3/${infuraKeyValue}`,
 					defaultAddressIndex,
 					addressCountValue
 				);
@@ -110,7 +110,7 @@ module.exports = {
 			provider: function() {
 				return new HDWalletProvider(
 					mnemonicKeyValue,
-					`https://infuranet.infura.io/${infuraKeyValue}`,
+					`https://infuranet.infura.io/v3/${infuraKeyValue}`,
 					defaultAddressIndex,
 					addressCountValue
 				);

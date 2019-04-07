@@ -10,11 +10,11 @@ const PLATFORM_FEE_KEY = 'config.platform.fee';
 /** Platform configuration values. */
 const printDeployCostValue = appConfig.getPrintDeployCost().get();
 const platformFee = appConfig.getPlatformFee().get();
-const maxGasForDeploying = 4500000;
+const maxGasForDeploying = 5000000;
 
 // Mock Smart Contracts
 const BaseMock = artifacts.require("./mock/BaseMock.sol");
-const StablePayMock = artifacts.require("./mock/StablePayMock.sol");
+const StablePayBaseMock = artifacts.require("./mock/StablePayBaseMock.sol");
 const StablePayStorageMock = artifacts.require("./mock/StablePayStorageMock.sol");
 const CustomSwappingProviderMock = artifacts.require("./mock/CustomSwappingProviderMock.sol");
 
@@ -33,7 +33,6 @@ const Upgrade = artifacts.require("./base/Upgrade.sol");
 const StablePay = artifacts.require("./StablePay.sol");
 const StablePayBase = artifacts.require("./base/StablePayBase.sol");
 const StablePayCommon = artifacts.require("./StablePayCommon.sol");
-const ZeroxSwappingProvider = artifacts.require("./providers/ZeroxSwappingProvider.sol");
 const KyberSwappingProvider = artifacts.require("./providers/KyberSwappingProvider.sol");
 
 const UniswapSwappingProvider = artifacts.require("./providers/UniswapSwappingProvider.sol");
@@ -57,10 +56,7 @@ module.exports = function(deployer, network, accounts) {
   const envConf = require('../config')(network);
   const stablePayConf = envConf.stablepay;
   const kyberConf = envConf.kyber;
-  const zeroxConf = envConf.zerox;
   const uniswapConf = envConf.uniswap;
-
-  const zeroxContracts = zeroxConf.contracts;
 
   const kyberContracts = kyberConf.contracts;
   const kyberTokens = kyberConf.tokens;
@@ -81,31 +77,26 @@ module.exports = function(deployer, network, accounts) {
 
       const factoryResult = await factoryABI.deploy({
         data: uniswapConf.factory.bytecode
-      })
-          .send({
-            from: owner,
-            gas: 1500000,
-            gasPrice: 90000 * 2
-          });
+      }).send({
+        from: owner,
+        gas: 1500000,
+        gasPrice: 90000 * 2
+      });
       uniswapFactory = await UniswapFactoryInterface.at(factoryResult.options.address);
       console.log('uniswapFactory', uniswapFactory.address);
       const exchangeTemplateResult = await exchangeBI.deploy({
         data: uniswapConf.exchange.bytecode
-      })
-          .send({
-            from: owner,
-            gas: 5500000,
-            gasPrice: 90000 * 2
-          });
+      }).send({
+        from: owner,
+        gas: 5500000,
+        gasPrice: 90000 * 2
+      });
 
       exchangeTemplate = await UniswapTemplateExchangeInterface.at(exchangeTemplateResult.options.address);
-
       await uniswapFactory.initializeFactory(exchangeTemplate.address, {from: owner});
-
 
       console.log('setting up uniswap contracts addresses');
       uniswapContracts.factory = uniswapFactory.address;
-
     }
 
 
@@ -122,7 +113,7 @@ module.exports = function(deployer, network, accounts) {
       AddressLib
     ], {gas: maxGasForDeploying});
     
-    await deployerApp.deployMockIf(StablePayMock, Storage.address);
+    await deployerApp.deployMockIf(StablePayBaseMock, Storage.address);
     await deployerApp.deployMockIf(StablePayStorageMock, Storage.address);
     await deployerApp.deployMockIf(BaseMock, Storage.address);
 
@@ -132,7 +123,7 @@ module.exports = function(deployer, network, accounts) {
     ]);
     await deployerApp.deploy(StablePayStorage, Storage.address, {gas: maxGasForDeploying});
     await deployerApp.deploy(Settings, Storage.address, {gas: maxGasForDeploying});
-    await deployerApp.deploy(Upgrade, Storage.address);
+    await deployerApp.deploy(Upgrade, Storage.address, {gas: maxGasForDeploying});
     await deployerApp.deploy(Role, Storage.address, {gas: maxGasForDeploying});
     await deployerApp.deploy(Vault, Storage.address);
 
@@ -172,7 +163,9 @@ module.exports = function(deployer, network, accounts) {
     deployerApp.addData(kyberProviderKey.name, kyberProviderKey.providerKey);
 
     /** Deploying Uniswap swap provider. */
-
+    await deployerApp.links(UniswapSwappingProvider, [
+      SafeMath
+    ]);
     await deployerApp.deploy(
         UniswapSwappingProvider,
         stablePayInstance.address,

@@ -1,11 +1,10 @@
 pragma solidity 0.4.25;
 
 import "../interface/IStorage.sol";
-
+import "../interface/IVault.sol";
+import "../util/StablePayCommon.sol";
 
 /**
-     
-     
      @notice Reentrancy Guard: Remco Bloemen <remco@2π.com>: If you mark a function `nonReentrant`, you should also mark it `external`.
  */
 contract Base {
@@ -15,6 +14,10 @@ contract Base {
     string constant internal STATE_PAUSED = "state.paused";
     string constant internal PLATFORM_FEE = "config.platform.fee";
 
+    string constant internal STABLE_PAY_STORAGE_NAME = "StablePayStorage";
+    string constant internal SETTINGS_NAME = "Settings";
+    string constant internal VAULT_NAME = "Vault";
+    string constant internal ROLE_NAME = "Role";
     string constant internal CONTRACT_NAME = "contract.name";
     string constant internal CONTRACT_ADDRESS = "contract.address";
 
@@ -123,7 +126,17 @@ contract Base {
         _;
     }
 
-  
+    function () public payable {
+        require(msg.value > 0, "Msg value > 0");
+        bool depositResult = IVault(getVault()).deposit.value(msg.value)();
+        require(depositResult, "The deposit was not successful.");
+        emit DepositReceived(
+            address(this),
+            msg.sender,
+            msg.value
+        );
+    }
+
     /** Constructor */
    
     /**
@@ -134,6 +147,12 @@ contract Base {
         _storage = IStorage(_storageAddress);
     }
 
+    function getVault()
+        internal
+        view
+        returns (address) {
+        return _storage.getAddress(keccak256(abi.encodePacked(CONTRACT_NAME, VAULT_NAME)));
+    }
 
     /** Role utilities */
 
@@ -150,5 +169,20 @@ contract Base {
     */
     function roleCheck(string _role, address _address) internal view {
         require(roleHas(_role, _address) == true, "Invalid role");
+    }
+
+    /**
+        @dev Emit PaymentSent event.
+     */
+    function emitPaymentSentEvent(StablePayCommon.Order order, uint256 amountSent)
+    internal {
+        emit PaymentSent(
+            address(this),
+            order.merchantAddress,
+            msg.sender,
+            order.sourceToken,
+            order.targetToken,
+            amountSent
+        );
     }
 }

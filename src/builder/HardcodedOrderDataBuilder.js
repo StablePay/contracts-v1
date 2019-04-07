@@ -15,6 +15,7 @@ HardcodedOrderDataBuilder.prototype.build = async function(data) {
         sourceToken,
         targetToken,
         merchantAddress,
+        customerAddress,
         providerKey
     } = data;
 
@@ -32,6 +33,7 @@ HardcodedOrderDataBuilder.prototype.build = async function(data) {
         sourceToken,
         targetToken,
         merchantAddress,
+        customerAddress,
 
         '0x0000000000000000000000000000000000000000',
         '0x0000000000000000000000000000000000000000',

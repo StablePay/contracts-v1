@@ -71,13 +71,15 @@ contract SwappingProviderMock is ISwappingProvider {
   public
   payable
   returns (bool) {
+    order;
     return true;
   }
 
   function getExpectedRate(ERC20 src, ERC20 dest, uint srcQty)
   public
   view
-  returns (bool isSupported, uint minRate, uint maxRate) {
+  returns (bool _isSupported, uint _minRate, uint _maxRate) {
+    src; dest; srcQty;
     return (isSupported, minRate, maxRate);
   }
 
