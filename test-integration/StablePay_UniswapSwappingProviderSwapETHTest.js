@@ -178,12 +178,13 @@ contract('StablePay_UniswapSwappingProviderSwapTokenTest', (accounts) => {
                 targetToken: targetToken.instance.address,
                 sourceAmount: 0,
                 targetAmount: targetToken.amount,
-                merchantAddress: merchantAddress
+                merchantAddress: merchantAddress,
+                customerAddress: customerAddress
             }).createOrder();
             //console.log('orderArray', orderArray);
 
             const initialTargetBalance = new BigNumber(await targetToken.instance.balanceOf(merchantAddress)).toFixed();
-            console.log('initialTargetBalance=>>>', initialTargetBalance);
+            console.log('initialTargetBalance===ß=>>>', initialTargetBalance);
             const val = (new BigNumber(ethToBuyTargetToken)).times(4);
 
             //Invocation

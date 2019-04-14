@@ -184,7 +184,8 @@ contract('StablePay_UniswapSwappingProviderSwapTokenTest', (accounts) => {
                 targetToken: targetToken.instance.address,
                 sourceAmount: sourceToken.amount,
                 targetAmount: targetToken.amount,
-                merchantAddress: merchantAddress
+                merchantAddress: merchantAddress,
+                customerAddress: customerAddress
             }).createOrder();
             console.log('orderArray', orderArray);
 
@@ -194,7 +195,8 @@ contract('StablePay_UniswapSwappingProviderSwapTokenTest', (accounts) => {
             //Invocation
             const result = await istablePay.payWithToken(orderArray, [uniswapProviderKey], {
                 from: customerAddress,
-                gas: 5000000
+                gas: 5000000,
+                gasPrice: 0
             });
 
 

@@ -89,8 +89,10 @@ contract ISwappingProvider {
     pure
     returns (uint diffBalance)
     {
+
         require(initialBalance >= finalBalance, "SwappingProvider: Initial balance >= final balance.");
         uint used = initialBalance.sub(finalBalance);
+
         require(sentAmount >= used, "SwappingProvider: Sent amount >= used.");
         uint diff = sentAmount.sub(used);
         return diff;

@@ -231,7 +231,7 @@ contract StablePayBase is Base, IStablePay {
     }
 
     /**
-        @dev It checks whether the diff between final and initia balance is equals to a target amount.
+        @dev It checks whether the diff between final and initial balance is equals to a target amount.
         @dev If diff balance is not equals to target amount, it throws a require error.
      */
     function checkCurrentTargetBalance(uint targetAmount, uint initialBalance, uint finalBalance)
@@ -241,7 +241,7 @@ contract StablePayBase is Base, IStablePay {
     {
         require(finalBalance >= initialBalance, "StablePayBase: Final balance >= initial balance.");
         uint currentBalance = finalBalance.sub(initialBalance);
-        require(currentBalance == targetAmount, "Target final tokens balance is not valid.");
+        require(currentBalance == targetAmount, "Target final tokens balance is not valid#.");
         return true;
     }
 
