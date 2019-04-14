@@ -1,14 +1,14 @@
 const BigNumber = require('bignumber.js');
-const t = require('./util/TestUtil').title;
+const t = require('../util/TestUtil').title;
 const withData = require('leche').withData;
-const KyberOrderFactory = require('./factories/KyberOrderFactory');
+const KyberOrderFactory = require('../factories/KyberOrderFactory');
 
 // Smart Contracts
-const StablePayMock = artifacts.require("./mock/StablePayMock.sol");
+const StablePayBaseMock = artifacts.require("./mock/StablePayBaseMock.sol");
 const Storage = artifacts.require("./base/Storage.sol");
 const Settings = artifacts.require("./base/Settings.sol");
 
-contract('StablePayGetFeeAmountTest', accounts => {
+contract('StablePayBaseGetFeeAmountTest', accounts => {
     const owner = accounts[0];
     const account1 = accounts[1];
     const token1 = accounts[7];
@@ -26,7 +26,7 @@ contract('StablePayGetFeeAmountTest', accounts => {
         assert(storageInstance);
         assert(storageInstance.address);
 
-        stablePay = await StablePayMock.new(storageInstance.address);
+        stablePay = await StablePayBaseMock.new(storageInstance.address);
         assert(stablePay);
         assert(stablePay.address);
     });
@@ -47,7 +47,8 @@ contract('StablePayGetFeeAmountTest', accounts => {
                 targetAmount: targetAmount,
                 minRate: '10',
                 maxRate: '20',
-                merchantAddress: merchantAddress
+                merchantAddress: merchantAddress,
+                customerAddress: merchantAddress
             }).createOrder();
             
             //Invocation

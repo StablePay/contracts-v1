@@ -246,5 +246,34 @@ module.exports = {
                 notEmitted: (assertFunction = () => {} ) => notEmitted(tx, name, assertFunction)
             };
         }
+    },
+    vault: {
+        tokensWithdrawn: tx => {
+            const name = 'TokensWithdrawn';
+            return {
+                name: name,
+                emitted: (thisContract, erc20Contract, who, to, amount) => emitted(tx, name, ev => {
+                    assert.equal(ev.thisContract, thisContract);
+                    assert.equal(ev.erc20Contract, erc20Contract);
+                    assert.equal(ev.who, who);
+                    assert.equal(ev.to, to);
+                    assert.equal(ev.amount.toString(), amount.toString());
+                }),
+                notEmitted: (assertFunction = () => {} ) => notEmitted(tx, name, assertFunction)
+            };
+        },
+        ethersWithdrawn: tx => {
+            const name = 'EthersWithdrawn';
+            return {
+                name: name,
+                emitted: (thisContract, who, to, amount) => emitted(tx, name, ev => {
+                    assert.equal(ev.thisContract, thisContract);
+                    assert.equal(ev.who, who);
+                    assert.equal(ev.to, to);
+                    assert.equal(ev.amount.toString(), amount.toString());
+                }),
+                notEmitted: (assertFunction = () => {} ) => notEmitted(tx, name, assertFunction)
+            };
+        }
     }
 }

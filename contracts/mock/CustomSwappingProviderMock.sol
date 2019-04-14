@@ -56,4 +56,32 @@ contract CustomSwappingProviderMock is ISwappingProvider {
         return (_isSupported, _minRate, _maxRate);
     }
 
+    function deposit()
+    public
+    payable
+    returns (bool)
+    {
+        return true;
+    }
+
+    function _transferDiffEtherBalanceIfApplicable(address to, uint transferAmount)
+    public
+    payable
+    returns (bool)
+    {
+        uint256 initialBalance = getEtherBalance();
+        stablePay.transfer(transferAmount);
+        uint256 finalBalance = getEtherBalance();
+        return super.transferDiffEtherBalanceIfApplicable(to, msg.value, initialBalance, finalBalance);
+    }
+
+    function _calculateDiffBalance(uint sentAmount, uint initialBalance, uint finalBalance)
+    public
+    pure
+    returns (uint)
+    {
+        return super.calculateDiffBalance(sentAmount, initialBalance, finalBalance);
+    }
+
+    
 }

@@ -1,16 +1,16 @@
 const BigNumber = require('bignumber.js');
-const t = require('./util/TestUtil').title;
+const t = require('../util/TestUtil').title;
 const withData = require('leche').withData;
-const KyberOrderFactory = require('./factories/KyberOrderFactory');
+const KyberOrderFactory = require('../factories/KyberOrderFactory');
 
 // Mock Smart Contracts
-const StablePayMock = artifacts.require("./mock/StablePayMock.sol");
+const StablePayBaseMock = artifacts.require("./mock/StablePayBaseMock.sol");
 const StandardTokenMock = artifacts.require("./mock/StandardTokenMock.sol");
 
 // Smart Contracts
 const Storage = artifacts.require("./base/Storage.sol");
 
-contract('StablePayIsTransferTokensTest', accounts => {
+contract('StablePayBaseTransferTokensIfTokensAreEqualsTest', accounts => {
     const owner = accounts[0];
     const account1 = accounts[1];
     const account2 = accounts[2];
@@ -25,7 +25,7 @@ contract('StablePayIsTransferTokensTest', accounts => {
         assert(storageInstance);
         assert(storageInstance.address);
 
-        stablePay = await StablePayMock.new(storageInstance.address);
+        stablePay = await StablePayBaseMock.new(storageInstance.address);
         assert(stablePay);
         assert(stablePay.address);
     });
@@ -34,7 +34,7 @@ contract('StablePayIsTransferTokensTest', accounts => {
         _1_amount100: [account1, account2, '100'],
         _2_amount1000: [account3, account4, '1000']
     }, function(customerAddress, merchantAddress, targetAmount) {
-        it(t('anUser', '_isTransferTokens', 'Should be able to transfer tokens.', false), async function() {
+        it(t('anUser', '_transferTokensIfTokensAreEquals', 'Should be able to transfer tokens.', false), async function() {
             // Setup
             const amount = web3.utils.toWei('100000', 'ether');
             const token = await StandardTokenMock.new(customerAddress, amount);
@@ -45,7 +45,8 @@ contract('StablePayIsTransferTokensTest', accounts => {
                 targetAmount: targetAmount,
                 minRate: targetAmount,
                 maxRate: targetAmount,
-                merchantAddress: merchantAddress
+                merchantAddress: merchantAddress,
+                customerAddress: customerAddress
             }).createOrder();
             await token.approve(
                 stablePay.address,
@@ -56,7 +57,7 @@ contract('StablePayIsTransferTokensTest', accounts => {
             const merchantInitialBalance = await token.balanceOf(merchantAddress);
 
             // Invocation
-            const result = await stablePay._isTransferTokens(orderArray, {from: customerAddress});
+            const result = await stablePay._transferTokensIfTokensAreEquals(orderArray, {from: customerAddress});
 
             // Assertions
             const customerFinalBalance = await token.balanceOf(customerAddress);
@@ -72,7 +73,7 @@ contract('StablePayIsTransferTokensTest', accounts => {
         _1_source105_target100: [account1, account2, '105', '100'],
         _2_source51_target50: [account1, account2, '51', '50']
     }, function(customerAddress, merchantAddress, sourceAmount, targetAmount) {
-        it(t('anUser', '_isTransferTokens', 'Should be able to transfer tokens (source/target amounts not equals).', false), async function() {
+        it(t('anUser', '_transferTokensIfTokensAreEquals', 'Should be able to transfer tokens (source/target amounts not equals).', false), async function() {
             // Setup
             const amount = web3.utils.toWei('100000', 'ether');
             const token = await StandardTokenMock.new(customerAddress, amount);
@@ -83,7 +84,8 @@ contract('StablePayIsTransferTokensTest', accounts => {
                 targetAmount: targetAmount,
                 minRate: sourceAmount,
                 maxRate: targetAmount,
-                merchantAddress: merchantAddress
+                merchantAddress: merchantAddress,
+                customerAddress: customerAddress
             }).createOrder();
             await token.approve(
                 stablePay.address,
@@ -94,7 +96,7 @@ contract('StablePayIsTransferTokensTest', accounts => {
             const merchantInitialBalance = await token.balanceOf(merchantAddress);
 
             // Invocation
-            const result = await stablePay._isTransferTokens(orderArray, {from: customerAddress});
+            const result = await stablePay._transferTokensIfTokensAreEquals(orderArray, {from: customerAddress});
 
             // Assertions
             const customerFinalBalance = await token.balanceOf(customerAddress);
@@ -106,11 +108,11 @@ contract('StablePayIsTransferTokensTest', accounts => {
         });
     });
 
-withData({
+	withData({
         _1_source99_target100: [account1, account2, '99', '100'],
         _2_source25_target0: [account1, account2, '25', '50']
     }, function(customerAddress, merchantAddress, sourceAmount, targetAmount) {
-        it(t('anUser', '_isTransferTokens', 'Should not be able to transfer tokens (source/target amounts not equals).', true), async function() {
+        it(t('anUser', '_transferTokensIfTokensAreEquals', 'Should not be able to transfer tokens (source/target amounts not equals).', true), async function() {
             // Setup
             const amount = web3.utils.toWei('100000', 'ether');
             const token = await StandardTokenMock.new(customerAddress, amount);
@@ -121,7 +123,8 @@ withData({
                 targetAmount: targetAmount,
                 minRate: sourceAmount,
                 maxRate: targetAmount,
-                merchantAddress: merchantAddress
+                merchantAddress: merchantAddress,
+                customerAddress: customerAddress
             }).createOrder();
             await token.approve(
                 stablePay.address,
@@ -133,7 +136,7 @@ withData({
 
             try {
                 // Invocation
-                await stablePay._isTransferTokens(orderArray, {from: customerAddress});
+                await stablePay._transferTokensIfTokensAreEquals(orderArray, {from: customerAddress});
 
                 // Assertions
                 fail(true, "It should have failed because source amount is < than target amount.")

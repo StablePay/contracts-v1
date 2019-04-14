@@ -102,7 +102,7 @@ StablePayWrapper.prototype.payWithEther = async function(data, ...params) {
         logIf(this.verbose, `Source Token:          ${order[10]}.`);
         logIf(this.verbose, `Target Token:          ${order[11]}.`);
         logIf(this.verbose, `Merchant Address:      ${order[12]}.`);
-        logIf(this.verbose, `Customer Address:      ${params}.`);
+        logIf(this.verbose, `Params:                ${JSON.stringify(params)}.`);
 
         const result = await this.stablePay.payWithEther(order, providers, {
             from: params[0].from,

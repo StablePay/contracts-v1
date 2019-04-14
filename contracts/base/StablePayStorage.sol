@@ -67,8 +67,8 @@ contract StablePayStorage is Base, IProviderRegistry {
         public Base(_storageAddress) {
     }
 
-
     /** Fallback Method */
+	// TODO Review fallback function.
 
     function () public payable {
         require(msg.value > 0, "Msg value > 0");

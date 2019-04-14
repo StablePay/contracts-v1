@@ -14,7 +14,8 @@ class KyberOrderFactory extends BaseOrderFactory {
             targetAmount,
             minRate,
             maxRate,
-            merchantAddress
+            merchantAddress,
+            customerAddress
         } = data;
         this.sourceToken = sourceToken;
         this.targetToken = targetToken;
@@ -23,6 +24,7 @@ class KyberOrderFactory extends BaseOrderFactory {
         this.minRate = minRate;
         this.maxRate = maxRate;
         this.merchantAddress = merchantAddress;
+        this.customerAddress = customerAddress;
     }
 }
 
@@ -42,6 +44,7 @@ KyberOrderFactory.prototype.createOrder = function() {
         this.sourceToken,
         this.targetToken,
         this.merchantAddress,
+        this.customerAddress,
         NULL_ADDRESS, // Address that created the order
         NULL_ADDRESS, // Address that is allowed to fill the order. If set to 0, any address is allowed to fill the order.
         NULL_ADDRESS, // Address that will recieve fees when order is filled.

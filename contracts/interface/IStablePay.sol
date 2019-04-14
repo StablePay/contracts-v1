@@ -13,7 +13,10 @@ contract IStablePay {
     event SwapExecutionFailed(
         address indexed thisContract,
         address indexed providerAddress,
-        bytes32 providerKey
+        address from,
+        address to,
+        bytes32 providerKey,
+        bytes data
     );
 
     /**
@@ -22,7 +25,13 @@ contract IStablePay {
     event SwapExecutionSuccess(
         address indexed thisContract,
         address indexed providerAddress,
-        bytes32 providerKey
+        address from,
+        address to,
+        uint merchantAmount,
+        uint feeAmount,
+        uint16 platformFee,
+        bytes32 providerKey,
+        bytes data
     );
 
     /**
@@ -31,7 +40,10 @@ contract IStablePay {
     event SwapEthExecutionFailed(
         address indexed thisContract,
         address indexed strategyAddress,
-        bytes32 providerKey
+        address from,
+        address to,
+        bytes32 providerKey,
+        bytes data
     );
 
     /**
@@ -40,7 +52,13 @@ contract IStablePay {
     event SwapEthExecutionSuccess(
         address indexed thisContract,
         address indexed strategyAddress,
-        bytes32 providerKey
+        address from,
+        address to,
+        uint merchantAmount,
+        uint feeAmount,
+        uint16 platformFee,
+        bytes32 providerKey,
+        bytes data
     );
 
     /** Functions */

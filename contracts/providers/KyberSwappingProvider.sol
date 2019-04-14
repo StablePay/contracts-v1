@@ -7,14 +7,12 @@ import "../kyber/KyberNetworkProxyInterface.sol";
 import "../kyber/KyberNetworkProxy.sol";
 import "../util/StablePayCommon.sol";
 import "./ISwappingProvider.sol";
-import "../util/SafeMath.sol";
 
 /**
     https://developer.kyber.network/docs/VendorsGuide/#converting-from-erc20
     https://developer.kyber.network/docs/KyberNetworkProxy/#getexpectedrate
  */
 contract KyberSwappingProvider is ISwappingProvider {
-    using SafeMath for uint256;
 
     ERC20 constant internal ETH_TOKEN_ADDRESS = ERC20(0x00eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee);
     address public proxy;
@@ -29,10 +27,6 @@ contract KyberSwappingProvider is ISwappingProvider {
         public ISwappingProvider(_stablePay) {
         proxy = _proxy;
     }
-
-    /** Fallback Method */
-
-    function () external payable {}
 
     /** Methods */
 
@@ -57,37 +51,39 @@ contract KyberSwappingProvider is ISwappingProvider {
         require(_order.sourceAmount > 0, "Amount must be > 0");
         require(_order.merchantAddress != address(0x0), "Merchant must be != 0x0.");
 
-        // Get the minimum conversion rate
-        bool isSupported;
+        // Gets the ERC20 source/target token instances.
+        ERC20 sourceToken = ERC20(_order.sourceToken);
+        ERC20 targetToken = ERC20(_order.targetToken);
+
+        // Get expected rates if the swapping is supported.
         uint minRate;
         uint maxRate;
-        (isSupported, minRate, maxRate) = getExpectedRate(ERC20(_order.sourceToken), ERC20(_order.targetToken), _order.sourceAmount);
+        (minRate, maxRate) = getExpectedRateIfSupported(sourceToken, targetToken, _order.sourceAmount);
 
-        require(isSupported, "Swap not supported. Verify source/target amount.");
+        // Check the current source token balance is higher (or equals) to the order source amount.
+        uint256 sourceInitialTokenBalance = getTokenBalanceOf(_order.sourceToken);
+        require(sourceInitialTokenBalance >= _order.sourceAmount, "Not enough tokens in balance.");
 
-        uint256 thisSourceInitialTokenBalance = ERC20(_order.sourceToken).balanceOf(address(this));
-        require(thisSourceInitialTokenBalance >= _order.sourceAmount, "Not enough tokens in balance.");
-
-        // Mitigate ERC20 Approve front-running attack, by initially setting allowance to 0
-        require(ERC20(_order.sourceToken).approve(address(proxy), 0), "Error mitigating front-running attack.");
         // Set the spender's token allowance to tokenQty
-        require(ERC20(_order.sourceToken).approve(address(proxy), _order.sourceAmount), "Error approving tokens for proxy."); // Set max amount.
+        approveTokensTo(sourceToken, address(proxy), _order.sourceAmount);
 
-        // Swap the ERC20 token to ETH
+        // Execute swap between the ERC20 token to ERC20 token.
         KyberNetworkProxy(proxy).trade(
-            ERC20(_order.sourceToken),
+            sourceToken,
             _order.sourceAmount,
-            ERC20(_order.targetToken),
-            msg.sender,
+            targetToken,
+            msg.sender, // Kyber will call sender fallback function to transfer back the ether left.
             _order.targetAmount,
             maxRate,
             0
         );
 
-        uint256 thisSourceFinalTokenBalance = ERC20(_order.sourceToken).balanceOf(address(this));
+        // Get source token balance after swapping execution.
+        uint256 sourceFinalTokenBalance = getTokenBalanceOf(_order.sourceToken);
 
-        bool sourceTransferResult = ERC20(_order.sourceToken).transfer(msg.sender, thisSourceFinalTokenBalance);
-        require(sourceTransferResult, "Source transfer invocation was not successful.");
+        // Transfer diff (initial - final) source token balance to the sender.
+        // The initial balance is higher (or equals) than final source token balance.
+        transferDiffTokensIfApplicable(_order.sourceToken, msg.sender, _order.sourceAmount, sourceInitialTokenBalance, sourceFinalTokenBalance);
 
         return true;
     }
@@ -95,6 +91,7 @@ contract KyberSwappingProvider is ISwappingProvider {
     function swapEther(StablePayCommon.Order _order)
     public
     payable
+    isStablePay(msg.sender)
     returns (bool)
     {
         require(msg.value > 0, "Msg value must be > 0");
@@ -102,30 +99,36 @@ contract KyberSwappingProvider is ISwappingProvider {
         require(msg.value == _order.sourceAmount, "Msg value == source amount");
         require(_order.merchantAddress != address(0x0), "Merchant must be != 0x0.");
 
-        // Get the minimum conversion rate
-        bool isSupported;
+        // Gets the ERC20 source/target token instances.
+        ERC20 sourceToken = ERC20(_order.sourceToken);
+        ERC20 targetToken = ERC20(_order.targetToken);
+
+        // Get expected rates if the swapping is supported.
         uint minRate;
         uint maxRate;
-        (isSupported, minRate, maxRate) = getExpectedRate(ERC20(_order.sourceToken), ERC20(_order.targetToken), _order.sourceAmount);
+        (minRate, maxRate) = getExpectedRateIfSupported(sourceToken, targetToken, _order.sourceAmount);
 
-        require(isSupported, "Swap not supported. Verify source/target amount.");
+        // Get ether balance before swapping execution, and validate it is higher (or equals) to order source amount.
+        uint256 sourceInitialEtherBalance = getEtherBalance();
+        require(sourceInitialEtherBalance >= _order.sourceAmount, "Not enough ether in balance.");
 
-        uint256 thisSourceInitialTokenBalance = address(this).balance;
-        require(thisSourceInitialTokenBalance >= _order.sourceAmount, "Not enough ether in balance.");
-
-        // Swap the ERC20 token to ETH        
+        // Execute the swapping from ERC20 token to ETH.
         KyberNetworkProxy(proxy).trade.value(msg.value)(
-            ERC20(_order.sourceToken),
+            sourceToken,
             _order.sourceAmount,
-            ERC20(_order.targetToken),
+            targetToken,
             msg.sender,
             _order.targetAmount,
             maxRate,
             0
         );
 
-        uint256 thisSourceFinalTokenBalance = address(this).balance;
-        msg.sender.transfer(thisSourceFinalTokenBalance);
+        // Get ether balance after swapping execution.
+        uint256 sourceFinalEtherBalance = getEtherBalance();
+
+        // Transfer back to the sender the diff balance (Ether).
+        transferDiffEtherBalanceIfApplicable(_order.customerAddress, msg.value, sourceInitialEtherBalance, sourceFinalEtherBalance);
+
         return true;
     }
 }

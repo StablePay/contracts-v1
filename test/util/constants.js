@@ -10,6 +10,7 @@ const TEN_MINUTES_MS = ONE_MINUTE_MS * 10;
 const UNLIMITED_ALLOWANCE_IN_BASE_UNITS = new BigNumber(2).pow(256).minus(1);
 // tslint:disable-next-line:custom-no-magic-numbers
 const DECIMALS = 18;
+const ETH_ADDRESS = '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
 const NULL_ADDRESS = '0x0000000000000000000000000000000000000000';
 const ZERO = new BigNumber(0);
 const GANACHE_NETWORK_ID = 50;
@@ -23,6 +24,7 @@ module.exports = {
     UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
     DECIMALS,
     NULL_ADDRESS,
+    ETH_ADDRESS,
     ZERO,
     GANACHE_NETWORK_ID,
     KOVAN_NETWORK_ID,

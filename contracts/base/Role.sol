@@ -27,7 +27,7 @@ contract Role is Base {
         @dev Only allow access from the latest version of the role contract
      */
     modifier onlyLatestRole() {
-        require(address(this) == _storage.getAddress(keccak256(abi.encodePacked("contract.name", "Role"))), "Only the latest version contract.");
+        require(address(this) == _storage.getAddress(keccak256(abi.encodePacked(CONTRACT_NAME, ROLE_NAME))), "Only the latest version contract.");
         _;
     }
   

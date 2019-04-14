@@ -23,6 +23,6 @@ contract ProxyBase is DelegateProxy, Base {
     }
 
     function getTargetAddress(string _targetId) internal view returns (address) {
-        return _storage.getAddress(keccak256(abi.encodePacked("contract.name", _targetId)));
+        return _storage.getAddress(keccak256(abi.encodePacked(CONTRACT_NAME, _targetId)));
     }
 }

@@ -10,26 +10,6 @@ contract Vault is Base, IVault {
 
     /** Variables */
 
-    /** Events */
-
-    /**
-      @dev This event is emitted when any tokens amount is withdrawn from the contract.
-     */
-    event TokensWithdrawn (
-      address indexed thisContract,
-      address erc20Contract,
-      address who,
-      address to,
-      uint256 amount
-    );
-
-    event EthersWithdrawn (
-      address indexed thisContract,
-      address who,
-      address to,
-      uint256 amount
-    );
-
     /** Modifiers */
 
     /** Constructor */
@@ -38,19 +18,17 @@ contract Vault is Base, IVault {
       public {
     }
 
-    /** Functions */
+    /** Fallback Method */
 
-    function () payable public {
-      require(msg.value > 0, "Msg value > 0.");
-      emit DepositReceived(address(this), msg.sender, msg.value);
-    }
+    // TODO Override Base's Fallback Function.
+
+    /** Functions */
 
     function deposit()
       payable
       external
       returns (bool){
         require(msg.value > 0, "Msg value > 0.");
-
         emit DepositReceived(address(this), msg.sender, msg.value);
     }
 
@@ -87,7 +65,7 @@ contract Vault is Base, IVault {
       nonReentrant()
       returns (bool)
       {
-      require(address(this).balance > _amount, "Contract has not enough balance.");
+      require(address(this).balance >= _amount, "Contract has not enough balance.");
       
       _toAddress.transfer(_amount);
       
