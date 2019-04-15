@@ -105,7 +105,7 @@ contract UniswapSwappingProvider is ISwappingProvider {
     return true;
     }
 
-    function getExpectedRate(ERC20 _sourceToken, ERC20 _targetToken, uint _sourceAmount)
+    function getExpectedRate(ERC20 _sourceToken, ERC20 _targetToken, uint _targetAmount)
     public
     view
     returns (bool isSupported, uint minRate, uint maxRate)
@@ -117,7 +117,7 @@ contract UniswapSwappingProvider is ISwappingProvider {
         isSupported = sourceExchange != address(0x0) && targetExchange != address(0x0);
         uint rate = 0;
         if(isSupported) {
-            uint256 ethToBuyTargetToken = targetExchange.getEthToTokenOutputPrice(_sourceAmount);
+            uint256 ethToBuyTargetToken = targetExchange.getEthToTokenOutputPrice(_targetAmount);
             rate = sourceExchange.getTokenToEthOutputPrice(ethToBuyTargetToken);
         }
 
