@@ -59,13 +59,10 @@ contract UniswapSwappingProvider is ISwappingProvider {
             _order.targetToken
         );
 
-        //require(ERC20(_order.targetToken).transfer(msg.sender,  _order.targetAmount), "Source transfer invocation was not successful.");
+        require(ERC20(_order.targetToken).transfer(msg.sender,  _order.targetAmount), "Source transfer invocation was not successful.");
 
         // Get source token balance after swapping execution.
         uint256 sourceFinalTokenBalance = getTokenBalanceOf(_order.sourceToken);
-
-        require(ERC20(_order.targetToken).transfer(msg.sender,  _order.targetAmount), "Source transfer invocation was not successful.");
-
         // Transfer diff (initial - final) source token balance to the sender.
         // The initial balance is higher (or equals) than final source token balance.
         transferDiffTokensIfApplicable(_order.sourceToken, _order.customerAddress, _order.sourceAmount, sourceInitialTokenBalance, sourceFinalTokenBalance);
@@ -94,10 +91,12 @@ contract UniswapSwappingProvider is ISwappingProvider {
             block.timestamp + 300
         );
 
-        // Get ether balance after swapping execution.
-        uint256 sourceFinalEtherBalance = getEtherBalance();
+
 
         require(ERC20(_order.targetToken).transfer(msg.sender,  _order.targetAmount), "Source transfer invocation was not successful.");
+
+        // Get ether balance after swapping execution.
+        uint256 sourceFinalEtherBalance = getEtherBalance();
 
         // Transfer back to the sender the diff balance (Ether).
         transferDiffEtherBalanceIfApplicable(_order.customerAddress, msg.value, sourceInitialEtherBalance, sourceFinalEtherBalance);
