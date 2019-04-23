@@ -44,6 +44,8 @@ contract UniswapSwappingProvider is ISwappingProvider {
         uint256 ethToBuyTargetToken = targetExchange.getEthToTokenOutputPrice(_order.targetAmount);
         uint256 sourceTokensToSell = sourceExchange.getTokenToEthOutputPrice(ethToBuyTargetToken);
 
+        require(sourceTokensToSell >= _order.targetAmount , "Source amount not enough for the swapping.");
+
         // Mitigate ERC20 Approve front-running attack, by initially setting allowance to 0
         require(ERC20(_order.sourceToken).approve(address(sourceExchange), 0), "Error mitigating front-running attack.");
         // Set the spender's token allowance to tokenQty
@@ -81,7 +83,7 @@ contract UniswapSwappingProvider is ISwappingProvider {
 
         UniswapExchangeInterface targetExchange = UniswapExchangeInterface(uFactory.getExchange(_order.targetToken));
         uint256 sourceInitialEtherBalance = getEtherBalance();
-        require(sourceInitialEtherBalance >= _order.sourceAmount, "Not enough ether in balance.");
+
 
         uint256 ethToBuyTargetToken = targetExchange.getEthToTokenOutputPrice(_order.targetAmount);
         require(msg.value >= ethToBuyTargetToken, "Not enough value to complete swapping transaction");
