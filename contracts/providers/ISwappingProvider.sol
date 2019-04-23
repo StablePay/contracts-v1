@@ -157,7 +157,7 @@ contract ISwappingProvider {
     /**
         @dev It gets the expected rates for the pair (source/target tokens).
         @dev It requires that the swapping is supported. if not, it throws a require error.
-        @dev It returns the min/max expected rates.
+        @dev It returns the min/max expected rates of the target token.
      */
     function getExpectedRateIfSupported(ERC20 sourceToken, ERC20 targetToken, uint sourceAmount)
     internal
