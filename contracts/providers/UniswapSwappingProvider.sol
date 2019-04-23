@@ -116,7 +116,7 @@ contract UniswapSwappingProvider is ISwappingProvider {
         isSupported = sourceExchange != address(0x0) && targetExchange != address(0x0);
         uint rate = 0;
         if(isSupported) {
-            uint256 ethToBuyTargetToken = targetExchange.getEthToTokenOutputPrice(_targetAmount);
+            uint256 ethToBuyTargetToken = targetExchange.getEthToTokenOutputPrice(_sourceAmount);
             rate = sourceExchange.getTokenToEthOutputPrice(ethToBuyTargetToken);
         }
 
