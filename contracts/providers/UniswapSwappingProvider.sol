@@ -104,7 +104,7 @@ contract UniswapSwappingProvider is ISwappingProvider {
     return true;
     }
 
-    function getExpectedRate(ERC20 _sourceToken, ERC20 _targetToken, uint _targetAmount)
+    function getExpectedRate(ERC20 _sourceToken, ERC20 _targetToken, uint _sourceAmount)
     public
     view
     returns (bool isSupported, uint minRate, uint maxRate)
