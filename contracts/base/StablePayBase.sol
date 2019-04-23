@@ -241,7 +241,7 @@ contract StablePayBase is Base, IStablePay {
     {
         require(finalBalance >= initialBalance, "StablePayBase: Final balance >= initial balance.");
         uint currentBalance = finalBalance.sub(initialBalance);
-        require(currentBalance == targetAmount, "Target final tokens balance is not valid#.");
+        require(currentBalance == targetAmount, "Target final tokens balance is not valid.");
         return true;
     }
 
