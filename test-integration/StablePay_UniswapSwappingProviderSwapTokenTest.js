@@ -227,4 +227,92 @@ contract('StablePay_UniswapSwappingProviderSwapTokenTest', (accounts) => {
 
         });
     });
+
+    withData({
+        _10_QuarterToken_dot25: [quartertoken, new BigNumber(20), zero ],
+
+        _20_HalfTokenPlusExtraTokenAmount_dot10: [halftoken,new BigNumber(10), zero],
+    }, function(targetAmount, minusAmount, stablePayBalance) {
+        it(t('anUser', 'swapToken', 'Should not be able to swap any token due to not enough tokens'), async function() {
+            // Setup
+            const sourceToken = {
+                name: 'KNC',
+                instance: sourceErc20,
+                amount: 0
+            };
+            const targetToken = {
+                name: 'OMG',
+                instance: targetErc20,
+                amount: targetAmount
+            };
+
+            if(stablePayBalance.gt(0)) {
+                await sourceErc20.transfer(uniswapProvider.address, stablePayBalance, {from: owner});
+                await targetErc20.transfer(uniswapProvider.address, stablePayBalance, {from: owner});
+            }
+
+            const providerInitialTargetBalance = new BigNumber(await targetToken.instance.balanceOf(uniswapProvider.address));
+            const providerInitialSourceBalance = new BigNumber(await sourceToken.instance.balanceOf(uniswapProvider.address));
+
+            // Get the initial balances (source and target tokens) for customer and merchant.
+            await sourceErc20.transfer(customerAddress, twotokens, {from: owner});
+
+            const initialMerchantBalance = new BigNumber(await targetToken.instance.balanceOf(merchantAddress));
+            const initialCustomerBalance = new BigNumber(await sourceToken.instance.balanceOf(customerAddress));
+
+            const costs = await uniswapProvider.getExpectedRate.call(sourceErc20.address, targetErc20.address, targetAmount);
+            const sourceTokensTosell = toDecimal(costs[1])
+            const t = new BigNumber(costs[1]).div(DECIMALS);
+
+
+            let  tokensToSend = new BigNumber(costs[1]);
+            sourceToken.amount = tokensToSend;
+
+            await sourceErc20.approve(
+                istablePay.address,
+                sourceToken.amount,
+                {from: customerAddress}
+            );
+
+            tokensToSend = (new BigNumber(costs[1])).minus( minusAmount);
+            sourceToken.amount = tokensToSend;
+
+            const uniswapProviderKey = providersMap.get('Uniswap_v1');
+
+
+            const orderArray = new UniswapOrderFactory({
+                sourceToken: sourceToken.instance.address,
+                targetToken: targetToken.instance.address,
+                sourceAmount: sourceToken.amount,
+                targetAmount: targetToken.amount,
+                merchantAddress: merchantAddress,
+                customerAddress: customerAddress
+            }).createOrder();
+
+            const platformFee= new BigNumber(await settings.getPlatformFee()).div(10000);
+
+
+
+
+
+            try {
+                //Invocation
+                const result = await istablePay.payWithToken(orderArray, [uniswapProviderKey], {
+                    from: customerAddress,
+                    gas: 5000000,
+                    gasPrice: 0
+                });
+                assert(false, 'It should have failed');
+            } catch (error) {
+                assert(error);
+                assert(error.message.includes("revert"));
+                assert(error.message.includes("Source amount not enough for the swapping"))
+
+            }
+
+
+
+
+        });
+    });
 });
