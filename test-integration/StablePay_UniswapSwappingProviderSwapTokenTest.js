@@ -312,6 +312,23 @@ contract('StablePay_UniswapSwappingProviderSwapTokenTest', (accounts) => {
 
 
 
+            const finalMerchantBalance = new BigNumber(await targetToken.instance.balanceOf(merchantAddress));
+            const finalCustomerBalance = new BigNumber(await sourceToken.instance.balanceOf(customerAddress));
+
+
+            assert(initialMerchantBalance.isEqualTo( finalMerchantBalance));
+            assert(initialCustomerBalance.isEqualTo( finalCustomerBalance));
+
+            // Assertions
+
+            const providerFinalTargetBalance = new BigNumber(await targetToken.instance.balanceOf(uniswapProvider.address));
+            const providerFinalSourceBalance = new BigNumber(await sourceToken.instance.balanceOf(uniswapProvider.address));
+
+
+            assert(providerInitialTargetBalance.isEqualTo( providerFinalTargetBalance));
+            assert(providerInitialSourceBalance.isEqualTo( providerFinalSourceBalance));
+
+
 
         });
     });
