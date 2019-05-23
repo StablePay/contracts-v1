@@ -54,18 +54,13 @@ contract('StablePay_UniswapSwappingProviderSwapTokenTest', (accounts) => {
     let proxy;
 
     const DECIMALS = (new BigNumber(10)).pow(18);
-    const supply =  (new BigNumber(10).pow(10)).times(DECIMALS).toFixed();
-    const approved = (new BigNumber(10).pow(8)).times(DECIMALS).toFixed();
-    const initialLiquidity = (new BigNumber(10).pow(8)).times(DECIMALS).toFixed();
-
-    const min = (new BigNumber(10).pow(2)).times(DECIMALS).toFixed();
-    const onetoken = (new BigNumber(1)).times(DECIMALS).toFixed();
+    const supply =  (new BigNumber(109).pow(64)).times(DECIMALS).toFixed();
     const twotokens = (new BigNumber(2)).times(DECIMALS).toFixed();
-    const alice = accounts[2];
-    const bob = accounts[3];
-    const halftoken = (new BigNumber(0.5)).times(DECIMALS).toFixed();
-    const quartertoken = (new BigNumber(0.25)).times(DECIMALS).toFixed();
-
+    const hundredTokens = (new BigNumber(100)).times(DECIMALS);
+    const halftoken = (new BigNumber(0.5)).times(DECIMALS);
+    const quartertoken = (new BigNumber(0.25)).times(DECIMALS);
+    const _dot10token = (new BigNumber(0.10)).times(DECIMALS);
+    const zero = (new BigNumber(0.0));
     beforeEach('Deploying contract for each test', async () => {
 
         settings = await Settings.deployed();
@@ -93,7 +88,6 @@ contract('StablePay_UniswapSwappingProviderSwapTokenTest', (accounts) => {
         assert(uniswapProvider.address);
 
         const fact = await uniswapProvider.uniswapFactory.call();
-        console.log('fact -> ' + fact);
         uniswapFactory = await factory.at(fact);
 
         sourceErc20 = await Token1.new(supply, "KNC", 18, "KNC");
@@ -104,30 +98,23 @@ contract('StablePay_UniswapSwappingProviderSwapTokenTest', (accounts) => {
         assert(targetErc20);
         assert(targetErc20.address);
 
-        console.log('template address', await uniswapFactory.exchangeTemplate.call());
 
         await uniswapFactory.createExchange(sourceErc20.address);
         await uniswapFactory.createExchange(targetErc20.address);
-        assert.equal(await uniswapFactory.tokenCount(), 2);
 
 
         let sourceErc20ExchangeAddress = await uniswapFactory.getExchange(sourceErc20.address);
         let sourceErc20Exchange = await exchange.at(sourceErc20ExchangeAddress);
-        await sourceErc20.approve(sourceErc20ExchangeAddress, approved);
+        await sourceErc20.approve(sourceErc20ExchangeAddress, supply);
 
         let targetErc20ExchangeAddress = await uniswapFactory.getExchange(targetErc20.address);
         let targetErc20Exchange = await exchange.at(targetErc20ExchangeAddress);
-        await targetErc20.approve(targetErc20ExchangeAddress, approved);
+        await targetErc20.approve(targetErc20ExchangeAddress, supply);
 
 
         const deadLine = (await web3.eth.getBlock(await web3.eth.getBlockNumber())).timestamp + 300;
-        await sourceErc20Exchange.addLiquidity(1, twotokens, deadLine, {value: web3.utils.toWei('1', 'ether')});
-        await targetErc20Exchange.addLiquidity(1, twotokens, deadLine, {value: web3.utils.toWei('1', 'ether')});
-
-
-
-        const platformFeeString = await settings.getPlatformFee();
-        const platformFee = Number(platformFeeString.toString()) / 100;
+        await sourceErc20Exchange.addLiquidity(1, hundredTokens, deadLine, {value: web3.utils.toWei('0.1', 'ether')});
+        await targetErc20Exchange.addLiquidity(1, hundredTokens, deadLine, {value: web3.utils.toWei('0.1', 'ether')});
 
         await settings.setTokenAvailability(sourceErc20.address, 100, supply, {from: owner});
         await settings.setTokenAvailability(targetErc20.address, 100, supply, {from: owner});
@@ -136,8 +123,14 @@ contract('StablePay_UniswapSwappingProviderSwapTokenTest', (accounts) => {
 
 
     withData({
-        _1_smallAmount: [10000000]
-    }, function(unitsOfTokens) {
+         _10_QuarterToken_dot25: [quartertoken, zero, _dot10token],
+         _20_QuarterToken_dot25: [quartertoken, zero, zero],
+         _30_QuarterPlusExtraTokenAmount_dot10: [quartertoken, _dot10token, _dot10token],
+         _40_exactTokenAmount_dot25: [(new BigNumber(0.2)).times(DECIMALS) , zero, zero],
+         _50_exactTokenAmount_dot25: [halftoken, zero, _dot10token],
+         _60_HalfTokenPlusExtraTokenAmount_dot10: [halftoken,_dot10token, quartertoken],
+         _70_HalfTokenPlusExtraTokenAmount_dot10: [halftoken,_dot10token, zero],
+    }, function(targetAmount, extraAmount, stablePayBalance) {
         it(t('anUser', 'swapToken', 'Should be able to swap any token.'), async function() {
             // Setup
             const sourceToken = {
@@ -148,67 +141,192 @@ contract('StablePay_UniswapSwappingProviderSwapTokenTest', (accounts) => {
             const targetToken = {
                 name: 'OMG',
                 instance: targetErc20,
-                amount: quartertoken
+                amount: targetAmount
             };
 
+            if(stablePayBalance.gt(0)) {
+                await sourceErc20.transfer(uniswapProvider.address, stablePayBalance, {from: owner});
+                await targetErc20.transfer(uniswapProvider.address, stablePayBalance, {from: owner});
+            }
+
+            const providerInitialTargetBalance = new BigNumber(await targetToken.instance.balanceOf(uniswapProvider.address));
+            const providerInitialSourceBalance = new BigNumber(await sourceToken.instance.balanceOf(uniswapProvider.address));
+
             // Get the initial balances (source and target tokens) for customer and merchant.
-            await sourceErc20.transfer(customerAddress, onetoken, {from: owner});
+            await sourceErc20.transfer(customerAddress, twotokens, {from: owner});
 
-            const availability = await settings.getTokenAvailability(targetErc20.address);
+            const initialMerchantBalance = new BigNumber(await targetToken.instance.balanceOf(merchantAddress));
+            const initialCustomerBalance = new BigNumber(await sourceToken.instance.balanceOf(customerAddress));
+
+            const costs = await uniswapProvider.getExpectedRate.call(sourceErc20.address, targetErc20.address, targetAmount);
+            const sourceTokensTosell = toDecimal(costs[1])
+            const t = new BigNumber(costs[1]).div(DECIMALS);
 
 
-            const costs = await uniswapProvider.getExpectedRate.call(sourceErc20.address, targetErc20.address, quartertoken);
-            const ethToBuyTargetToken = toDecimal(costs[1])
-            const sourceTokensTosell = toDecimal(costs[2]);
+            const tokensToSend = BigNumber.sum(costs[1], extraAmount);
+            sourceToken.amount = tokensToSend;
 
-            console.log('result =>>>', (costs[0]));
-            console.log('ethToBuyTargetToken =>>>', ethToBuyTargetToken);
-            console.log('sourceTokensTosell =>>>', sourceTokensTosell);
-
-            sourceToken.amount = sourceTokensTosell;
             await sourceErc20.approve(
                 istablePay.address,
                 sourceToken.amount,
                 {from: customerAddress}
             );
 
-            console.log('Source Amount');
-            console.log(sourceToken.amount);
-            console.log('Target Amount');
-            console.log(targetToken.amount);
-
             const uniswapProviderKey = providersMap.get('Uniswap_v1');
+
 
             const orderArray = new UniswapOrderFactory({
                 sourceToken: sourceToken.instance.address,
                 targetToken: targetToken.instance.address,
                 sourceAmount: sourceToken.amount,
                 targetAmount: targetToken.amount,
-                merchantAddress: merchantAddress
+                merchantAddress: merchantAddress,
+                customerAddress: customerAddress
             }).createOrder();
-            console.log('orderArray', orderArray);
 
-            const initialTargetBalance = new BigNumber(await targetToken.instance.balanceOf(merchantAddress)).toFixed();
-            console.log('initialTargetBalance=>>>', initialTargetBalance);
+            const platformFee= new BigNumber(await settings.getPlatformFee()).div(10000);
+
+
 
             //Invocation
             const result = await istablePay.payWithToken(orderArray, [uniswapProviderKey], {
                 from: customerAddress,
-                gas: 5000000
+                gas: 5000000,
+                gasPrice: 0
             });
 
 
             const finalistablePayTargetBalance = new BigNumber(await targetToken.instance.balanceOf(vault.address));
-            console.log('finalistablePayTargetBalance=>>>', finalistablePayTargetBalance);
 
             const finalTargetBalance = new BigNumber(await targetToken.instance.balanceOf(merchantAddress));
-            console.log('finalTargetBalance          =>>>', finalTargetBalance);
             const sum = finalistablePayTargetBalance.plus(finalTargetBalance);
 
+            const finalMerchantBalance = new BigNumber(await targetToken.instance.balanceOf(merchantAddress));
+            const finalCustomerBalance = new BigNumber(await sourceToken.instance.balanceOf(customerAddress));
+
+            const merchantDiff = finalMerchantBalance.minus(initialMerchantBalance);
+            const customerDiff = initialCustomerBalance.minus(finalCustomerBalance);
+            const feeAmount = targetToken.amount.times(platformFee);
+            const finalTargetAmount = targetToken.amount.minus(feeAmount);
+
+
             // Assertions
-            assert.equal(sum, targetToken.amount);
+            assert(sum.isEqualTo( targetToken.amount));
+            assert(merchantDiff.isEqualTo( finalTargetAmount));
+            assert(customerDiff.isEqualTo(sourceTokensTosell));
+
+            const providerFinalTargetBalance = new BigNumber(await targetToken.instance.balanceOf(uniswapProvider.address));
+            const providerFinalSourceBalance = new BigNumber(await sourceToken.instance.balanceOf(uniswapProvider.address));
 
 
+            assert(providerInitialTargetBalance.isEqualTo( providerFinalTargetBalance));
+            assert(providerInitialSourceBalance.isEqualTo( providerFinalSourceBalance));
+
+
+
+
+        });
+    });
+
+    withData({
+        _10_QuarterToken_dot25: [quartertoken, new BigNumber(20), zero ],
+
+        _20_HalfTokenPlusExtraTokenAmount_dot10: [halftoken,new BigNumber(10), zero],
+    }, function(targetAmount, minusAmount, stablePayBalance) {
+        it(t('anUser', 'swapToken', 'Should not be able to swap any token due to not enough tokens'), async function() {
+            // Setup
+            const sourceToken = {
+                name: 'KNC',
+                instance: sourceErc20,
+                amount: 0
+            };
+            const targetToken = {
+                name: 'OMG',
+                instance: targetErc20,
+                amount: targetAmount
+            };
+
+            if(stablePayBalance.gt(0)) {
+                await sourceErc20.transfer(uniswapProvider.address, stablePayBalance, {from: owner});
+                await targetErc20.transfer(uniswapProvider.address, stablePayBalance, {from: owner});
+            }
+
+            const providerInitialTargetBalance = new BigNumber(await targetToken.instance.balanceOf(uniswapProvider.address));
+            const providerInitialSourceBalance = new BigNumber(await sourceToken.instance.balanceOf(uniswapProvider.address));
+
+            // Get the initial balances (source and target tokens) for customer and merchant.
+            await sourceErc20.transfer(customerAddress, twotokens, {from: owner});
+
+            const initialMerchantBalance = new BigNumber(await targetToken.instance.balanceOf(merchantAddress));
+            const initialCustomerBalance = new BigNumber(await sourceToken.instance.balanceOf(customerAddress));
+
+            const costs = await uniswapProvider.getExpectedRate.call(sourceErc20.address, targetErc20.address, targetAmount);
+            const sourceTokensTosell = toDecimal(costs[1])
+            const t = new BigNumber(costs[1]).div(DECIMALS);
+
+
+            let  tokensToSend = new BigNumber(costs[1]);
+            sourceToken.amount = tokensToSend;
+
+            await sourceErc20.approve(
+                istablePay.address,
+                sourceToken.amount,
+                {from: customerAddress}
+            );
+
+            tokensToSend = (new BigNumber(costs[1])).minus( minusAmount);
+            sourceToken.amount = tokensToSend;
+
+            const uniswapProviderKey = providersMap.get('Uniswap_v1');
+
+
+            const orderArray = new UniswapOrderFactory({
+                sourceToken: sourceToken.instance.address,
+                targetToken: targetToken.instance.address,
+                sourceAmount: sourceToken.amount,
+                targetAmount: targetToken.amount,
+                merchantAddress: merchantAddress,
+                customerAddress: customerAddress
+            }).createOrder();
+
+            const platformFee= new BigNumber(await settings.getPlatformFee()).div(10000);
+
+
+
+
+
+            try {
+                //Invocation
+                const result = await istablePay.payWithToken(orderArray, [uniswapProviderKey], {
+                    from: customerAddress,
+                    gas: 5000000,
+                    gasPrice: 0
+                });
+                assert(false, 'It should have failed');
+            } catch (error) {
+                assert(error);
+                assert(error.message.includes("revert"));
+                assert(error.message.includes("Source amount not enough for the swapping"))
+
+            }
+
+
+
+            const finalMerchantBalance = new BigNumber(await targetToken.instance.balanceOf(merchantAddress));
+            const finalCustomerBalance = new BigNumber(await sourceToken.instance.balanceOf(customerAddress));
+
+
+            assert(initialMerchantBalance.isEqualTo( finalMerchantBalance));
+            assert(initialCustomerBalance.isEqualTo( finalCustomerBalance));
+
+            // Assertions
+
+            const providerFinalTargetBalance = new BigNumber(await targetToken.instance.balanceOf(uniswapProvider.address));
+            const providerFinalSourceBalance = new BigNumber(await sourceToken.instance.balanceOf(uniswapProvider.address));
+
+
+            assert(providerInitialTargetBalance.isEqualTo( providerFinalTargetBalance));
+            assert(providerInitialSourceBalance.isEqualTo( providerFinalSourceBalance));
 
 
 
