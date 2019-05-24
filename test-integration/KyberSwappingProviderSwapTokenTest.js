@@ -92,7 +92,8 @@ contract('KyberSwappingProviderSwapTokenTest', (accounts) => {
                 sourceToken: sourceToken.instance.address,
                 targetToken: targetToken.instance.address,
                 amountWei: targetToken.amountWei,
-                merchantAddress: merchantAddress
+                merchantAddress: merchantAddress,
+                customerAddress: customerAddress
             }).createOrder();
 
             //Invocation
