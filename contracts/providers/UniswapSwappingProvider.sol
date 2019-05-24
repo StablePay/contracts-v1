@@ -88,7 +88,7 @@ contract UniswapSwappingProvider is ISwappingProvider {
         uint256 ethToBuyTargetToken = targetExchange.getEthToTokenOutputPrice(_order.targetAmount);
         require(msg.value >= ethToBuyTargetToken, "Not enough value to complete swapping transaction");
 
-        uint eth_sold = targetExchange.ethToTokenSwapOutput.value(ethToBuyTargetToken)(
+        targetExchange.ethToTokenSwapOutput.value(ethToBuyTargetToken)(
             _order.targetAmount,
             block.timestamp + 300
         );
