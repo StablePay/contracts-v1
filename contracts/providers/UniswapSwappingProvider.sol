@@ -67,7 +67,7 @@ contract UniswapSwappingProvider is ISwappingProvider {
         uint256 sourceFinalTokenBalance = getTokenBalanceOf(_order.sourceToken);
         // Transfer diff (initial - final) source token balance to the sender.
         // The initial balance is higher (or equals) than final source token balance.
-        transferDiffTokensIfApplicable(_order.sourceToken, _order.customerAddress, _order.sourceAmount, sourceInitialTokenBalance, sourceFinalTokenBalance);
+        transferDiffTokensIfApplicable(_order.sourceToken, _order.fromAddress, _order.sourceAmount, sourceInitialTokenBalance, sourceFinalTokenBalance);
 
 
     return true;
@@ -101,7 +101,7 @@ contract UniswapSwappingProvider is ISwappingProvider {
         uint256 sourceFinalEtherBalance = getEtherBalance();
 
         // Transfer back to the sender the diff balance (Ether).
-        transferDiffEtherBalanceIfApplicable(_order.customerAddress, msg.value, sourceInitialEtherBalance, sourceFinalEtherBalance);
+        transferDiffEtherBalanceIfApplicable(_order.fromAddress, msg.value, sourceInitialEtherBalance, sourceFinalEtherBalance);
 
     return true;
     }

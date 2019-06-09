@@ -58,8 +58,8 @@ contract Base {
      */
     event PaymentSent(
         address indexed thisContract,
-        address merchant,
-        address customer,
+        address to,
+        address from,
         address sourceToken,
         address targetToken,
         uint amount
@@ -178,7 +178,7 @@ contract Base {
     internal {
         emit PaymentSent(
             address(this),
-            order.merchantAddress,
+            order.toAddress,
             msg.sender,
             order.sourceToken,
             order.targetToken,

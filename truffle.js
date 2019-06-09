@@ -24,14 +24,25 @@ const infuraKeyValue = appConfig.getInfuraKey().get();
 const gasKeyValue = appConfig.getGasWei().get();
 const gasPriceKeyValue = appConfig.getGasPriceGwei().get();
 const defaultAddressIndex = appConfig.getDefaultAddressIndex().get();
+const etherscanApiKeyValue = appConfig.getEtherscanApiKey().get();
 
 module.exports = {
 	web3: Web3,
 	compilers: {
 		solc: {
 			version: "0.4.25",
+			optimizer: {
+				enabled: true,
+				runs: 200
+			}
 		}
 	},
+	api_keys: {
+		etherscan: etherscanApiKeyValue
+	},
+	plugins: [
+		'truffle-plugin-verify'
+	],
 	networks: {
 		geth: {
 			host: 'localhost',
@@ -91,7 +102,8 @@ module.exports = {
 			},
 			gas: gasKeyValue,
 			gasPrice: web3.utils.toWei(gasPriceKeyValue, 'gwei'),
-			network_id: '3'
+			network_id: '3',
+			skipDryRun: true,
 		},
 		infuraMainnet: {
 			provider: function() {

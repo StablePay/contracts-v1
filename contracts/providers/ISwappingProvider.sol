@@ -21,7 +21,7 @@ contract ISwappingProvider {
 
     /**
         @dev This event is emitted when a ether transfer is sent.
-        @dev It is used to transfer ether back to the customer.
+        @dev It is used to transfer ether back to the 'to' address.
      */
     event TransferEther (
         address indexed thisContract,
@@ -51,7 +51,7 @@ contract ISwappingProvider {
     function () external payable {
         require(msg.value > 0, "Value must be > 0");
         // @dev https://ethereum.stackexchange.com/questions/19341/address-send-vs-address-transfer-best-practice-usage/38642#38642
-        // @dev https://ropsten.etherscan.io/tx/0xbb7bd5c4ba0d5a4d4141b5f1b759f75253dacb58b85a71e7848ef9295872046f#internal payWithEther
+        // @dev https://ropsten.etherscan.io/tx/0xbb7bd5c4ba0d5a4d4141b5f1b759f75253dacb58b85a71e7848ef9295872046f#internal transferWithEthers
         // TODO Check stablePay.call.value(msg.value)();
         emit DepositReceived(
             address(this),

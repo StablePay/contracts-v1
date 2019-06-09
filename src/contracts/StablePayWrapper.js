@@ -14,7 +14,7 @@ class StablePayWrapper  {
     }
 }
 
-StablePayWrapper.prototype.payWithToken = async function(data, ...params) {
+StablePayWrapper.prototype.transferWithTokens = async function(data, ...params) {
     const { order, providers, amounts } = await this.orderDataBuilder.build(data);
     try {
         console.log(`Params:    ${JSON.stringify(params)}`);
@@ -47,7 +47,7 @@ StablePayWrapper.prototype.payWithToken = async function(data, ...params) {
         logIf(this.verbose, `Merchant Address:      ${order[12]}.`);
         //logIf(this.verbose, `Customer Address:      ${params}.`);
 
-        const result = await this.stablePay.payWithToken(order, providers, ...params);
+        const result = await this.stablePay.transferWithTokens(order, providers, ...params);
         // Assertions
         assert(result);
 
@@ -86,7 +86,7 @@ StablePayWrapper.prototype.payWithToken = async function(data, ...params) {
     }
 }
 
-StablePayWrapper.prototype.payWithEther = async function(data, ...params) {
+StablePayWrapper.prototype.transferWithEthers = async function(data, ...params) {
     const { order, providers, amounts } = await this.orderDataBuilder.build(data);
     try {
         console.log(`Params:    ${JSON.stringify(params)}`);
@@ -104,7 +104,7 @@ StablePayWrapper.prototype.payWithEther = async function(data, ...params) {
         logIf(this.verbose, `Merchant Address:      ${order[12]}.`);
         logIf(this.verbose, `Params:                ${JSON.stringify(params)}.`);
 
-        const result = await this.stablePay.payWithEther(order, providers, {
+        const result = await this.stablePay.transferWithEthers(order, providers, {
             from: params[0].from,
             gas: params[0].gas,
             value: calculatedSourceAmount

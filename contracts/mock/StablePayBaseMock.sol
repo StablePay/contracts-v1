@@ -61,6 +61,7 @@ contract StablePayBaseMock is StablePayBase {
         return super.checkCurrentTargetBalance(targetAmount, initialBalance, finalBalance);
     }
 
+
     function _calculateAndTransferFee(StablePayCommon.Order order)
     public
     returns (bool success, uint feeAmount)
@@ -68,10 +69,10 @@ contract StablePayBaseMock is StablePayBase {
         return super.calculateAndTransferFee(order);
     }
 
-    function _calculateAndTransferMerchantAmount(StablePayCommon.Order order, uint feeAmount)
+    function _calculateAndTransferToAmount(StablePayCommon.Order order, uint feeAmount)
     public
-    returns (bool success, uint merchantAmount)
+    returns (bool success, uint toAmount)
     {
-        return super.calculateAndTransferMerchantAmount(order, feeAmount);
+        return super.calculateAndTransferToAmount(order, feeAmount);
     }
 }
