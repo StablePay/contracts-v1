@@ -147,7 +147,8 @@ contract('StablePay_KyberSwappingProviderSwapTokenTest', (accounts) => {
                 targetAmount: targetToken.amount,
                 minRate: minRate,
                 maxRate: maxRate,
-                merchantAddress: merchantAddress
+                merchantAddress: merchantAddress,
+                customerAddress: customerAddress
             }).createOrder();
             
             const kyberProviderKey = providersMap.get('KyberNetwork_v1');

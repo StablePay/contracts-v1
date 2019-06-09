@@ -54,14 +54,14 @@ contract('StablePayPayWithEtherPerApiTest', (accounts) => {
     });
 
     withData({
-        //_1_ETH_to_30_KNC: [0, 1, "ETH", "KNC", "30", true] // Ganache
         _1_ETH_to_10_DAI: [0, 1, "ETH", "DAI", "10", true],
         _2_ETH_to_20_DAI: [0, 1, "ETH", "DAI", "20", true],
         _3_ETH_to_30_DAI: [0, 1, "ETH", "DAI", "30", true],
         _4_ETH_to_80_DAI: [0, 1, "ETH", "DAI", "80", true],
         _5_ETH_to_30_DAI: [0, 1, "ETH", "DAI", "30", true],
         _6_ETH_to_30_DAI: [0, 1, "ETH", "DAI", "30", true],
-        _1_KNC_to_10_DAI: [0, 1, "ETH", "DAI", "29.98", true]
+		_7_ETH_to_30_DAI: [0, 1, "ETH", "DAI", "12", true],
+        _8_ETH_to_10_DAI: [0, 1, "ETH", "DAI", "29.98", true]
     }, function(customerIndex, merchantIndex, sourceTokenName, targetTokenName, targetTokenAmount, verbose) {
         it(t('anUser', 'payWithEther', `Should be able to payWithEther ${sourceTokenName} -> ${targetTokenAmount} ${targetTokenName}s.`), async function() {
             // Setup
