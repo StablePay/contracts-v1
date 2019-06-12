@@ -21,7 +21,6 @@ contract('StablePayStorageGetExpectedRateRangeTest', (accounts) => {
 
     // Kyber configuration
     const kyberConf = appConf.kyber;
-    const kyberContracts = kyberConf.contracts;
     const kyberTokens = kyberConf.tokens;
 
     let providerRegistry;

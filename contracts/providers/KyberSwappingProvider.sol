@@ -48,8 +48,8 @@ contract KyberSwappingProvider is ISwappingProvider {
     isStablePay(msg.sender)
     returns (bool)
     {
-        require(_order.sourceAmount > 0, "Amount must be > 0");
-        require(_order.merchantAddress != address(0x0), "Merchant must be != 0x0.");
+        require(_order.sourceAmount > 0, "Source amount must be > 0");
+        require(_order.toAddress != address(0x0), "To address must be != 0x0.");
 
         // Gets the ERC20 source/target token instances.
         ERC20 sourceToken = ERC20(_order.sourceToken);
@@ -97,7 +97,7 @@ contract KyberSwappingProvider is ISwappingProvider {
         require(msg.value > 0, "Msg value must be > 0");
         require(_order.sourceAmount > 0, "Amount must be > 0");
         require(msg.value == _order.sourceAmount, "Msg value == source amount");
-        require(_order.merchantAddress != address(0x0), "Merchant must be != 0x0.");
+        require(_order.toAddress != address(0x0), "To address must be != 0x0.");
 
         // Gets the ERC20 source/target token instances.
         ERC20 sourceToken = ERC20(_order.sourceToken);
@@ -127,7 +127,7 @@ contract KyberSwappingProvider is ISwappingProvider {
         uint256 sourceFinalEtherBalance = getEtherBalance();
 
         // Transfer back to the sender the diff balance (Ether).
-        transferDiffEtherBalanceIfApplicable(_order.customerAddress, msg.value, sourceInitialEtherBalance, sourceFinalEtherBalance);
+        transferDiffEtherBalanceIfApplicable(_order.fromAddress, msg.value, sourceInitialEtherBalance, sourceFinalEtherBalance);
 
         return true;
     }

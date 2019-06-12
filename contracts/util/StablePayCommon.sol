@@ -32,8 +32,8 @@ contract StablePayCommon {
         
         address sourceToken;            // Source ERC20 token address.
         address targetToken;            // Target ERC20 token address.
-        address merchantAddress;
-        address customerAddress;
+        address toAddress;
+        address fromAddress;
         address makerAddress;           // Address that created the order.
         address takerAddress;           // Address that is allowed to fill the order. If set to 0, any address is allowed to fill the order.
         address feeRecipientAddress;    // Address that will recieve fees when order is filled.

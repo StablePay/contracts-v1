@@ -10,11 +10,14 @@ contract IStablePay {
     /**
         @dev This event is emitted when a swap execution has failed.
      */
-    event SwapExecutionFailed(
+    event ExecutionTransferFailed(
         address indexed thisContract,
         address indexed providerAddress,
+        address sourceToken,
+        address targetToken,
         address from,
         address to,
+        uint timestamp,
         bytes32 providerKey,
         bytes data
     );
@@ -22,52 +25,48 @@ contract IStablePay {
     /**
         @dev This event is emitted when a swap has been executed successfully.
      */
-    event SwapExecutionSuccess(
+    event ExecutionTransferSuccess(
         address indexed thisContract,
-        address indexed providerAddress,
+        bytes32 indexed providerKey,
+        address sourceToken,
+        address targetToken,
         address from,
         address to,
-        uint merchantAmount,
+        uint toAmount,
         uint feeAmount,
+        uint timestamp,
         uint16 platformFee,
-        bytes32 providerKey,
         bytes data
     );
 
     /**
-        @dev This event is emitted when a swap ETH has been executed successfully.
+        @dev This event is emitted when a deposit is received.
      */
-    event SwapEthExecutionFailed(
+    event DepositReceived (
         address indexed thisContract,
-        address indexed strategyAddress,
         address from,
-        address to,
-        bytes32 providerKey,
-        bytes data
+        uint amount
     );
 
     /**
-        @dev This event is emitted when a swap ETH has been executed successfully.
+        @dev This event is emitted when a new payment is sent to an address.
      */
-    event SwapEthExecutionSuccess(
+    event PaymentSent(
         address indexed thisContract,
-        address indexed strategyAddress,
-        address from,
         address to,
-        uint merchantAmount,
-        uint feeAmount,
-        uint16 platformFee,
-        bytes32 providerKey,
-        bytes data
+        address from,
+        address sourceToken,
+        address targetToken,
+        uint amount
     );
 
     /** Functions */
 
-    function payWithToken(StablePayCommon.Order order, bytes32[] _providerKeys)
+    function transferWithTokens(StablePayCommon.Order order, bytes32[] _providerKeys)
     public
     returns (bool);
 
-    function payWithEther(StablePayCommon.Order order, bytes32[] _providerKeys)
+    function transferWithEthers(StablePayCommon.Order order, bytes32[] _providerKeys)
     public
     payable
     returns (bool);

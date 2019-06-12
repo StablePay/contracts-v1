@@ -22,8 +22,8 @@ contract StablePayBase is Base, IStablePay {
 
     /** Modifiers */
 
-    modifier isSender(address _sender, address _customer) {
-        require(_sender == _customer, "Sender is not equals to customer.");
+    modifier isSender(address _sender, address _to) {
+        require(_sender == _to, "Sender is not equals to 'to' address.");
         _;
     }
 
@@ -261,23 +261,23 @@ contract StablePayBase is Base, IStablePay {
     }
 
     /**
-        @dev Calculate the merchant amount based on the order target amount and platform fee amount.
-        @dev Transfer the merchant amount to merchant address defined in order.
+        @dev Calculate the 'to' amount based on the order target amount and platform fee amount.
+        @dev Transfer the 'to' amount to 'to' address defined in order.
      */
-    function calculateAndTransferMerchantAmount(StablePayCommon.Order order, uint feeAmount)
+    function calculateAndTransferToAmount(StablePayCommon.Order order, uint feeAmount)
     internal
-    returns (bool success, uint merchantAmount)
+    returns (bool success, uint toAmount)
     {
-        // Calculate the merchant amount.
-        uint256 currentMerchantAmount = order.targetAmount.sub(feeAmount);
-        // Transfer the merchant amount to the merchant address.
-        bool result = ERC20(order.targetToken).transfer(order.merchantAddress, currentMerchantAmount);
-        require(result, "Transfer to merchant address failed.");
-        return (true, currentMerchantAmount);
+        // Calculate the 'to' amount.
+        uint256 currentToAmount = order.targetAmount.sub(feeAmount);
+        // Transfer the 'to' amount to the 'to' address.
+        bool result = ERC20(order.targetToken).transfer(order.toAddress, currentToAmount);
+        require(result, "Transfer to 'to' address failed.");
+        return (true, currentToAmount);
     }
 
     /**
-        @dev Transfer tokens to merchant address if source / target tokens are equal.
+        @dev Transfer tokens to the 'to' address if source / target tokens are equal.
         @dev It returns true when source and target tokens are equals. Otherwise it returns false.
      */
     function transferTokensIfTokensAreEquals(StablePayCommon.Order order)
@@ -290,12 +290,15 @@ contract StablePayBase is Base, IStablePay {
             uint allowanceResult = ERC20(order.sourceToken).allowance(msg.sender, address(this));
             require(allowanceResult >= order.targetAmount, "Not enough allowed tokens to StablePay.");
 
-            // Transfer tokens to merchant address without paying platform fees.
-            bool transferFromResult = ERC20(order.sourceToken).transferFrom(msg.sender, order.merchantAddress, order.targetAmount);
+            // Transfer tokens to the 'to' address without paying platform fees.
+            bool transferFromResult = ERC20(order.sourceToken).transferFrom(msg.sender, order.toAddress, order.targetAmount);
             require(transferFromResult, "Transfer from StablePay was not successful.");
 
-            // Emit PaymentSent event
+            // Emit PaymentSent event for the from/to order.
             emitPaymentSentEvent(order, order.targetAmount);
+
+            // Emit ExecutionTransferSuccess event for StablePay.
+            emitExecutionTransferSuccessEvent(order, uint256(0), order.targetAmount, 0x0);
         }
         return _isTransferTokens;
     }
@@ -304,7 +307,7 @@ contract StablePayBase is Base, IStablePay {
         @dev It executes the swapping process associated to an order for a specific provider key.
         @dev It returns true if the swapping was executed successfully. Otherwise, it returns false.
      */
-    function doPayWithToken(StablePayCommon.Order order, bytes32 _providerKey)
+    function doTransferWithTokens(StablePayCommon.Order order, bytes32 _providerKey)
     internal
     returns (bool)
     {
@@ -331,7 +334,7 @@ contract StablePayBase is Base, IStablePay {
                 // Get source token balance for StablePay.
                 uint stablePaySourceFinalBalance = getTokenBalanceOf(order.sourceToken);
 
-                // Transfer the difference between initial/final tokens to the customer when the diff > 0.
+                // Transfer the difference between initial/final tokens to the 'to' address when the diff > 0.
                 // The final balance is higher than initial
                 transferDiffSourceTokensIfApplicable(order.sourceToken, msg.sender, stablePaySourceInitialBalance, stablePaySourceFinalBalance);
                 
@@ -345,32 +348,32 @@ contract StablePayBase is Base, IStablePay {
                 // Calculate and transfer the platform fee amount.
                 (, feeAmount) = calculateAndTransferFee(order);
 
-                // Calculate and transfer the merchant amount.
-                uint merchantAmount;
-                (, merchantAmount) = calculateAndTransferMerchantAmount(order, feeAmount);
+                // Calculate and transfer the 'to' amount.
+                uint toAmount;
+                (, toAmount) = calculateAndTransferToAmount(order, feeAmount);
 
-                // Emit PaymentSent event for the customer/merchant order.
-                emitPaymentSentEvent(order, merchantAmount);
+                // Emit PaymentSent event for the from/to order.
+                emitPaymentSentEvent(order, toAmount);
 
-                // Emit SwapExecutionSuccess event for StablePay.
-                emitSwapExecutionSuccessEvent(order, feeAmount, merchantAmount, swappingProvider.providerAddress, _providerKey);
+                // Emit ExecutionTransferSuccess event for StablePay.
+                emitExecutionTransferSuccessEvent(order, feeAmount, toAmount, _providerKey);
 
                 return true;
             } else {
-                // Emit SwapExecutionFailed event for StablePay.
-                emitSwapExecutionFailedEvent(order, swappingProvider.providerAddress, _providerKey);
+                // Emit ExecutionTransferFailed event for StablePay.
+                emitExecutionTransferFailedEvent(order, swappingProvider.providerAddress, _providerKey);
             }
         }
         return false;
     }
 
-    function payWithToken(StablePayCommon.Order order, bytes32[] _providerKeys)
+    function transferWithTokens(StablePayCommon.Order order, bytes32[] _providerKeys)
     public
     isNotPaused()
     nonReentrant()
     isTokenAvailable(order.targetToken, order.targetAmount)
     areOrderAmountsValidToken(order)
-    isSender(msg.sender, order.customerAddress)
+    isSender(msg.sender, order.fromAddress)
     returns (bool)
     {
         // Transfer tokens if source / target tokens are equal.
@@ -381,7 +384,7 @@ contract StablePayBase is Base, IStablePay {
 
         for (uint256 index = 0; index < _providerKeys.length; index = index.add(1)) {
             bytes32 _providerKey = _providerKeys[index];
-            bool swapSuccess = doPayWithToken(order, _providerKey);
+            bool swapSuccess = doTransferWithTokens(order, _providerKey);
             if(swapSuccess) {
                 return true;
             }
@@ -389,7 +392,7 @@ contract StablePayBase is Base, IStablePay {
         require(false, "Swapping token could not be processed.");
     }
 
-    function doPayWithEther(StablePayCommon.Order order, bytes32 _providerKey)
+    function doTransferWithEthers(StablePayCommon.Order order, bytes32 _providerKey)
     internal
     returns (bool)
     {
@@ -411,7 +414,7 @@ contract StablePayBase is Base, IStablePay {
                 uint stablePayFinalSourceBalance = getEtherBalanceOf();
                 uint stablePayFinalTargetBalance = getTokenBalanceOf(order.targetToken);
 
-                // Transfer back the Ether left to the customer.
+                // Transfer back the Ether left to the 'to' address.
                 transferDiffEtherBalanceIfApplicable(msg.sender, msg.value, stablePayInitialSourceBalance, stablePayFinalSourceBalance);
 
                 // Check current StablePay target token balance. It must be equals to order target amount.
@@ -421,32 +424,32 @@ contract StablePayBase is Base, IStablePay {
                 // Calculate and transfer the platform fee amount.
                 (, feeAmount) = calculateAndTransferFee(order);
 
-                // Calculate and transfer the merchant amount.
-                uint merchantAmount;
-                (, merchantAmount) = calculateAndTransferMerchantAmount(order, feeAmount);
+                // Calculate and transfer the 'to' amount.
+                uint toAmount;
+                (, toAmount) = calculateAndTransferToAmount(order, feeAmount);
   
-                // Emit PaymentSent event for the customer/merchant order.
-                emitPaymentSentEvent(order, merchantAmount);
+                // Emit PaymentSent event for the from/to order.
+                emitPaymentSentEvent(order, toAmount);
 
-                // Emit SwapExecutionSuccess event for StablePay.
-                emitSwapEthExecutionSuccessEvent(order, feeAmount, merchantAmount, swappingProvider.providerAddress, _providerKey);
+                // Emit ExecutionTransferSuccess event for StablePay.
+                emitExecutionTransferSuccessEvent(order, feeAmount, toAmount, _providerKey);
 
                 return true;
             } else {
-                // Emit SwapExecutionFailed event for StablePay.
-                emitSwapEthExecutionFailedEvent(order, swappingProvider.providerAddress, _providerKey);
+                // Emit ExecutionTransferFailed event for StablePay.
+                emitExecutionTransferFailedEvent(order, swappingProvider.providerAddress, _providerKey);
             }
         }
         return false;
     }
 
-    function payWithEther(StablePayCommon.Order order, bytes32[] _providerKeys)
+    function transferWithEthers(StablePayCommon.Order order, bytes32[] _providerKeys)
     public
     isNotPaused()
     nonReentrant()
     isTokenAvailable(order.targetToken, order.targetAmount)
     areOrderAmountsValidEther(order)
-    isSender(msg.sender, order.customerAddress)
+    isSender(msg.sender, order.fromAddress)
     payable
     returns (bool)
     {
@@ -454,7 +457,7 @@ contract StablePayBase is Base, IStablePay {
 
         for (uint256 index = 0; index < _providerKeys.length; index = index.add(1)) {
             bytes32 _providerKey = _providerKeys[index];
-            bool swapSuccess = doPayWithEther(order, _providerKey);
+            bool swapSuccess = doTransferWithEthers(order, _providerKey);
             if(swapSuccess) {
                 return true;
             }
@@ -463,59 +466,38 @@ contract StablePayBase is Base, IStablePay {
         return true;
     }
 
-    function emitSwapEthExecutionFailedEvent(StablePayCommon.Order _order, address _providerAddress, bytes32 _providerKey)
+    function emitExecutionTransferFailedEvent(StablePayCommon.Order _order, address _providerAddress, bytes32 _providerKey)
     internal {
-        emit SwapEthExecutionFailed(
+        emit ExecutionTransferFailed(
             address(this),
-            _order.customerAddress,
-            _order.merchantAddress,
             _providerAddress,
+            _order.sourceToken,
+            _order.targetToken,
+            _order.fromAddress,
+            _order.toAddress,
+            now,
             _providerKey,
             _order.data
         );
     }
 
-    function emitSwapExecutionFailedEvent(StablePayCommon.Order _order, address _providerAddress, bytes32 _providerKey)
+    function emitExecutionTransferSuccessEvent(StablePayCommon.Order _order, uint feeAmount, uint toAmount, bytes32 _providerKey)
     internal {
-        emit SwapExecutionFailed(
+        // Note: Provider address is not added due to a Stack too deep error. It can be taken from provider key.
+        uint16 platformFee = _order.sourceToken == _order.targetToken ? 0 : getSettings().getPlatformFee();
+        emit ExecutionTransferSuccess(
             address(this),
-            _order.customerAddress,
-            _order.merchantAddress,
-            _providerAddress,
             _providerKey,
-            _order.data
-        );
-    }
-
-    function emitSwapExecutionSuccessEvent(StablePayCommon.Order _order, uint feeAmount, uint merchantAmount, address _providerAddress, bytes32 _providerKey)
-    internal {
-        uint16 platformFee = getSettings().getPlatformFee();
-        emit SwapExecutionSuccess(
-            address(this),
-            _providerAddress,
-            _order.customerAddress,
-            _order.merchantAddress,
-            merchantAmount,
+            _order.sourceToken,
+            _order.targetToken,
+            _order.fromAddress,
+            _order.toAddress,
+            toAmount,
             feeAmount,
+            now,
             platformFee,
-            _providerKey,
             _order.data
         );
-    }
 
-    function emitSwapEthExecutionSuccessEvent(StablePayCommon.Order _order, uint feeAmount, uint merchantAmount, address _providerAddress, bytes32 _providerKey)
-    internal {
-        uint16 platformFee = getSettings().getPlatformFee();
-        emit SwapEthExecutionSuccess(
-            address(this),
-            _providerAddress,
-            _order.customerAddress,
-            _order.merchantAddress,
-            merchantAmount,
-            feeAmount,
-            platformFee,
-            _providerKey,
-            _order.data
-        );
     }
 }

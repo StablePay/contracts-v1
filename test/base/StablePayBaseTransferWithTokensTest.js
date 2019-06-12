@@ -15,7 +15,7 @@ const SwappingProviderMock = artifacts.require("./mock/SwappingProviderMock.sol"
 // Smart Contracts
 const Storage = artifacts.require("./base/Storage.sol");
 
-contract('StablePayBasePayWithTokenTest', accounts => {
+contract('StablePayBaseTransferWithTokensTest', accounts => {
     const owner = accounts[0];
     const account1 = accounts[1];
     const account2 = accounts[2];
@@ -49,7 +49,7 @@ contract('StablePayBasePayWithTokenTest', accounts => {
     withData({
         _1_amount100: [account1, account2, '1742909715561031044', '20000000000000000000', "1", "19800000000000000000"]
     }, function(customerAddress, merchantAddress, sourceAmount, targetAmount, extraTargetAmount, merchantAmountExpected) {
-        it(t('anUser', 'payWithToken', 'Should be able to pay with token.', false), async function() {
+        it(t('anUser', 'transferWithTokens', 'Should be able to transfer with tokens.', false), async function() {
             // Setup
             const amount = web3.utils.toWei('100000', 'ether');
             // Create source and target tokens.
@@ -91,12 +91,12 @@ contract('StablePayBasePayWithTokenTest', accounts => {
             await targetToken.transfer(stablePay.address, extraTargetAmount, {from: customerAddress});
 
             // Invocation
-            const result = await stablePay.payWithToken(order, providers, {from: customerAddress, gas: 6721900});
+            const result = await stablePay.transferWithTokens(order, providers, {from: customerAddress, gas: 6721900});
 
             // Assertions
             stablePayBase
-                .swapExecutionSuccess(result)
-                .emitted(stablePay.address, swappingProvider.address, providerKey.providerKey);
+                .executionTransferSuccess(result)
+                .emitted(stablePay.address, providerKey.providerKey);
             base
                 .paymentSent(result)
                 .emitted(stablePay.address, merchantAddress, customerAddress, sourceToken.address, targetToken.address, merchantAmountExpected);

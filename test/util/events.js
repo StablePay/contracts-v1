@@ -33,10 +33,10 @@ module.exports = {
             const name = 'PaymentSent';
             return {
                 name: name,
-                emitted: (thisContract, merchant, customer, sourceToken, targetToken, amount) => emitted(tx, name, ev => {
+                emitted: (thisContract, to, from, sourceToken, targetToken, amount) => emitted(tx, name, ev => {
                     assert.equal(ev.thisContract, thisContract);
-                    assert.equal(ev.merchant, merchant);
-                    assert.equal(ev.customer, customer);
+                    assert.equal(ev.to, to);
+                    assert.equal(ev.from, from);
                     assert.equal(ev.sourceToken, sourceToken);
                     assert.equal(ev.targetToken, targetToken);
                     assert.equal(ev.amount.toString(), amount.toString());
@@ -198,8 +198,8 @@ module.exports = {
         }
     },
     stablePayBase: {
-        swapExecutionFailed: tx => {
-            const name = 'SwapExecutionFailed';
+        executionTransferFailed: tx => {
+            const name = 'ExecutionTransferFailed';
             return {
                 name: name,
                 emitted: (thisContract, providerAddress, providerKey) => emitted(tx, name, ev => {
@@ -210,42 +210,17 @@ module.exports = {
                 notEmitted: (assertFunction = () => {} ) => notEmitted(tx, name, assertFunction)
             };
         },
-        swapExecutionSuccess: tx => {
-            const name = 'SwapExecutionSuccess';
+        executionTransferSuccess: tx => {
+            const name = 'ExecutionTransferSuccess';
             return {
                 name: name,
-                emitted: (thisContract, providerAddress, providerKey) => emitted(tx, name, ev => {
+                emitted: (thisContract, providerKey) => emitted(tx, name, ev => {
                     assert.equal(ev.thisContract, thisContract);
-                    assert.equal(ev.providerAddress, providerAddress);
                     assert.equal(ev.providerKey, providerKey);
                 }),
                 notEmitted: (assertFunction = () => {} ) => notEmitted(tx, name, assertFunction)
             };
         },
-        swapEthExecutionFailed: tx => {
-            const name = 'SwapEthExecutionFailed';
-            return {
-                name: name,
-                emitted: (thisContract, strategyAddress, providerKey) => emitted(tx, name, ev => {
-                    assert.equal(ev.thisContract, thisContract);
-                    assert.equal(ev.strategyAddress, strategyAddress);
-                    assert.equal(ev.providerKey, providerKey);
-                }),
-                notEmitted: (assertFunction = () => {} ) => notEmitted(tx, name, assertFunction)
-            };
-        },
-        swapEthExecutionSuccess: tx => {
-            const name = 'SwapEthExecutionSuccess';
-            return {
-                name: name,
-                emitted: (thisContract, strategyAddress, providerKey) => emitted(tx, name, ev => {
-                    assert.equal(ev.thisContract, thisContract);
-                    assert.equal(ev.strategyAddress, strategyAddress);
-                    assert.equal(ev.providerKey, providerKey);
-                }),
-                notEmitted: (assertFunction = () => {} ) => notEmitted(tx, name, assertFunction)
-            };
-        }
     },
     vault: {
         tokensWithdrawn: tx => {

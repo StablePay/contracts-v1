@@ -36,7 +36,7 @@ contract('StablePayStorageGetExpectedRateTest', (accounts) => {
         _1_Kyber_1_ETH_to_DAI: [stablepayProviders.Kyber, "1", "ETH", "DAI", true],
         _2_Uniswap_1_ETH_to_DAI: [stablepayProviders.Uniswap, "1", "ETH", "DAI", false],
         _3_Kyber_100_KNC_to_DAI: [stablepayProviders.Kyber, "100", "KNC", "DAI", true],
-        _4_Uniswap_100_KNC_to_DAI: [stablepayProviders.Uniswap, "100", "KNC", "DAI", false],
+        _4_Uniswap_100_KNC_to_DAI: [stablepayProviders.Uniswap, "100", "KNC", "DAI", true],
         _5_Uniswap_1_OMG_to_DAI: [stablepayProviders.Uniswap, "1", "OMG", "DAI", false],
         _6_Kyber_1_OMG_to_DAI: [stablepayProviders.Kyber, "1", "OMG", "DAI", true]
     }, function(providerKey, sourceAmountUnit, sourceTokenName, targetTokenName, isSupportedExpected) {
