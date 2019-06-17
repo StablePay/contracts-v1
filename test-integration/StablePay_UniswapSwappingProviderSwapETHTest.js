@@ -188,7 +188,7 @@ contract('StablePay_UniswapSwappingProviderSwapTokenTest', (accounts) => {
             const providerInitialSourceBalance = new BigNumber(await sourceToken.instance.balanceOf(uniswapProvider.address));
 
             //Invocation
-            const result = await istablePay.payWithEther(orderArray, [uniswapProviderKey], {
+            const result = await istablePay.transferWithEthers(orderArray, [uniswapProviderKey], {
                 from: customerAddress,
                 value: ethToSend,
                 gas: 5000000,

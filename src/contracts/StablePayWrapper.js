@@ -107,7 +107,7 @@ StablePayWrapper.prototype.transferWithEthers = async function(data, ...params) 
         const result = await this.stablePay.transferWithEthers(order, providers, {
             from: params[0].from,
             gas: params[0].gas,
-            value: calculatedSourceAmount
+            value: calculatedSourceAmount //eth
         });
         // Assertions
         assert(result);
