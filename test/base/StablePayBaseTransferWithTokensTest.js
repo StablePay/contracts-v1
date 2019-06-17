@@ -96,7 +96,7 @@ contract('StablePayBaseTransferWithTokensTest', accounts => {
             // Assertions
             stablePayBase
                 .executionTransferSuccess(result)
-                .emitted(stablePay.address, providerKey.providerKey);
+                .emitted(providerKey.providerKey, sourceToken.address, targetToken.address, customerAddress, merchantAddress);
             base
                 .paymentSent(result)
                 .emitted(stablePay.address, merchantAddress, customerAddress, sourceToken.address, targetToken.address, merchantAmountExpected);
