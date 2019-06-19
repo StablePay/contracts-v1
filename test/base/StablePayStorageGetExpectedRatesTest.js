@@ -14,7 +14,6 @@ contract('StablePayStorageGetExpectedRatesTest', accounts => {
     const owner = accounts[0];
     const account1 = accounts[1];
     const account2 = accounts[2];
-    const genericSmartContract = accounts[8];
 
     let stablePayStorage;
     let storageInstance;
@@ -100,7 +99,7 @@ contract('StablePayStorageGetExpectedRatesTest', accounts => {
             const result = await stablePayStorage.getExpectedRates(account1, account2, "1");
 
             // Assertions
-            const resultProviders = result.filter(provider => provider.exists);
+            const resultProviders = result.filter(provider => provider.isSupported);
             assert.equal(resultProviders.length, expectedCount);
         });
     });
