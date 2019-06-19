@@ -72,6 +72,7 @@ contract UniswapSwappingProvider is ISwappingProvider {
 
     return true;
     }
+
     function swapEther(StablePayCommon.Order memory  _order)
     public isStablePay(msg.sender)
     payable
@@ -111,12 +112,16 @@ contract UniswapSwappingProvider is ISwappingProvider {
     view
     returns (bool isSupported, uint minRate, uint maxRate)
     {
+        require(address(_sourceToken) != address(0x0), "Source token != 0x0.");
+        require(address(_targetToken) != address(0x0), "Target token != 0x0.");
+        require(_sourceAmount > 0, "Source amount > 0.");
+        
         UniswapFactoryInterface uFactory = UniswapFactoryInterface(uniswapFactory);
         UniswapExchangeInterface sourceExchange = UniswapExchangeInterface(uFactory.getExchange(_sourceToken));
         UniswapExchangeInterface targetExchange = UniswapExchangeInterface(uFactory.getExchange(_targetToken));
 
         isSupported = sourceExchange != address(0x0) && targetExchange != address(0x0);
-        uint rate = 0;
+        uint rate = _sourceAmount;
         if(isSupported) {
             uint256 ethToBuyTargetToken = targetExchange.getEthToTokenOutputPrice(_sourceAmount);
             rate = sourceExchange.getTokenToEthOutputPrice(ethToBuyTargetToken);
