@@ -11,6 +11,7 @@ class ByApiOrderDataBuilder extends OrderDataBuilder {
 ByApiOrderDataBuilder.prototype.build = async function(data) {
     console.log(`Data `);
     console.log(data);
+    console.log(`========= `);
     const {
         sourceAddress,
         targetAmount,
@@ -32,7 +33,7 @@ ByApiOrderDataBuilder.prototype.build = async function(data) {
     const providersKey = apiResponse.providers.map(provider => provider.providerKey);
     const order = apiResponse.order;
     const amounts = apiResponse.amounts;
-    console.log(amounts);
+    console.log('amounts: ', amounts);
     return {
         order: order,
         providers: providersKey,

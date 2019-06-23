@@ -3,14 +3,15 @@ const NULL_ADDRESS = '0x0000000000000000000000000000000000000000';
 const util = require('ethereumjs-util');
 const EMPTY_BYTES_32 = util.bufferToHex(util.setLengthRight(``, 32));
 const { BigNumber } = require('bignumber.js');
-
+const  ETH_ADDRESS = '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
 
 class UniswapApiOrderDataBuilder extends OrderDataBuilder {
-    constructor(url, uniswapProvider, exchange) {
+    constructor(url, storage, uniswapProvider, exchange) {
         super();
         this.url = url;
         this.uniswapProvider = uniswapProvider;
         this.exchange = exchange || 'no instance';
+        this.storage = storage;
     }
 }
 UniswapApiOrderDataBuilder.prototype.createOrder = function(sourceToken, targetToken ,sourceAmount,targetAmount,merchantAddress,customerAddress) {
@@ -57,15 +58,16 @@ UniswapApiOrderDataBuilder.prototype.build = async function(data) {
         '0x556e69737761705f763100000000000000000000000000000000000000000000'
     ];
     let costs ;
-    if(NULL_ADDRESS === sourceAddress){
-        const eth = await  this.exchange.getEthToTokenOutputPrice.call(targetAmount);
-        console.log('eth eth', eth);
-        costs = ['', eth] ;
-
-    }else{
-        costs = await this.uniswapProvider.getExpectedRate.call(sourceAddress, targetAddress, targetAmount);
-    }
-
+    // if(ETH_ADDRESS === sourceAddress){
+    //     const eth = await  this.exchange.getEthToTokenOutputPrice.call(targetAmount);
+    //     console.log('eth eth', eth);
+    //     costs = ['', eth] ;
+    //
+    // }else{
+        //costs = await this.uniswapProvider.getExpectedRate.call(sourceAddress, targetAddress, targetAmount);
+    costs = await this.storage.getExpectedRateRange.call(sourceAddress, targetAddress, targetAmount);
+    //}
+    console.log('costs', costs);
 
     const sourceTokensTosell = new BigNumber(costs[1]).toFixed();
     const order = this.createOrder(

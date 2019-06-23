@@ -14,6 +14,7 @@ import "../util/SafeMath.sol";
 contract UniswapSwappingProvider is ISwappingProvider {
 
     address public uniswapFactory;
+    address private ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
 
     constructor(address _stablePay, address _factory)
     public ISwappingProvider(_stablePay)
@@ -112,11 +113,20 @@ contract UniswapSwappingProvider is ISwappingProvider {
     returns (bool isSupported, uint minRate, uint maxRate)
     {
         UniswapFactoryInterface uFactory = UniswapFactoryInterface(uniswapFactory);
-        UniswapExchangeInterface sourceExchange = UniswapExchangeInterface(uFactory.getExchange(_sourceToken));
         UniswapExchangeInterface targetExchange = UniswapExchangeInterface(uFactory.getExchange(_targetToken));
-
-        isSupported = sourceExchange != address(0x0) && targetExchange != address(0x0);
         uint rate = 0;
+
+        if(ETH_ADDRESS == address (_sourceToken)) {
+            isSupported =  targetExchange != address(0x0);
+            if(isSupported) {
+                rate = targetExchange.getEthToTokenOutputPrice(_sourceAmount);
+            }
+            return (isSupported, rate, rate);
+        }
+
+        UniswapExchangeInterface sourceExchange = UniswapExchangeInterface(uFactory.getExchange(_sourceToken));
+        isSupported = sourceExchange != address(0x0) && targetExchange != address(0x0);
+
         if(isSupported) {
             uint256 ethToBuyTargetToken = targetExchange.getEthToTokenOutputPrice(_sourceAmount);
             rate = sourceExchange.getTokenToEthOutputPrice(ethToBuyTargetToken);

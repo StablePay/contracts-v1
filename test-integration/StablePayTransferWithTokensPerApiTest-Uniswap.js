@@ -3,7 +3,6 @@ const UniswapSwappingProvider = artifacts.require("./providers/UniswapSwappingPr
 const IStablePay = artifacts.require("./interface/IStablePay.sol");
 const Settings = artifacts.require("./base/Settings.sol");
 const Vault = artifacts.require("./base/Vault.sol");
-//const KyberNetworkProxyInterface = artifacts.require("./kyber/KyberNetworkProxyInterface.sol");
 const ERC20 = artifacts.require("./erc20/ERC20.sol");
 const DECIMALS = (new BigNumber(10)).pow(18);
 const appConfig = require('../src/config');
@@ -14,7 +13,7 @@ const t = require('../test/util/TestUtil').title;
 const Balances = require('../src/balances/Balances');
 const Amount = require('../src/amounts/Amount');
 const ProcessArgs = require('../src/utils/ProcessArgs');
-const OrderDataBuilder = require('../src/builder/UniswapApiOrderDataBuilder');
+const OrderDataBuilder = require('../src/builder/ByApiOrderDataBuilder');
 const StablePayWrapper = require('../src/contracts/StablePayWrapper');
 const processArgs = new ProcessArgs();
 
@@ -57,8 +56,8 @@ contract('StablePayPayWithTokenPerApiTest-Uniswap', (accounts) => {
     });
 
     withData({
-        _1_BAT_to_11_DAI: [0, 1, "BAT", "DAI", BigNumber("11").times(DECIMALS).toFixed(), true],
-        _2_SNT_to_15_DAI: [0, 1, "SNT", "DAI", BigNumber("15").times(DECIMALS).toFixed(), true],
+        _1_BAT_to_11_DAI: [0, 1, "BAT", "DAI", "11", true],
+      //  _2_SNT_to_15_DAI: [0, 1, "SNT", "DAI", "15", true],
 
     }, function(customerIndex, merchantIndex, sourceTokenName, targetTokenName, targetTokenAmount, verbose) {
         it(t('anUser', 'payWithToken', `Should be able to payWithToken ${sourceTokenName} -> ${targetTokenAmount} ${targetTokenName}s.`), async function() {
@@ -110,7 +109,7 @@ contract('StablePayPayWithTokenPerApiTest-Uniswap', (accounts) => {
             } else {
                 vaultAmount = new Amount(
                     Number(target.amount) * platformFee.toNumber(),
-                    0
+                    await targetTokenInstance.decimals()
                 );
             }
             
@@ -140,7 +139,7 @@ contract('StablePayPayWithTokenPerApiTest-Uniswap', (accounts) => {
 
             const toAmount = new Amount(
                 Number(target.amount) - vaultAmount.value,
-                0
+                await targetTokenInstance.decimals()
             );
 
             const merchantSourceTokenBalance = resultBalances.getBalance('Merchant', sourceTokenInstance);

@@ -8,6 +8,7 @@ const IStablePay = artifacts.require("./interface/IStablePay.sol");
 const Settings = artifacts.require("./base/Settings.sol");
 const Vault = artifacts.require("./base/Vault.sol");
 const ERC20 = artifacts.require("./erc20/ERC20.sol");
+const Storage = artifacts.require("./base/StablePayStorage.sol");
 
 const DECIMALS = (new BigNumber(10)).pow(18);
 const leche = require('leche');
@@ -16,10 +17,11 @@ const t = require('../test/util/TestUtil').title;
 const Balances = require('../src/balances/Balances');
 const Amount = require('../src/amounts/Amount');
 const ProcessArgs = require('../src/utils/ProcessArgs');
-const OrderDataBuilder = require('../src/builder/UniswapApiOrderDataBuilder');
+const OrderDataBuilder = require('../src/builder/ByApiOrderDataBuilder');
 const StablePayWrapper = require('../src/contracts/StablePayWrapper');
 const processArgs = new ProcessArgs();
 const NULL_ADDRESS = '0x0000000000000000000000000000000000000000';
+const  ETH_ADDRESS = '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
 contract('StablePayTransferWithEthersPerApiTest-Uniswap', (accounts) => {
     const appConf = require('../config')(processArgs.network());
     const stablepayConf = appConf.stablepay;
@@ -35,6 +37,8 @@ contract('StablePayTransferWithEthersPerApiTest-Uniswap', (accounts) => {
     let balances;
     let uniswapProvider;
     let uniswapFactory;
+    let storage;
+
     beforeEach('Deploying contract for each test', async () => {
 
         uniswapFactory = await Factory.at(uniswapContracts.factory);
@@ -48,6 +52,10 @@ contract('StablePayTransferWithEthersPerApiTest-Uniswap', (accounts) => {
         vault = await Vault.at(stablepayContracts.Vault);
         assert(vault);
         assert(vault.address);
+
+        storage = await Storage.at(stablepayContracts.StablePayStorage);
+        assert(storage);
+        assert(storage.address);
 
         uniswapProvider = await UniswapSwappingProvider.at(stablepayContracts.UniswapSwappingProvider);
         assert(uniswapProvider);
@@ -64,8 +72,8 @@ contract('StablePayTransferWithEthersPerApiTest-Uniswap', (accounts) => {
     });
 
     withData({
-        _1_ETH_to_10_DAI: [0, 1, "ETH", "DAI", BigNumber("11").times(DECIMALS).toFixed(), true],
-        _2_ETH_to_15_5_DAI: [0, 1, "ETH", "DAI", BigNumber("15.5").times(DECIMALS).toFixed(), true],
+        _1_ETH_to_10_DAI: [0, 1, "ETH", "DAI", "11", true],
+        _2_ETH_to_15_5_DAI: [0, 1, "ETH", "DAI", "15.5", true],
 
     }, function(customerIndex, merchantIndex, sourceTokenName, targetTokenName, targetTokenAmount, verbose) {
         it(t('anUser', 'transferWithEthers', `Should be able to transferWithEthers ${sourceTokenName} -> ${targetTokenAmount} ${targetTokenName}s.`), async function() {
@@ -98,25 +106,25 @@ contract('StablePayTransferWithEthersPerApiTest-Uniswap', (accounts) => {
             const customerInitialBalance = await web3.eth.getBalance(customerAddress);
             console.log('customerAddress Initial    ', customerInitialBalance.toString());
             const url = appConfig.getOrderFactoryUrl().get();
-            const stablePayWrapper = new StablePayWrapper(stablePay, new OrderDataBuilder(url, uniswapProvider,exchangeInstance), null, verbose);
+            const stablePayWrapper = new StablePayWrapper(stablePay, new OrderDataBuilder(url, storage, uniswapProvider, exchangeInstance), null, verbose);
 
             // Invocation
             const data = {
-                sourceAddress: NULL_ADDRESS,
+                sourceAddress: ETH_ADDRESS,
                 targetAmount: target.amount,
                 targetAddress: target.address,
                 merchantAddress: merchantAddress,
                 customerAddress: customerAddress
             };
             const result = await stablePayWrapper.transferWithEthers(data,
-                {from: customerAddress, gas: 8000000});//8000000
+                {from: customerAddress, gas: 8000000});
 
             assert(result.success);
             const amounts = result.amounts;
 
             const vaultAmount = new Amount(
                 Number(target.amount) * platformFee.toNumber() ,
-                0
+                await targetTokenInstance.decimals()
             );
             
             await balances.saveBalances('FinalBalances', [
@@ -142,7 +150,7 @@ contract('StablePayTransferWithEthersPerApiTest-Uniswap', (accounts) => {
 
             const toAmount = new Amount(
                 Number(target.amount) - vaultAmount.value,
-               0
+                await targetTokenInstance.decimals()
             );
             const merchantTargetTokenBalance = resultBalances.getBalance('Merchant', targetTokenInstance);
             assert(merchantTargetTokenBalance.isMinusEquals(toAmount.asWeisFixed()));
