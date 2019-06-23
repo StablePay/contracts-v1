@@ -28,6 +28,9 @@ const etherscanApiKeyValue = appConfig.getEtherscanApiKey().get();
 
 module.exports = {
 	web3: Web3,
+	mocha: {
+		enableTimeouts: false,
+	},
 	compilers: {
 		solc: {
 			version: "0.4.25",

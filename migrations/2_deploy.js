@@ -10,7 +10,7 @@ const PLATFORM_FEE_KEY = 'config.platform.fee';
 /** Platform configuration values. */
 const printDeployCostValue = appConfig.getPrintDeployCost().get();
 const platformFee = appConfig.getPlatformFee().get();
-const maxGasForDeploying = 5000000;
+const maxGasForDeploying = 6000000;
 
 // Mock Smart Contracts
 const BaseMock = artifacts.require("./mock/BaseMock.sol");

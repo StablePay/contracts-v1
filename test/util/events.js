@@ -214,9 +214,12 @@ module.exports = {
             const name = 'ExecutionTransferSuccess';
             return {
                 name: name,
-                emitted: (thisContract, providerKey) => emitted(tx, name, ev => {
-                    assert.equal(ev.thisContract, thisContract);
+                emitted: (providerKey, sourceToken, targetToken, from, to) => emitted(tx, name, ev => {
                     assert.equal(ev.providerKey, providerKey);
+                    assert.equal(ev.sourceToken, sourceToken);
+                    assert.equal(ev.targetToken, targetToken);
+                    assert.equal(ev.from, from);
+                    assert.equal(ev.to, to);
                 }),
                 notEmitted: (assertFunction = () => {} ) => notEmitted(tx, name, assertFunction)
             };

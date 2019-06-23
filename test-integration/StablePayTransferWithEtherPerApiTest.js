@@ -20,9 +20,7 @@ contract('StablePayTransferWithEthersPerApiTest', (accounts) => {
     const appConf = require('../config')(processArgs.network());
     const stablepayConf = appConf.stablepay;
     const stablepayContracts = stablepayConf.contracts;
-    const stablepayProviders = stablepayConf.providers;
     const kyberConf = appConf.kyber;
-    const kyberContracts = kyberConf.contracts;
     const kyberTokens = kyberConf.tokens;
 
     let vault;

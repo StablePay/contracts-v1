@@ -36,7 +36,8 @@ contract KyberSwappingProvider is ISwappingProvider {
     returns (bool isSupported, uint minRate, uint maxRate)
     {
         require(address(_sourceToken) != address(0x0), "Source token != 0x0.");
-        require(address(_targetToken) != address(0x0), "Targe token != 0x0.");
+        require(address(_targetToken) != address(0x0), "Target token != 0x0.");
+        require(_sourceAmount > 0, "Source amount > 0.");
         KyberNetworkProxyInterface networkProxy = KyberNetworkProxyInterface(proxy);
         (minRate, maxRate) = networkProxy.getExpectedRate(_sourceToken, _targetToken, _sourceAmount);
         isSupported = minRate > 0 || maxRate > 0;

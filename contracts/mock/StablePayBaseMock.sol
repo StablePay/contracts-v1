@@ -48,7 +48,7 @@ contract StablePayBaseMock is StablePayBase {
 
     function _transferDiffEtherBalanceIfApplicable(address to, uint sentAmount, uint initialBalance, uint finalBalance)
     public
-    returns (bool)
+    returns (bool, uint)
     {
         return super.transferDiffEtherBalanceIfApplicable(to, sentAmount, initialBalance, finalBalance);
     }

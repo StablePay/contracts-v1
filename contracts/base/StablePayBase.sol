@@ -191,7 +191,7 @@ contract StablePayBase is Base, IStablePay {
      */
     function transferDiffSourceTokensIfApplicable(address token, address to, uint initialBalance, uint finalBalance)
     internal
-    returns (bool)
+    returns (bool, uint)
     {
         require(finalBalance >= initialBalance, "StablePayBase Token: Final balance >= initial balance.");
         uint tokensDiff = finalBalance.sub(initialBalance);
@@ -199,7 +199,7 @@ contract StablePayBase is Base, IStablePay {
             bool transferResult = ERC20(token).transfer(to, tokensDiff);
             require(transferResult, "Transfer tokens back failed.");
         }
-        return true;
+        return (true, tokensDiff);
     }
 
     function calculateDiffBalance(uint sentAmount, uint initialBalance, uint finalBalance)
@@ -221,13 +221,13 @@ contract StablePayBase is Base, IStablePay {
      */
     function transferDiffEtherBalanceIfApplicable(address to, uint sentAmount, uint initialBalance, uint finalBalance)
     internal
-    returns (bool)
+    returns (bool, uint)
     {
         uint diffAmount = calculateDiffBalance(sentAmount, initialBalance, finalBalance);
         if(diffAmount > 0) {
             to.transfer(diffAmount);
         }
-        return true;
+        return (true, diffAmount);
     }
 
     /**
@@ -298,7 +298,7 @@ contract StablePayBase is Base, IStablePay {
             emitPaymentSentEvent(order, order.targetAmount);
 
             // Emit ExecutionTransferSuccess event for StablePay.
-            emitExecutionTransferSuccessEvent(order, uint256(0), order.targetAmount, 0x0);
+            emitExecutionTransferSuccessEvent(order, uint256(0), order.targetAmount, 0, 0x0);
         }
         return _isTransferTokens;
     }
@@ -336,7 +336,8 @@ contract StablePayBase is Base, IStablePay {
 
                 // Transfer the difference between initial/final tokens to the 'to' address when the diff > 0.
                 // The final balance is higher than initial
-                transferDiffSourceTokensIfApplicable(order.sourceToken, msg.sender, stablePaySourceInitialBalance, stablePaySourceFinalBalance);
+                uint tokensDiff;
+                (, tokensDiff) = transferDiffSourceTokensIfApplicable(order.sourceToken, msg.sender, stablePaySourceInitialBalance, stablePaySourceFinalBalance);
                 
                 // Get target token balance for StablePay
                 uint stablePayTargetFinalBalance = getTokenBalanceOf(order.targetToken);
@@ -356,7 +357,7 @@ contract StablePayBase is Base, IStablePay {
                 emitPaymentSentEvent(order, toAmount);
 
                 // Emit ExecutionTransferSuccess event for StablePay.
-                emitExecutionTransferSuccessEvent(order, feeAmount, toAmount, _providerKey);
+                emitExecutionTransferSuccessEvent(order, feeAmount, toAmount, tokensDiff, _providerKey);
 
                 return true;
             } else {
@@ -415,7 +416,8 @@ contract StablePayBase is Base, IStablePay {
                 uint stablePayFinalTargetBalance = getTokenBalanceOf(order.targetToken);
 
                 // Transfer back the Ether left to the 'to' address.
-                transferDiffEtherBalanceIfApplicable(msg.sender, msg.value, stablePayInitialSourceBalance, stablePayFinalSourceBalance);
+                uint diffEthers;
+                (, diffEthers) = transferDiffEtherBalanceIfApplicable(msg.sender, msg.value, stablePayInitialSourceBalance, stablePayFinalSourceBalance);
 
                 // Check current StablePay target token balance. It must be equals to order target amount.
                 checkCurrentTargetBalance(order.targetAmount, stablePayInitialTargetBalance, stablePayFinalTargetBalance);
@@ -432,7 +434,7 @@ contract StablePayBase is Base, IStablePay {
                 emitPaymentSentEvent(order, toAmount);
 
                 // Emit ExecutionTransferSuccess event for StablePay.
-                emitExecutionTransferSuccessEvent(order, feeAmount, toAmount, _providerKey);
+                emitExecutionTransferSuccessEvent(order, feeAmount, toAmount, diffEthers, _providerKey);
 
                 return true;
             } else {
@@ -481,20 +483,19 @@ contract StablePayBase is Base, IStablePay {
         );
     }
 
-    function emitExecutionTransferSuccessEvent(StablePayCommon.Order _order, uint feeAmount, uint toAmount, bytes32 _providerKey)
+    function emitExecutionTransferSuccessEvent(StablePayCommon.Order _order, uint feeAmount, uint toAmount, uint amountDiff, bytes32 _providerKey)
     internal {
         // Note: Provider address is not added due to a Stack too deep error. It can be taken from provider key.
         uint16 platformFee = _order.sourceToken == _order.targetToken ? 0 : getSettings().getPlatformFee();
         emit ExecutionTransferSuccess(
-            address(this),
             _providerKey,
             _order.sourceToken,
             _order.targetToken,
             _order.fromAddress,
             _order.toAddress,
+            _order.sourceAmount.sub(amountDiff),
             toAmount,
             feeAmount,
-            now,
             platformFee,
             _order.data
         );
