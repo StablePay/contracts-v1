@@ -1,5 +1,3 @@
-const chai = require('chai');
-
 const KyberSwappingProvider = artifacts.require("./providers/KyberSwappingProvider.sol");
 const IStablePay = artifacts.require("./interface/IStablePay.sol");
 const Settings = artifacts.require("./base/Settings.sol");
@@ -21,9 +19,9 @@ const processArgs = new ProcessArgs();
 
 contract('StablePayPayWithTokenPerApiTest', (accounts) => {
     const appConf = require('../config')(processArgs.network());
+    const maxGas = appConf.maxGas;
     const stablepayConf = appConf.stablepay;
     const stablepayContracts = stablepayConf.contracts;
-    const stablepayProviders = stablepayConf.providers;
     const kyberConf = appConf.kyber;
     const kyberContracts = kyberConf.contracts;
     const kyberTokens = kyberConf.tokens;
@@ -62,19 +60,20 @@ contract('StablePayPayWithTokenPerApiTest', (accounts) => {
         balances.addAccount('KyberProvider', kyberProvider.address);
     });
 
-    withData({
-        //_1_DAI_to_10_DAI: [0, 1, "OMG", "KNC", "30", true],
-                
+    withData({  
         _1_DAI_to_10_DAI: [0, 1, "DAI", "DAI", "10", true],
-        //_2_KNC_to_20_DAI: [0, 1, "KNC", "DAI", "20", true],
-        //_3_KNC_to_30_DAI: [0, 1, "KNC", "DAI", "30", true],
-        //_4_KNC_to_80_DAI: [0, 1, "KNC", "DAI", "80", true],
-        _5_OMG_to_31_DAI: [0, 1, "OMG", "DAI", "31", true],
-        _6_MANA_to_30_DAI: [0, 1, "MANA", "DAI", "30", true],
-        //_7_ZIL_to_25_DAI: [0, 1, "ZIL", "DAI", "25", true],
-        _8_ELF_to_32_DAI: [0, 1, "ELF", "DAI", "32", true],
-        //_9_SNT_to_41_DAI: [0, 1, "SNT", "DAI", "41", true],
-        _11_OMG_to_15_DAI: [0, 1, "OMG", "DAI", "15", true],
+        _2_KNC_to_20_DAI: [0, 1, "KNC", "DAI", "20", true],
+        _3_KNC_to_30_DAI: [0, 1, "KNC", "DAI", "30", true],
+        _4_KNC_to_80_DAI: [0, 1, "KNC", "DAI", "80", true],
+        _5_EOS_to_80_DAI: [0, 1, "EOS", "DAI", "25", true],
+        _6_OMG_to_15_DAI: [0, 1, "OMG", "DAI", "15", true],
+        _7_OMG_to_31_DAI: [0, 1, "OMG", "DAI", "31", true],
+        _8_MANA_to_30_DAI: [0, 1, "MANA", "DAI", "30", true],
+        _9_ZIL_to_25_DAI: [0, 1, "ZIL", "DAI", "25", true],
+        _10_ELF_to_32_DAI: [0, 1, "ELF", "DAI", "32", true],
+        _11_SNT_to_41_DAI: [0, 1, "SNT", "DAI", "41", true],
+        _12_BAT_to_21_DAI: [0, 1, "BAT", "DAI", "21", true],
+        _13_POWR_to_15_5_DAI: [0, 1, "POWR", "DAI", "15.5", true]
     }, function(customerIndex, merchantIndex, sourceTokenName, targetTokenName, targetTokenAmount, verbose) {
         it(t('anUser', 'payWithToken', `Should be able to payWithToken ${sourceTokenName} -> ${targetTokenAmount} ${targetTokenName}s.`), async function() {
             // Setup
@@ -116,8 +115,7 @@ contract('StablePayPayWithTokenPerApiTest', (accounts) => {
                 merchantAddress: merchantAddress,
                 customerAddress: customerAddress
             };
-            //GasUsed Ropsten: 778619
-            const result = await stablePayWrapper.transferWithTokens(data, {from: customerAddress, gas: 8000000});//6721975
+            const result = await stablePayWrapper.transferWithTokens(data, {from: customerAddress, gas: maxGas});
 
             assert(result.success);
             const amounts = result.amounts;
@@ -138,7 +136,6 @@ contract('StablePayPayWithTokenPerApiTest', (accounts) => {
             ]);
 
             const resultBalances = balances.getBalances('FinalBalances', 'InitialBalances');
-
             const vaultSourceTokenBalance = resultBalances.getBalance('Vault', sourceTokenInstance);
             const vaultTargetTokenBalance = resultBalances.getBalance('Vault', targetTokenInstance);
             assert(vaultSourceTokenBalance.isMinusEquals("0"));
@@ -177,12 +174,10 @@ contract('StablePayPayWithTokenPerApiTest', (accounts) => {
             console.log('Customer Source         ', customerSourceTokenBalance.minusString());
             console.log('Customer Target         ', customerTargetTokenBalance);
             console.log('Customer Target         ', customerTargetTokenBalance.minusString());
-            console.log(amounts.min);
-            console.log(amounts.max);
 
             if(source.address === target.address) {
-                assert(customerSourceTokenBalance.minus().times(-1).gte(amounts.max));
-                assert(customerSourceTokenBalance.minus().times(-1).lte(amounts.min));
+                assert(customerSourceTokenBalance.minus().times(-1).gte(amounts.min.toString()));
+                assert(customerSourceTokenBalance.minus().times(-1).lte(amounts.max.toString()));
                 
                 // Source/target address are the same.
                 const customerAmount = new Amount(

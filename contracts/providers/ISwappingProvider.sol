@@ -155,26 +155,6 @@ contract ISwappingProvider {
     }
 
     /**
-        @dev It gets the expected rates for the pair (source/target tokens).
-        @dev It requires that the swapping is supported. if not, it throws a require error.
-        @dev It returns the min/max expected rates of the target token.
-     */
-    function getExpectedRateIfSupported(ERC20 sourceToken, ERC20 targetToken, uint sourceAmount)
-    internal
-    view
-    returns (uint minRate, uint maxRate)
-    {
-        bool isSupported;
-        uint minRateValue;
-        uint maxRateValue;
-        // Get expected rates for the swapping source/target tokens.
-        (isSupported, minRateValue, maxRateValue) = getExpectedRate(sourceToken, targetToken, sourceAmount);
-        // Check whether the swapping is supported.
-        require(isSupported, "Swapping not supported. Verify source/target amount.");
-        return (minRateValue, maxRateValue);
-    }
-
-    /**
         @dev Perform the swapping between tokens.
         @dev The function must transfer the target tokens to the StablePay smart contract.
         @dev After the transfer, the StablePay contract will check the transfer result.

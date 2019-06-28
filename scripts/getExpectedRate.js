@@ -11,6 +11,7 @@ const IProviderRegistry = artifacts.require("./interface/IProviderRegistry.sol")
 const ERC20 = artifacts.require("./erc20/ERC20.sol");
 
 // Util classes
+const BigNumber = require('bignumber.js');
 const assert = require('assert');
 const ProviderKeyGenerator = require('../src/utils/ProviderKeyGenerator');
 const ProcessArgs = require('../src/utils/ProcessArgs');
@@ -21,9 +22,9 @@ const processArgs = new ProcessArgs();
  */
 const providerName = 'Uniswap'; // KyberNetwork or Uniswap
 const providerVersion = "1";
-const sourceTokenName = 'ZIL';
+const sourceTokenName = 'SNT';
 const targetTokenName = 'DAI';
-const sourceAmount = "100000000"; // 0.005 eth
+const targetAmount = '1';
 
 module.exports = async (callback) => {
     try {
@@ -40,13 +41,18 @@ module.exports = async (callback) => {
         assert(sourceToken, "Source token is undefined.");
         assert(targetToken, "Target token is undefined.");
 
-        const sourceTokenInstance = await ERC20.at(sourceToken);
         const targetTokenInstance = await ERC20.at(targetToken);
+        assert(targetTokenInstance, "Target token instance is undefined.");
 
-        const providerStrategy = await IProviderRegistry.at(stablepayContracts.StablePayStorage);
-        assert(providerStrategy.address, "Provider registry address is undefined.");
+        const tokenDecimals = await targetTokenInstance.decimals();
+        assert(tokenDecimals, "Target token decimals is undefined.");
+        const decimalsPow = (new BigNumber(10)).pow(tokenDecimals);
+        const targetAmountWei = BigNumber(targetAmount).times(decimalsPow).toFixed();
         
-        const accounts = web3.eth.accounts._provider.addresses;
+        const providerRegistry = await IProviderRegistry.at(stablepayContracts.StablePayStorage);
+        assert(providerRegistry.address, "Provider registry address is undefined.");
+        
+        const accounts = await web3.eth.getAccounts();
         assert(accounts, "Accounts must be defined.");
         
         const providerKeyGenerator = new ProviderKeyGenerator();
@@ -54,24 +60,31 @@ module.exports = async (callback) => {
         assert(providerKey, 'Provider key object must be defined.');
         assert(providerKey.providerKey, 'Provider key value must be defined.');
 
-        const getExpectedRateResult = await providerStrategy.getExpectedRate(
+        const getExpectedRateResult = await providerRegistry.getExpectedRate(
             providerKey.providerKey,
-            sourceTokenInstance.address,
+            sourceToken,
             targetTokenInstance.address,
-            sourceAmount
+            targetAmountWei
         );
         assert(getExpectedRateResult, "Expected rate rante result must exist.");
         /******************************************************************
                                 Function Invocation
         ******************************************************************/
+        const {
+            minRate,
+            maxRate,
+        } = getExpectedRateResult;
+
         console.log(`Provider Name:             ${providerKey.name}`);
         console.log(`Provider Key:              ${providerKey.providerKey}`);
         console.log(`Source Token:              ${sourceTokenName}`);
         console.log(`Target Token:              ${targetTokenName}`);
-        console.log(`Source Amount:             ${sourceAmount}`);
+        console.log(`Target Amount:             ${targetAmount}`);
         console.log(`Is Supported?:             ${getExpectedRateResult.isSupported}`);
-        console.log(`Min. Rate:                 ${getExpectedRateResult.minRate}`);
-        console.log(`Max. Rate:                 ${getExpectedRateResult.maxRate}`);
+        console.log(`Min. Rate:                 ${minRate.toString()}`);
+        console.log(`Max. Rate:                 ${maxRate.toString()}`);
+        console.log('');
+        console.log(`${minRate.toString()}-${maxRate.toString()} ${sourceTokenName} => ${targetAmountWei} ${targetTokenName}`);
 
         console.log('>>>> The script finished successfully. <<<<');
         callback();

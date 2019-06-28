@@ -7,6 +7,8 @@
     truffle exec ./scripts/registerNewUniswapSwappingProvider.js --network infuraRopsten
  */
 
+const appConfig = require('../src/config');
+
 // Smart contracts
 const IProviderRegistry = artifacts.require("./interface/IProviderRegistry.sol");
 
@@ -20,9 +22,9 @@ const processArgs = new ProcessArgs();
 /**
     Script Arguments
  */
-const UniswapSwappingProvider = artifacts.require("./providers/UniswapSwappingProvider.sol");
+const NewSwappingProvider = artifacts.require("./providers/KyberSwappingProvider.sol");
 const senderIndex = 0;
-const providerName = 'Uniswap';
+const providerName = 'KyberNetwork';
 const providerVersion = "2";
 
 module.exports = async (callback) => {
@@ -30,11 +32,12 @@ module.exports = async (callback) => {
         const network = processArgs.network();
         console.log(`Script will be executed in network ${network}.`)
         const appConf = require('../config')(network);
-        const maxGasForDeploying = appConf.maxGas;
-        const uniswapConf = appConf.uniswap;
+        const maxGasForDeploying = envConf.maxGas;
+        const kyberConf = appConf.kyber;
         const stablepayConf = appConf.stablepay;
         const stablepayContracts = stablepayConf.contracts;
-        const uniswapContracts = uniswapConf.contracts;
+        const kyberContracts = kyberConf.contracts;
+        const kyberAddressFee = appConfig.getKyberAddressFee().get();
 
         const providerStrategy = await IProviderRegistry.at(stablepayContracts.StablePayStorage);
         assert(providerStrategy.address, "Provider registry address is undefined.");
@@ -52,26 +55,24 @@ module.exports = async (callback) => {
 
         const stablePayAddress = stablepayContracts.StablePay;
         assert(stablePayAddress, 'StablePay address must be defined.');
-        const uniswapFactoryAddress = uniswapContracts.factory;
-        assert(uniswapFactoryAddress, 'Uniswap factory address must be defined.');
+        const kyberNetworkProxyAddress = kyberContracts.KyberNetworkProxy;
+        assert(kyberNetworkProxyAddress, 'Kyber Netowork Proxy address must be defined.');
 
-        const uniswapSwappingProvider = await UniswapSwappingProvider.new(
+        const newSwappingProvider = await NewSwappingProvider.new(
             stablePayAddress,
-            uniswapFactoryAddress,
-            {
-                from: sender,
-                gas: maxGasForDeploying
-            }
+            kyberNetworkProxyAddress,
+            kyberAddressFee,
+            { gas: maxGasForDeploying }
         );
 
-        assert(uniswapSwappingProvider, "Uniswap swapping provider is undefined.");
-        assert(uniswapSwappingProvider.address, "Uniswap swapping provider address is undefined.");
+        assert(newSwappingProvider, "New swapping provider is undefined.");
+        assert(newSwappingProvider.address, "New swapping provider address is undefined.");
         
         /******************************************************************
                                 Function Invocation
         ******************************************************************/
         const registerSwappingProviderResult = await providerStrategy.registerSwappingProvider(
-            uniswapSwappingProvider.address,
+            newSwappingProvider.address,
             providerKey.providerKey,
             {from: sender}
         );
@@ -79,12 +80,12 @@ module.exports = async (callback) => {
         console.log('Transation Result:');
         console.log(util.inspect(registerSwappingProviderResult, {showHidden: false, depth: null}));
 
-        const newSwappingProvider = await providerStrategy.getSwappingProvider(providerKey.providerKey);
-        assert(newSwappingProvider.exists === true, 'Swapping provider must exists.');
-        assert(newSwappingProvider.pausedByAdmin === false, 'Swapping provider must not be paused by admin.');
-        assert(newSwappingProvider.pausedByOwner === false, 'Swapping provider must not be paused by owner.');
+        const swappingProviderRegistered = await providerStrategy.getSwappingProvider(providerKey.providerKey);
+        assert(swappingProviderRegistered.exists === true, 'Swapping provider must exists.');
+        assert(swappingProviderRegistered.pausedByAdmin === false, 'Swapping provider must not be paused by admin.');
+        assert(swappingProviderRegistered.pausedByOwner === false, 'Swapping provider must not be paused by owner.');
 
-        console.log(`New Swapping Provider Address: ${uniswapSwappingProvider.address}`);
+        console.log(`New Swapping Provider Address: ${swappingProviderRegistered.swappingProvider}`);
         console.log(`Provider Key: ${providerKey.providerKey}`);
 
         console.log('>>>> The script finished successfully. <<<<');
@@ -93,4 +94,9 @@ module.exports = async (callback) => {
         console.log(error);
         callback(error);
     }
+
+    /*
+
+    
+*/
 };

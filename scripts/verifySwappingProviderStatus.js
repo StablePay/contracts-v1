@@ -19,7 +19,7 @@ const processArgs = new ProcessArgs();
 /**
     Script Arguments
  */
-const providerName = 'Uniswap';
+const providerName = 'KyberNetwork';
 const providerVersion = "1";
 
 module.exports = async (callback) => {

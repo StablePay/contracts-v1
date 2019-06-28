@@ -39,8 +39,8 @@
     "run-s": "^0.0.0",
     "truffle-core": "5.0.2",
     "truffle-plugin-verify": "^0.2.1",
-    "web3": "1.0.0-beta.33",
-    "web3-utils": "1.0.0-beta.33",
+    "web3": "1.0.0-beta.55",
+    "web3-utils": "1.0.0-beta.55",
     "zeppelin-solidity": "1.7.0"
   },
   "devDependencies": {
