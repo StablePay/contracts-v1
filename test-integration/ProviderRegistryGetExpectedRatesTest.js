@@ -36,23 +36,23 @@ contract('ProviderRegistryGetExpectedRatesTest', (accounts) => {
         _3_KNC_to_30_DAI: ['KNC', '30', 'DAI', 2],
         _4_KNC_to_80_DAI: ['KNC', '80', 'DAI', 2],
         _5_EOS_to_80_DAI: ['EOS', '25', 'DAI', 1],
-        // Fix _6_OMG_to_15_DAI: ['OMG', '15', 'DAI', 2],
-        // Fix _7_OMG_to_31_DAI: ['OMG', '31', 'DAI', 2],
+        _6_OMG_to_15_DAI: ['OMG', '15', 'DAI', 1],
+        _7_OMG_to_31_DAI: ['OMG', '31', 'DAI', 1],
         _8_MANA_to_30_DAI: ['MANA', '30', 'DAI', 1],
         _9_ZIL_to_25_DAI: ['ZIL', '25', 'DAI', 2],
         _10_ELF_to_32_DAI: ['ELF', '32', 'DAI', 1],
-        // Fix _11_SNT_to_41_DAI: ['SNT', '41', 'DAI', 2],
+        _11_SNT_to_41_DAI: ['SNT', '41', 'DAI', 2],
         _12_BAT_to_21_DAI: ['BAT', '21', 'DAI', 2],
         _13_POWR_to_15_5_DAI: ['POWR', '15.5', 'DAI', 1],
-        _14_ETH_to_1_DAI: ['ETH', '1', 'DAI', 2], // Fix lengthExpected should be 2. I think the new changes in Uniswap fixes it.
-        _15_ETH_to_10_DAI: ['ETH', '10', 'DAI', 2], // Fix lengthExpected should be 2. I think the new changes in Uniswap fixes it.
-        _16_ETH_to_20_DAI: ['ETH', '20', 'DAI', 2], // Fix lengthExpected should be 2. I think the new changes in Uniswap fixes it.
-        _17_ETH_to_30_DAI: ['ETH', '30', 'DAI', 2], // Fix lengthExpected should be 2. I think the new changes in Uniswap fixes it.
-        _18_ETH_to_80_DAI: ['ETH', '80', 'DAI', 2], // Fix lengthExpected should be 2. I think the new changes in Uniswap fixes it.
-        _19_ETH_to_30_DAI: ['ETH', '30', 'DAI', 2], // Fix lengthExpected should be 2. I think the new changes in Uniswap fixes it.
-        _20_ETH_to_30_DAI: ['ETH', '30', 'DAI', 2], // Fix lengthExpected should be 2. I think the new changes in Uniswap fixes it.
-        _21_ETH_to_30_DAI: ['ETH', '12', 'DAI', 2], // Fix lengthExpected should be 2. I think the new changes in Uniswap fixes it.
-        _22_ETH_to_10_DAI: ['ETH', '29.98', 'DAI', 2], // Fix lengthExpected should be 2. I think the new changes in Uniswap fixes it.
+        _14_ETH_to_1_DAI: ['ETH', '1', 'DAI', 2],
+        _15_ETH_to_10_DAI: ['ETH', '10', 'DAI', 2],
+        _16_ETH_to_20_DAI: ['ETH', '20', 'DAI', 2],
+        _17_ETH_to_30_DAI: ['ETH', '30', 'DAI', 2],
+        _18_ETH_to_80_DAI: ['ETH', '80', 'DAI', 2],
+        _19_ETH_to_30_DAI: ['ETH', '30', 'DAI', 2],
+        _20_ETH_to_30_DAI: ['ETH', '30', 'DAI', 2],
+        _21_ETH_to_30_DAI: ['ETH', '12', 'DAI', 2],
+        _22_ETH_to_10_DAI: ['ETH', '29.98', 'DAI', 2],
     }, function(sourceTokenName, targetAmountUnit, targetTokenName, lengthExpected) {
         it(t('anUser', 'getExpectedRates', `Should be able to get expected rate for: ${sourceTokenName} -> ${targetAmountUnit} ${targetTokenName}.`), async function() {
             // Setup
