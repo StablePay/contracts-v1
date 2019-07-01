@@ -110,9 +110,16 @@ contract UniswapSwappingProvider is ISwappingProvider {
         require(address(_targetToken) != address(0x0), "Target token != 0x0.");
         require(_sourceAmount > 0, "Source amount > 0.");
 
+
+
         UniswapFactoryInterface uFactory = UniswapFactoryInterface(uniswapFactory);
         UniswapExchangeInterface targetExchange = UniswapExchangeInterface(uFactory.getExchange(_targetToken));
         uint rate = 0;
+
+        if(_targetToken.balanceOf(address(targetExchange)) == 0){
+            return (false, 0, 0);
+        }
+
 
         if(ETH_ADDRESS == address (_sourceToken)) {
             isSupported =  targetExchange != address(0x0);
@@ -124,6 +131,10 @@ contract UniswapSwappingProvider is ISwappingProvider {
 
         UniswapExchangeInterface sourceExchange = UniswapExchangeInterface(uFactory.getExchange(_sourceToken));
         isSupported = sourceExchange != address(0x0) && targetExchange != address(0x0);
+
+        if(_sourceToken.balanceOf(address(sourceExchange)) == 0){
+            return (false, 0, 0);
+        }
 
         if(isSupported) {
             uint256 ethToBuyTargetToken = targetExchange.getEthToTokenOutputPrice(_sourceAmount);
