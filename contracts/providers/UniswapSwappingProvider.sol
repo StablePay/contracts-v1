@@ -14,6 +14,7 @@ import "../util/SafeMath.sol";
 contract UniswapSwappingProvider is ISwappingProvider {
 
     address public uniswapFactory;
+    address private ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
 
     constructor(address _stablePay, address _factory)
     public ISwappingProvider(_stablePay)
@@ -33,7 +34,6 @@ contract UniswapSwappingProvider is ISwappingProvider {
         require(address(sourceExchange) != 0x0, "Exchange not found for source token");
         require(address(targetExchange) != 0x0, "Exchange not found for target token");
 
-
         require(_order.targetAmount > 0 , "Target amount cannot be zero");
 
         // Check the current source token balance is higher (or equals) to the order source amount.
@@ -50,7 +50,6 @@ contract UniswapSwappingProvider is ISwappingProvider {
         require(ERC20(_order.sourceToken).approve(address(sourceExchange), 0), "Error mitigating front-running attack.");
         // Set the spender's token allowance to tokenQty
         require(ERC20(_order.sourceToken).approve(address(sourceExchange), sourceTokensToSell), "Error approving tokens for exchange."); // Set max amount.
-
 
         sourceExchange.tokenToTokenSwapOutput(
             _order.targetAmount ,
@@ -69,22 +68,20 @@ contract UniswapSwappingProvider is ISwappingProvider {
         // The initial balance is higher (or equals) than final source token balance.
         transferDiffTokensIfApplicable(_order.sourceToken, _order.fromAddress, _order.sourceAmount, sourceInitialTokenBalance, sourceFinalTokenBalance);
 
-
-    return true;
+        return true;
     }
 
     function swapEther(StablePayCommon.Order memory  _order)
-    public isStablePay(msg.sender)
+    public
+    isStablePay(msg.sender)
     payable
-    returns (bool)
-    {
+    returns (bool) {
         UniswapFactoryInterface uFactory = UniswapFactoryInterface(uniswapFactory);
 
         require(uFactory.getExchange(_order.targetToken) != 0x0, "Exchange not found for target token");
 
         UniswapExchangeInterface targetExchange = UniswapExchangeInterface(uFactory.getExchange(_order.targetToken));
         uint256 sourceInitialEtherBalance = getEtherBalance();
-
 
         uint256 ethToBuyTargetToken = targetExchange.getEthToTokenOutputPrice(_order.targetAmount);
         require(msg.value >= ethToBuyTargetToken, "Not enough value to complete swapping transaction");
@@ -94,8 +91,6 @@ contract UniswapSwappingProvider is ISwappingProvider {
             block.timestamp + 300
         );
 
-
-
         require(ERC20(_order.targetToken).transfer(msg.sender,  _order.targetAmount), "Source transfer invocation was not successful.");
 
         // Get ether balance after swapping execution.
@@ -104,24 +99,32 @@ contract UniswapSwappingProvider is ISwappingProvider {
         // Transfer back to the sender the diff balance (Ether).
         transferDiffEtherBalanceIfApplicable(_order.fromAddress, msg.value, sourceInitialEtherBalance, sourceFinalEtherBalance);
 
-    return true;
+        return true;
     }
 
     function getExpectedRate(ERC20 _sourceToken, ERC20 _targetToken, uint _sourceAmount)
     public
     view
-    returns (bool isSupported, uint minRate, uint maxRate)
-    {
+    returns (bool isSupported, uint minRate, uint maxRate) {
         require(address(_sourceToken) != address(0x0), "Source token != 0x0.");
         require(address(_targetToken) != address(0x0), "Target token != 0x0.");
         require(_sourceAmount > 0, "Source amount > 0.");
-        
-        UniswapFactoryInterface uFactory = UniswapFactoryInterface(uniswapFactory);
-        UniswapExchangeInterface sourceExchange = UniswapExchangeInterface(uFactory.getExchange(_sourceToken));
-        UniswapExchangeInterface targetExchange = UniswapExchangeInterface(uFactory.getExchange(_targetToken));
 
-        isSupported = sourceExchange != address(0x0) && targetExchange != address(0x0);
+        UniswapFactoryInterface uFactory = UniswapFactoryInterface(uniswapFactory);
+        UniswapExchangeInterface targetExchange = UniswapExchangeInterface(uFactory.getExchange(_targetToken));
         uint rate = 0;
+
+        if(ETH_ADDRESS == address (_sourceToken)) {
+            isSupported =  targetExchange != address(0x0);
+            if(isSupported) {
+                rate = targetExchange.getEthToTokenOutputPrice(_sourceAmount);
+            }
+            return (isSupported, rate, rate);
+        }
+
+        UniswapExchangeInterface sourceExchange = UniswapExchangeInterface(uFactory.getExchange(_sourceToken));
+        isSupported = sourceExchange != address(0x0) && targetExchange != address(0x0);
+
         if(isSupported) {
             uint256 ethToBuyTargetToken = targetExchange.getEthToTokenOutputPrice(_sourceAmount);
             rate = sourceExchange.getTokenToEthOutputPrice(ethToBuyTargetToken);

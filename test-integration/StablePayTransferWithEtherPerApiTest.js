@@ -18,6 +18,7 @@ const processArgs = new ProcessArgs();
 
 contract('StablePayTransferWithEthersPerApiTest', (accounts) => {
     const appConf = require('../config')(processArgs.network());
+    const maxGas = appConf.maxGas;
     const stablepayConf = appConf.stablepay;
     const stablepayContracts = stablepayConf.contracts;
     const kyberConf = appConf.kyber;
@@ -103,7 +104,7 @@ contract('StablePayTransferWithEthersPerApiTest', (accounts) => {
                 merchantAddress: merchantAddress,
                 customerAddress: customerAddress
             };
-            const result = await stablePayWrapper.transferWithEthers(data, {from: customerAddress, gas: 6721975});//8000000
+            const result = await stablePayWrapper.transferWithEthers(data, {from: customerAddress, gas: maxGas});
 
             assert(result.success);
             console.log(JSON.stringify(result.result));

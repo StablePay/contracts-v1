@@ -29,7 +29,7 @@ ByApiOrderDataBuilder.prototype.build = async function(data) {
         safeMargin: "0.000000000"
     });
     const apiResponse = apiResult.data;
-    const providersKey = apiResponse.providers.map(provider => provider.providerKey);
+    const providersKey = apiResponse.providers;
     const order = apiResponse.order;
     const amounts = apiResponse.amounts;
     console.log(amounts);

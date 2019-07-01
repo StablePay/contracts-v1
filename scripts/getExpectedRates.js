@@ -11,6 +11,7 @@ const IProviderRegistry = artifacts.require("./interface/IProviderRegistry.sol")
 const ERC20 = artifacts.require("./erc20/ERC20.sol");
 
 // Util classes
+const BigNumber = require('bignumber.js');
 const assert = require('assert');
 const ProcessArgs = require('../src/utils/ProcessArgs');
 const processArgs = new ProcessArgs();
@@ -18,9 +19,9 @@ const processArgs = new ProcessArgs();
 /**
     Script Arguments
  */
-const sourceTokenName = 'ZIL';
+const sourceTokenName = 'ETH';
 const targetTokenName = 'DAI';
-const sourceAmount = "1000000000000"; // 0.005 eth
+const targetAmount = "10";
 
 module.exports = async (callback) => {
     try {
@@ -37,32 +38,32 @@ module.exports = async (callback) => {
         assert(sourceToken, "Source token is undefined.");
         assert(targetToken, "Target token is undefined.");
 
-        const sourceTokenInstance = await ERC20.at(sourceToken);
         const targetTokenInstance = await ERC20.at(targetToken);
 
-        // const providerStrategy = await IProviderRegistry.at(stablepayContracts.StablePayStorage);
-        const providerStrategy = await IProviderRegistry.at('0xDA6d869782B45f90074F51F2F3A3f935a9c1D476');
+        const tokenDecimals = await targetTokenInstance.decimals();
+        const decimalsPow = (new BigNumber(10)).pow(tokenDecimals);
+        const targetAmountWei = BigNumber(targetAmount).times(decimalsPow).toFixed();
+
+        const providerStrategy = await IProviderRegistry.at(stablepayContracts.StablePayStorage);
         
         assert(providerStrategy.address, "Provider registry address is undefined.");
         
-        const accounts = web3.eth.accounts._provider.addresses;
+        const accounts = await web3.eth.getAccounts();
         assert(accounts, "Accounts must be defined.");
 
         const getExpectedRatesResult = await providerStrategy.getExpectedRates(
-            sourceTokenInstance.address,
+            sourceToken,
             targetTokenInstance.address,
-            sourceAmount
+            targetAmountWei
         );
-        console.log(getExpectedRatesResult);
         assert(getExpectedRatesResult, "Expected rate rante result must exist.");
         /******************************************************************
                                 Function Invocation
         ******************************************************************/
         console.log(`Source Token:              ${sourceTokenName}`);
         console.log(`Target Token:              ${targetTokenName}`);
-        console.log(`Source Amount:             ${sourceAmount}`);
+        console.log(`Target Amount:             ${targetAmount} / ${targetAmountWei}`);
         getExpectedRatesResult.forEach( expectedRate => {
-            //console.log('\n');
             console.log('-'.repeat(50));
             console.log(`Provider Key:              ${expectedRate.providerKey}`);
             console.log(`Is Supported?:             ${expectedRate.isSupported}`);

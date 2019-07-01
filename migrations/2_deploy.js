@@ -10,7 +10,7 @@ const PLATFORM_FEE_KEY = 'config.platform.fee';
 /** Platform configuration values. */
 const printDeployCostValue = appConfig.getPrintDeployCost().get();
 const platformFee = appConfig.getPlatformFee().get();
-const maxGasForDeploying = 6000000;
+const kyberAddressFee = appConfig.getKyberAddressFee().get();
 
 // Mock Smart Contracts
 const BaseMock = artifacts.require("./mock/BaseMock.sol");
@@ -54,6 +54,12 @@ module.exports = function(deployer, network, accounts) {
   const providerKeyGenerator = new ProviderKeyGenerator();
 
   const envConf = require('../config')(network);
+  const maxGasForDeploying = envConf.maxGas;
+
+  if(maxGasForDeploying === undefined) {
+    throw new Error(`Max gas value for network 'config/${network}.js' is not defined.`);
+  }
+
   const stablePayConf = envConf.stablepay;
   const kyberConf = envConf.kyber;
   const uniswapConf = envConf.uniswap;
@@ -153,6 +159,7 @@ module.exports = function(deployer, network, accounts) {
         KyberSwappingProvider,
         stablePayInstance.address,
         kyberContracts.KyberNetworkProxy,
+        kyberAddressFee,
         {gas: maxGasForDeploying}
     );
     const kyberProviderKey = providerKeyGenerator.generateKey('KyberNetwork', '1');

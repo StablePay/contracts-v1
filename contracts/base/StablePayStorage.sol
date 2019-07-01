@@ -91,13 +91,31 @@ contract StablePayStorage is Base, IProviderRegistry {
         return iSwappingProvider.getExpectedRate(_src, _dest, _srcQty);
     }
 
+    function getSupportedExpectedRatesCount(ERC20 _src, ERC20 _dest, uint _srcQty)
+        internal
+        view
+        returns (uint) {
+        uint count = 0;
+        for (uint256 index = 0; index < providersRegistry.length; index = index.add(1)) {
+            bytes32 _providerKey = providersRegistry[index];
+            if(isSwappingProviderValid(_providerKey)) {
+                ISwappingProvider iSwappingProvider = ISwappingProvider(providers[_providerKey].providerAddress);
+                bool isSupported;
+                (isSupported, , ) = iSwappingProvider.getExpectedRate(_src, _dest, _srcQty);
+                if(isSupported) {
+                    count = count.add(1);
+                }
+            }
+        }
+        return count;
+    }
+
     function getExpectedRates(ERC20 _src, ERC20 _dest, uint _srcQty)
         public
         view
-        returns (StablePayCommon.ExpectedRate[]) {
-        uint256 totalProviders = providersRegistry.length;
-        StablePayCommon.ExpectedRate[] memory expectedRates = new StablePayCommon.ExpectedRate[](totalProviders);
-
+        returns (StablePayCommon.ExpectedRate[] expectedRates) {
+        expectedRates = new StablePayCommon.ExpectedRate[](getSupportedExpectedRatesCount(_src, _dest, _srcQty));
+        uint currentIndex = 0;
         for (uint256 index = 0; index < providersRegistry.length; index = index.add(1)) {
             bytes32 _providerKey = providersRegistry[index];
             if(isSwappingProviderValid(_providerKey)) {
@@ -107,12 +125,15 @@ contract StablePayStorage is Base, IProviderRegistry {
                 uint maxRate;
                 bool isSupported;
                 (isSupported, minRate, maxRate) = iSwappingProvider.getExpectedRate(_src, _dest, _srcQty);
-                expectedRates[index] = StablePayCommon.ExpectedRate({
-                    providerKey: _providerKey,
-                    minRate: minRate,
-                    maxRate: maxRate,
-                    isSupported: isSupported
-                });
+                if(isSupported) {
+                    expectedRates[currentIndex] = StablePayCommon.ExpectedRate({
+                        providerKey: _providerKey,
+                        minRate: minRate,
+                        maxRate: maxRate,
+                        isSupported: isSupported
+                    });
+                    currentIndex = currentIndex.add(1);
+                }
             }
         }
         return expectedRates;
