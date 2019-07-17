@@ -81,17 +81,17 @@ contract StablePayStorage is Base, IProviderRegistry {
 
     /** Functions */
 
-    function getExpectedRate(bytes32 _providerKey, ERC20 _src, ERC20 _dest, uint _srcQty)
+    function getExpectedRate(bytes32 _providerKey, ERC20 sourceToken, ERC20 targetToken, uint targetAmount)
         public
         view
         returns (bool isSupported, uint minRate, uint maxRate) {
         require(isSwappingProviderValid(_providerKey), "Provider must exist and be enabled.");
         StablePayCommon.SwappingProvider memory swappingProvider = providers[_providerKey];
         ISwappingProvider iSwappingProvider = ISwappingProvider(swappingProvider.providerAddress);
-        return iSwappingProvider.getExpectedRate(_src, _dest, _srcQty);
+        return iSwappingProvider.getExpectedRate(sourceToken, targetToken, targetAmount);
     }
 
-    function getSupportedExpectedRatesCount(ERC20 _src, ERC20 _dest, uint _srcQty)
+    function getSupportedExpectedRatesCount(ERC20 sourceToken, ERC20 targetToken, uint targetAmount)
         internal
         view
         returns (uint) {
@@ -101,7 +101,7 @@ contract StablePayStorage is Base, IProviderRegistry {
             if(isSwappingProviderValid(_providerKey)) {
                 ISwappingProvider iSwappingProvider = ISwappingProvider(providers[_providerKey].providerAddress);
                 bool isSupported;
-                (isSupported, , ) = iSwappingProvider.getExpectedRate(_src, _dest, _srcQty);
+                (isSupported, , ) = iSwappingProvider.getExpectedRate(sourceToken, targetToken, targetAmount);
                 if(isSupported) {
                     count = count.add(1);
                 }
@@ -110,11 +110,11 @@ contract StablePayStorage is Base, IProviderRegistry {
         return count;
     }
 
-    function getExpectedRates(ERC20 _src, ERC20 _dest, uint _srcQty)
+    function getExpectedRates(ERC20 sourceToken, ERC20 targetToken, uint targetAmount)
         public
         view
         returns (StablePayCommon.ExpectedRate[] expectedRates) {
-        expectedRates = new StablePayCommon.ExpectedRate[](getSupportedExpectedRatesCount(_src, _dest, _srcQty));
+        expectedRates = new StablePayCommon.ExpectedRate[](getSupportedExpectedRatesCount(sourceToken, targetToken, targetAmount));
         uint currentIndex = 0;
         for (uint256 index = 0; index < providersRegistry.length; index = index.add(1)) {
             bytes32 _providerKey = providersRegistry[index];
@@ -124,7 +124,7 @@ contract StablePayStorage is Base, IProviderRegistry {
                 uint minRate;
                 uint maxRate;
                 bool isSupported;
-                (isSupported, minRate, maxRate) = iSwappingProvider.getExpectedRate(_src, _dest, _srcQty);
+                (isSupported, minRate, maxRate) = iSwappingProvider.getExpectedRate(sourceToken, targetToken, targetAmount);
                 if(isSupported) {
                     expectedRates[currentIndex] = StablePayCommon.ExpectedRate({
                         providerKey: _providerKey,
@@ -139,7 +139,7 @@ contract StablePayStorage is Base, IProviderRegistry {
         return expectedRates;
     }
 
-    function getExpectedRateRange(ERC20 _src, ERC20 _dest, uint _srcQty)
+    function getExpectedRateRange(ERC20 sourceToken, ERC20 targetToken, uint targetAmount)
         public
         view
         returns (uint minRate, uint maxRate) {
@@ -154,13 +154,13 @@ contract StablePayStorage is Base, IProviderRegistry {
                     uint minRateProvider;
                     uint maxRateProvider;
                     bool isSupported;
-                    (isSupported, minRateProvider, maxRateProvider) = iSwappingProvider.getExpectedRate(_src, _dest, _srcQty);
+                    (isSupported, minRateProvider, maxRateProvider) = iSwappingProvider.getExpectedRate(sourceToken, targetToken, targetAmount);
                     
                     if(isSupported) {
-                        if(minRateResult == 0 || minRateProvider > minRateResult) {
+                        if(minRateResult == 0 || minRateProvider < minRateResult) {
                             minRateResult = minRateProvider;
                         }
-                        if(maxRateResult == 0 || maxRateProvider < maxRateResult) {
+                        if(maxRateResult == 0 || maxRateProvider > maxRateResult) {
                             maxRateResult = maxRateProvider;
                         }
                     }

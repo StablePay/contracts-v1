@@ -37,17 +37,17 @@ interface IProviderRegistry {
 
     /*** Methods ***************/
 
-    function getExpectedRate(bytes32 _providerKey, ERC20 _src, ERC20 _dest, uint _srcQty)
+    function getExpectedRate(bytes32 _providerKey, ERC20 sourceToken, ERC20 targetToken, uint targetAmount)
         external
         view
         returns (bool isSupported, uint minRate, uint maxRate);
 
-    function getExpectedRates(ERC20 _src, ERC20 _dest, uint _srcQty)
+    function getExpectedRates(ERC20 sourceToken, ERC20 targetToken, uint targetAmount)
         external
         view
         returns (StablePayCommon.ExpectedRate[]);
 
-    function getExpectedRateRange(ERC20 _src, ERC20 _dest, uint _srcQty)
+    function getExpectedRateRange(ERC20 sourceToken, ERC20 targetToken, uint targetAmount)
         external
         view
         returns (uint minRate, uint maxRate);
