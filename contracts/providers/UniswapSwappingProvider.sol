@@ -110,17 +110,16 @@ contract UniswapSwappingProvider is ISwappingProvider {
         require(address(_targetToken) != address(0x0), "Target token != 0x0.");
         require(_sourceAmount > 0, "Source amount > 0.");
 
-
-
         UniswapFactoryInterface uFactory = UniswapFactoryInterface(uniswapFactory);
         UniswapExchangeInterface targetExchange = UniswapExchangeInterface(uFactory.getExchange(address(_targetToken)));
         uint rate = 0;
 
+        // TODO If targetExchange or sourceExchange is 0x0. Why not return is not supported?
         if(_targetToken.balanceOf(address(targetExchange)) == 0){
             return (false, 0, 0);
         }
 
-
+        // TODO If targetToken is equals to ETH_ADDRESS ?
         if(ETH_ADDRESS == address (_sourceToken)) {
             isSupported =  address(targetExchange) != address(0x0);
             if(isSupported) {

@@ -157,10 +157,10 @@ contract StablePayStorage is Base, IProviderRegistry {
                     (isSupported, minRateProvider, maxRateProvider) = iSwappingProvider.getExpectedRate(sourceToken, targetToken, targetAmount);
                     
                     if(isSupported) {
-                        if(minRateResult == 0 || minRateProvider > minRateResult) {
+                        if(minRateResult == 0 || minRateProvider < minRateResult) {
                             minRateResult = minRateProvider;
                         }
-                        if(maxRateResult == 0 || maxRateProvider < maxRateResult) {
+                        if(maxRateResult == 0 || maxRateProvider > maxRateResult) {
                             maxRateResult = maxRateProvider;
                         }
                     }
