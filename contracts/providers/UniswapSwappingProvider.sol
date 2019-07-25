@@ -102,41 +102,51 @@ contract UniswapSwappingProvider is ISwappingProvider {
         return true;
     }
 
-    function getExpectedRate(ERC20 _sourceToken, ERC20 _targetToken, uint _sourceAmount)
+    function getExpectedRate(ERC20 _sourceToken, ERC20 _targetToken, uint _targetAmount)
     public
     view
     returns (bool isSupported, uint minRate, uint maxRate) {
         require(address(_sourceToken) != address(0x0), "Source token != 0x0.");
         require(address(_targetToken) != address(0x0), "Target token != 0x0.");
-        require(_sourceAmount > 0, "Source amount > 0.");
+        require(_targetAmount > 0, "Source amount > 0.");
+
 
         UniswapFactoryInterface uFactory = UniswapFactoryInterface(uniswapFactory);
         UniswapExchangeInterface targetExchange = UniswapExchangeInterface(uFactory.getExchange(address(_targetToken)));
         uint rate = 0;
 
-        // TODO If targetExchange or sourceExchange is 0x0. Why not return is not supported?
-        if(_targetToken.balanceOf(address(targetExchange)) == 0){
-            return (false, 0, 0);
-        }
 
-        // TODO If targetToken is equals to ETH_ADDRESS ?
         if(ETH_ADDRESS == address (_sourceToken)) {
             isSupported =  address(targetExchange) != address(0x0);
             if(isSupported) {
-                rate = targetExchange.getEthToTokenOutputPrice(_sourceAmount);
+                rate = targetExchange.getEthToTokenOutputPrice(_targetAmount);
             }
             return (isSupported, rate, rate);
         }
 
-        UniswapExchangeInterface sourceExchange = UniswapExchangeInterface(uFactory.getExchange(address(_sourceToken)));
-        isSupported = address(sourceExchange) != address(0x0) && address(targetExchange) != address(0x0);
+        UniswapExchangeInterface sourceExchange = UniswapExchangeInterface(uFactory.getExchange(_sourceToken));
 
-        if(_sourceToken.balanceOf(address(sourceExchange)) == 0){
+
+        if(sourceExchange == address(0x0) || _sourceToken.balanceOf(address(sourceExchange)) == 0){
             return (false, 0, 0);
         }
 
+        if(ETH_ADDRESS == address (_targetToken)) {
+            isSupported =  sourceExchange != address(0x0);
+            if(isSupported) {
+                rate = sourceExchange.getTokenToEthOutputPrice(_targetAmount);
+            }
+            return (isSupported, rate, rate);
+        }
+
+
+        if( targetExchange == address(0x0) || _targetToken.balanceOf(address(targetExchange)) == 0 ){
+            return (false, 0, 0);
+        }
+
+        isSupported = sourceExchange != address(0x0) && targetExchange != address(0x0);
         if(isSupported) {
-            uint256 ethToBuyTargetToken = targetExchange.getEthToTokenOutputPrice(_sourceAmount);
+            uint256 ethToBuyTargetToken = targetExchange.getEthToTokenOutputPrice(_targetAmount);
             rate = sourceExchange.getTokenToEthOutputPrice(ethToBuyTargetToken);
         }
 
