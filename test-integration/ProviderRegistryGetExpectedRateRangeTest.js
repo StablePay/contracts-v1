@@ -52,7 +52,7 @@ contract('ProviderRegistryExpectedRateRangeTest', (accounts) => {
         _20_ETH_to_30_DAI: ['ETH', '30', 'DAI'],
         _21_ETH_to_30_DAI: ['ETH', '12', 'DAI'],
         _22_ETH_to_10_DAI: ['ETH', '29.98', 'DAI'],
-        // TODO Fix _23_ETH_to_10_DAI: ['DAI', '1', 'ETH'],
+        _23_DAI_to_10_ETH: ['DAI', '1', 'ETH'],
     }, function(sourceTokenName, targetAmountUnit, targetTokenName) {
         it(t('anUser', 'getExpectedRateRange', `Should be able to get expected rate range ${sourceTokenName} -> ${targetAmountUnit} ${targetTokenName}.`), async function() {
             // Setup
