@@ -94,7 +94,8 @@ contract('StablePayTransferWithEthersPerApiTest', (accounts) => {
             const customerInitialBalance = await web3.eth.getBalance(customerAddress);
             console.log('customerAddress Initial    ', customerInitialBalance.toString());
 
-            const stablePayWrapper = new StablePayWrapper(stablePay, new OrderDataBuilder(appConfig.getOrderFactoryUrl().get()), sourceTokenInstance, verbose);
+            const ordersUrl = `${appConfig.getStablePayApiUrl().get()}/orders`;
+            const stablePayWrapper = new StablePayWrapper(stablePay, new OrderDataBuilder(ordersUrl), sourceTokenInstance, verbose);
 
             // Invocation
             const data = {

@@ -15,13 +15,13 @@ module.exports = {
         },
         {
             name: 'SALT',
-            minAmount: BigNumber("12").times(DECIMALS).toFixed(),
-            maxAmount: BigNumber("10002").times(DECIMALS).toFixed()
+            minAmount: BigNumber("12").times(8).toFixed(),
+            maxAmount: BigNumber("10002").times(8).toFixed()
         },
         {
             name: 'ZIL',
-            minAmount: BigNumber("13").times(DECIMALS).toFixed(),
-            maxAmount: BigNumber("10003").times(DECIMALS).toFixed()
+            minAmount: BigNumber("13").times(12).toFixed(),
+            maxAmount: BigNumber("10003").times(12).toFixed()
         },
         {
             name: 'MANA',
@@ -30,11 +30,11 @@ module.exports = {
         }
     ],
 	contracts: {
-		StablePay: '0x1FC1Fb82C26BB42c8E075C6927bEAD120Fbde1C2',
-		StablePayStorage: '0x386ee4CCBaCCC99eD92f8A425BB92557FB85dc20',
-		Settings: '0x4939100Bb6e6a7e4b2f0D2c7f832Dd177b2a6aCb',
-		Vault: '0x12a96b07bB2622AE1B160062F910F9f3baB44f4d',
-		KyberSwappingProvider: '0x3CE2574f590ED957b3Fbd3d8F3DcaF091BcA2240'
+		StablePay: '0xC7425Bc338226BF4256EA86246FeF1C7e81BDF0E',
+		StablePayStorage: '0x37fb1B54BC36FfFc8FecB71344059cf208876D1C',
+		Settings: '0xbfd2D0A1eeC9302291Ee3f741E9Aa7A59D713f96',
+		Vault: '0x5c9598d17b4c092456C28195B288A7D4a60d97dC',
+		KyberSwappingProvider: '0x2D0Ca9c6937eFf370F830808EbC68Be2a1fe6156'
 	},
 	providers: {
 		Kyber: '0x4b796265724e6574776f726b5f76310000000000000000000000000000000000',

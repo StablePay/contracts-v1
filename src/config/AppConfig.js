@@ -15,9 +15,9 @@ const MNEMONIC_KEY = 'MNEMONIC_KEY';
 const INFURA_KEY = 'INFURA_KEY';
 const GAS_WEI_KEY = 'GAS_WEI_KEY';
 const GAS_PRICE_GWEI_KEY = 'GAS_PRICE_GWEI_KEY';
-const ORDER_FACTORY_URL_KEY = 'ORDER_FACTORY_URL';
 const ETHERSCAN_API_KEY_KEY = 'ETHERSCAN_API_KEY';
 const KYBER_ADDRESS_FEE_KEY = 'KYBER_ADDRESS_FEE';
+const STABLEPAY_API_URL_KEY = 'STABLEPAY_API_URL';
 
 class AppConfig {
     constructor() {
@@ -27,7 +27,7 @@ class AppConfig {
 }
 
 AppConfig.prototype.initializeConf = function() {
-    this.createItem(ORDER_FACTORY_URL_KEY, undefined, 'It is used to call API endpoint to create an order data.');
+    this.createItem(STABLEPAY_API_URL_KEY, undefined, 'It is used to call StablePay API Rest endpoints.');
     this.createItem(PRINT_DEPLOY_COST_KEY, DEFAULT_PRINT_DEPLOY_COST, 'It prints the costs per contract.');
     this.createItem(PLATFORM_FEE_KEY, undefined, 'This is the platform fee.');
     this.createItem(DEFAULT_ADDRESS_INDEX_KEY, DEFAULT_ADDRESS_INDEX, 'This is the address index to be used as default.');
@@ -77,16 +77,16 @@ AppConfig.prototype.getPrintDeployCost = function() {
     return this.conf.get(PRINT_DEPLOY_COST_KEY);
 }
 
-AppConfig.prototype.getOrderFactoryUrl = function() {
-    return this.conf.get(ORDER_FACTORY_URL_KEY);
-}
-
 AppConfig.prototype.getEtherscanApiKey = function() {
     return this.conf.get(ETHERSCAN_API_KEY_KEY);
 }
 
 AppConfig.prototype.getKyberAddressFee = function() {
     return this.conf.get(KYBER_ADDRESS_FEE_KEY);
+}
+
+AppConfig.prototype.getStablePayApiUrl = function() {
+    return this.conf.get(STABLEPAY_API_URL_KEY);
 }
 
 AppConfig.prototype.validate = function() {
