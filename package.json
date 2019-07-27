@@ -1,9 +1,12 @@
 {
   "name": "stablepay-smartcontracts",
   "version": "1.0.0",
-  "description": "StablePay Smart Contracts",
+  "description": "This is the official Github repository for the StablePay smart contracts.",
   "main": "truffle.js",
   "scripts": {
+    "lint:solium": "solium -d contracts/",
+    "lint:solhint": "solhint \"contracts/**/*.sol\"",
+
     "test": "truffle test",
     "test:coverage": "scripts/coverage.sh",
     "test:ganache": "truffle test --network ganache",

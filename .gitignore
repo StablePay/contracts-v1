@@ -9,8 +9,6 @@ yarn.lock
 /coverage
 coverageEnv/
 coverage.json
-/.soliumignore
-/.soliumrc.json
 /.node*
 .env
 full-ganache-db/
