@@ -6,7 +6,7 @@ tslint.json
 yarn.lock
 .idea
 .vscode
-coverage/
+/coverage
 coverageEnv/
 coverage.json
 /.soliumignore
@@ -19,3 +19,4 @@ kyber_db/
 resources/**/
 .DS_Store
 resources/.DS_Store
+/db

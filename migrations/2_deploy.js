@@ -17,6 +17,8 @@ const BaseMock = artifacts.require("./mock/BaseMock.sol");
 const StablePayBaseMock = artifacts.require("./mock/StablePayBaseMock.sol");
 const StablePayStorageMock = artifacts.require("./mock/StablePayStorageMock.sol");
 const CustomSwappingProviderMock = artifacts.require("./mock/CustomSwappingProviderMock.sol");
+const ProxyBaseMock = artifacts.require("./mock/proxy/ProxyBaseMock.sol");
+const ProxyTargetMock = artifacts.require("./mock/proxy/ProxyTargetMock.sol");
 
 // Libraries
 const Bytes32ArrayLib = artifacts.require("./util/Bytes32ArrayLib.sol");
@@ -40,7 +42,7 @@ const UniswapSwappingProvider = artifacts.require("./providers/UniswapSwappingPr
 const UniswapFactoryInterface = artifacts.require("./uniswap/UniswapFactoryInterface.sol");
 const UniswapTemplateExchangeInterface = artifacts.require("./uniswap/UniswapExchangeInterface.sol");
 
-const allowedNetworks = ['ganache', 'test'];
+const allowedNetworks = ['ganache', 'test', 'coverage', 'develop'];
 
 module.exports = function(deployer, network, accounts) {
   console.log(`Deploying smart contracts to '${network}'.`)
@@ -76,8 +78,6 @@ module.exports = function(deployer, network, accounts) {
 
   deployer.deploy(SafeMath).then(async (txInfo) => {
     if(allowedNetworks.includes(network)){
-      console.log('deploying uniswap contracts');
-
       let factoryABI = new web3.eth.Contract(JSON.parse(uniswapConf.factory.abi));
       let exchangeBI = new web3.eth.Contract(JSON.parse(uniswapConf.exchange.abi));
 
@@ -85,11 +85,10 @@ module.exports = function(deployer, network, accounts) {
         data: uniswapConf.factory.bytecode
       }).send({
         from: owner,
-        gas: 1500000,
+        gas: 1500000, // TODO Not hardcoded values in migrations. It should be configured by network in ./config/{network} file.
         gasPrice: 90000 * 2
       });
       uniswapFactory = await UniswapFactoryInterface.at(factoryResult.options.address);
-      console.log('uniswapFactory', uniswapFactory.address);
       const exchangeTemplateResult = await exchangeBI.deploy({
         data: uniswapConf.exchange.bytecode
       }).send({
@@ -101,14 +100,13 @@ module.exports = function(deployer, network, accounts) {
       exchangeTemplate = await UniswapTemplateExchangeInterface.at(exchangeTemplateResult.options.address);
       await uniswapFactory.initializeFactory(exchangeTemplate.address, {from: owner});
 
-      console.log('setting up uniswap contracts addresses');
       uniswapContracts.factory = uniswapFactory.address;
     }
 
 
 
 
-    const deployerApp = new DeployerApp(deployer, web3, owner, network);
+    const deployerApp = new DeployerApp(deployer, web3, owner, network, ["test", "ganache", "coverage"]);
     
     await deployerApp.addContractInfoByTransactionInfo(SafeMath, txInfo);
     
@@ -122,6 +120,8 @@ module.exports = function(deployer, network, accounts) {
     await deployerApp.deployMockIf(StablePayBaseMock, Storage.address);
     await deployerApp.deployMockIf(StablePayStorageMock, Storage.address);
     await deployerApp.deployMockIf(BaseMock, Storage.address);
+    await deployerApp.deployMockIf(ProxyTargetMock, Storage.address);
+    await deployerApp.deployMockIf(ProxyBaseMock, Storage.address, 'ProxyTargetMock');
 
     await deployerApp.links(StablePayStorage, [
       Bytes32ArrayLib,

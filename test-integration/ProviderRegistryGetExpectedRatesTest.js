@@ -1,5 +1,8 @@
 const Amount = require('../src/amounts/Amount');
-const { ETH_ADDRESS } = require('../test/util/constants');
+const {
+    ETH_ADDRESS,
+    title: t,
+} = require('../test/util/consts');
 const ProcessArgs = require('../src/utils/ProcessArgs');
 const processArgs = new ProcessArgs();
 
@@ -8,7 +11,6 @@ const ERC20 = artifacts.require("./interface/ERC20.sol");
 
 const leche = require('leche');
 const withData = leche.withData;
-const t = require('../test/util/TestUtil').title;
 
 contract('ProviderRegistryGetExpectedRatesTest', (accounts) => {
     const appConf = require('../config')(processArgs.network());
@@ -49,10 +51,10 @@ contract('ProviderRegistryGetExpectedRatesTest', (accounts) => {
         _16_ETH_to_20_DAI: ['ETH', '20', 'DAI', 2],
         _17_ETH_to_30_DAI: ['ETH', '30', 'DAI', 2],
         _18_ETH_to_80_DAI: ['ETH', '80', 'DAI', 2],
-        _19_ETH_to_30_DAI: ['ETH', '30', 'DAI', 2],
-        _20_ETH_to_30_DAI: ['ETH', '30', 'DAI', 2],
-        _21_ETH_to_30_DAI: ['ETH', '12', 'DAI', 2],
-        _22_ETH_to_10_DAI: ['ETH', '29.98', 'DAI', 2],
+        _19_ETH_to_49_99_DAI: ['ETH', '49.99', 'DAI', 2],
+        _20_ETH_to_47_25_DAI: ['ETH', '47.25', 'DAI', 2],
+        _21_ETH_to_12_DAI: ['ETH', '12', 'DAI', 2],
+        _22_ETH_to_29_98_DAI: ['ETH', '29.98', 'DAI', 2],
     }, function(sourceTokenName, targetAmountUnit, targetTokenName, lengthExpected) {
         it(t('anUser', 'getExpectedRates', `Should be able to get expected rate for: ${sourceTokenName} -> ${targetAmountUnit} ${targetTokenName}.`), async function() {
             // Setup

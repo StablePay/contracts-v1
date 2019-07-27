@@ -1,5 +1,6 @@
 // @dev see details on https://www.npmjs.com/package/truffle-assertions
 const truffleAssert = require('truffle-assertions');
+const { toBytes32 } = require('./consts');
 
 const emitted = (tx, eventName, assertFunction) => {
     truffleAssert.eventEmitted(tx, eventName, event => {
@@ -64,7 +65,7 @@ module.exports = {
             return {
                 name: name,
                 emitted: (contractAddress, oldContractAddress, newContractAddress, contractName, balance) => emitted(tx, name, ev => {
-                    assert.equal(ev.thisContract, contractAddress);
+                    assert.equal(ev.contractAddress, contractAddress);
                     assert.equal(ev.oldContractAddress, oldContractAddress);
                     assert.equal(ev.newContractAddress, newContractAddress);
                     assert.equal(ev.contractName, contractName);
@@ -253,5 +254,5 @@ module.exports = {
                 notEmitted: (assertFunction = () => {} ) => notEmitted(tx, name, assertFunction)
             };
         }
-    }
+    },
 }

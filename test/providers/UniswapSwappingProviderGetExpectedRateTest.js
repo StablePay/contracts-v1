@@ -7,10 +7,11 @@ const UniswapSwappingProvider = artifacts.require("./UniswapSwappingProvider.sol
 const StablePay = artifacts.require("./StablePay.sol");
 
 // Utils
-const t = require('../util/TestUtil').title;
+const {
+    title: t,
+} = require('../util/consts');
 
 contract('UniswapSwappingProviderGetExpectedRateTest', accounts => {
-    const owner = accounts[0];
     const account1 = accounts[1];
     const account2 = accounts[2];
 
@@ -21,7 +22,7 @@ contract('UniswapSwappingProviderGetExpectedRateTest', accounts => {
         assert(stablePay);
         assert(stablePay.address);
     });
-
+/*
     withData({
         _1_withInvalidExchangeAddress: [account1, account1, "0x0000000000000000000000000000000000000000", account2, "1", false, "0", "0"],
         _2_withUndefinedExchangeAddress: [account1, account1, undefined, account2, "1", true, "1", "1"]
@@ -49,4 +50,5 @@ contract('UniswapSwappingProviderGetExpectedRateTest', accounts => {
             assert.equal(expectedRateResult.maxRate, web3.utils.toWei(maxRateExpected, 'ether'));
         });
     });
+*/
 });

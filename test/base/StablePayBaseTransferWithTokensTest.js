@@ -1,5 +1,6 @@
-const BigNumber = require('bignumber.js');
-const t = require('../util/TestUtil').title;
+const {
+    title: t,
+} = require('../util/consts');
 const withData = require('leche').withData;
 const HardcodedOrderDataBuilder = require('../../src/builder/HardcodedOrderDataBuilder');
 const ProviderKeyGenerator = require('../../src/utils/ProviderKeyGenerator');
@@ -19,9 +20,6 @@ contract('StablePayBaseTransferWithTokensTest', accounts => {
     const owner = accounts[0];
     const account1 = accounts[1];
     const account2 = accounts[2];
-    const account3 = accounts[3];
-    const account4 = accounts[4];
-    const account5 = accounts[5];
 
     let stablePay;
     let stablePayStorage;

@@ -1,4 +1,4 @@
-pragma solidity 0.4.25;
+pragma solidity 0.5.3;
 pragma experimental ABIEncoderV2;
 
 import "../util/StablePayCommon.sol";
@@ -61,12 +61,24 @@ contract IStablePay {
 
     /** Functions */
 
-    function transferWithTokens(StablePayCommon.Order order, bytes32[] _providerKeys)
+    function transferWithTokens(StablePayCommon.Order memory order, bytes32[] memory providerKeys)
     public
     returns (bool);
 
-    function transferWithEthers(StablePayCommon.Order order, bytes32[] _providerKeys)
+    function transferWithEthers(StablePayCommon.Order memory order, bytes32[] memory providerKeys)
     public
     payable
     returns (bool);
+
+    function emitPaymentSentEvent(StablePayCommon.Order memory order, uint256 amountSent)
+    internal {
+        emit PaymentSent(
+            address(this),
+            order.toAddress,
+            msg.sender,
+            order.sourceToken,
+            order.targetToken,
+            amountSent
+        );
+    }
 }

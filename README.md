@@ -7,7 +7,7 @@ This is the official [StablePay](https://stablepay.io) repository for the smart 
 
 ## What is StablePay?
 
-[StablePay](https://stablepay.io) is a decentralized platform for the new internet of money. [StablePay](https://stablepay.io) allows people to send and receive any token or ether in a secured and easy way.
+[StablePay](https://stablepay.io) is a decentralized platform for the new internet of money. [StablePay](https://stablepay.io) allows people to send/receive any ERC20 token and ether and receive any ERC20 token or ether in a secured and easy way.
 
 > StablePay was one of the **bounty prize winners** in ETHSanFrancisco 2018.
 
@@ -18,9 +18,10 @@ To see more information, please visit:
 
 ## Architecture Diagram
 
-![diagram](https://cdn-images-1.medium.com/max/800/0*HhubSAynIXHHw_x1)
+![diagram](./docs/images/architecture.png)
 
 ---
+
 ## Get Started
 
 ### Checkout the repository

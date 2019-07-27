@@ -1,4 +1,4 @@
-pragma solidity 0.4.25;
+pragma solidity 0.5.3;
 pragma experimental ABIEncoderV2;
 
 import "./ISwappingProvider.sol";
@@ -31,8 +31,8 @@ contract UniswapSwappingProvider is ISwappingProvider {
         UniswapExchangeInterface sourceExchange = UniswapExchangeInterface(uFactory.getExchange(_order.sourceToken));
         UniswapExchangeInterface targetExchange = UniswapExchangeInterface(uFactory.getExchange(_order.targetToken));
 
-        require(address(sourceExchange) != 0x0, "Exchange not found for source token");
-        require(address(targetExchange) != 0x0, "Exchange not found for target token");
+        require(address(sourceExchange) != address(0x0), "Exchange not found for source token");
+        require(address(targetExchange) != address(0x0), "Exchange not found for target token");
 
         require(_order.targetAmount > 0 , "Target amount cannot be zero");
 
@@ -71,14 +71,14 @@ contract UniswapSwappingProvider is ISwappingProvider {
         return true;
     }
 
-    function swapEther(StablePayCommon.Order memory  _order)
+    function swapEther(StablePayCommon.Order memory _order)
     public
     isStablePay(msg.sender)
     payable
     returns (bool) {
         UniswapFactoryInterface uFactory = UniswapFactoryInterface(uniswapFactory);
 
-        require(uFactory.getExchange(_order.targetToken) != 0x0, "Exchange not found for target token");
+        require(uFactory.getExchange(_order.targetToken) != address(0x0), "Exchange not found for target token");
 
         UniswapExchangeInterface targetExchange = UniswapExchangeInterface(uFactory.getExchange(_order.targetToken));
         uint256 sourceInitialEtherBalance = getEtherBalance();
@@ -113,7 +113,7 @@ contract UniswapSwappingProvider is ISwappingProvider {
 
 
         UniswapFactoryInterface uFactory = UniswapFactoryInterface(uniswapFactory);
-        UniswapExchangeInterface targetExchange = UniswapExchangeInterface(uFactory.getExchange(_targetToken));
+        UniswapExchangeInterface targetExchange = UniswapExchangeInterface(uFactory.getExchange(address(_targetToken)));
         uint rate = 0;
 
         if(_targetToken.balanceOf(address(targetExchange)) == 0){
@@ -122,15 +122,15 @@ contract UniswapSwappingProvider is ISwappingProvider {
 
 
         if(ETH_ADDRESS == address (_sourceToken)) {
-            isSupported =  targetExchange != address(0x0);
+            isSupported =  address(targetExchange) != address(0x0);
             if(isSupported) {
                 rate = targetExchange.getEthToTokenOutputPrice(_sourceAmount);
             }
             return (isSupported, rate, rate);
         }
 
-        UniswapExchangeInterface sourceExchange = UniswapExchangeInterface(uFactory.getExchange(_sourceToken));
-        isSupported = sourceExchange != address(0x0) && targetExchange != address(0x0);
+        UniswapExchangeInterface sourceExchange = UniswapExchangeInterface(uFactory.getExchange(address(_sourceToken)));
+        isSupported = address(sourceExchange) != address(0x0) && address(targetExchange) != address(0x0);
 
         if(_sourceToken.balanceOf(address(sourceExchange)) == 0){
             return (false, 0, 0);

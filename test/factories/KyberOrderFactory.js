@@ -1,4 +1,4 @@
-const { NULL_ADDRESS, ZERO } =require('../util/constants');
+const { NULL_ADDRESS, ZERO } =require('../util/consts');
 const util = require('ethereumjs-util');
 const BaseOrderFactory = require('./BaseOrderFactory');
 const EMPTY_BYTES_32 = util.bufferToHex(util.setLengthRight(``, 32));

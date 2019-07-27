@@ -1,11 +1,15 @@
-pragma solidity 0.4.25;
+pragma solidity 0.5.3;
 
+/**
+    @notice This is an abstraction for the settings in the platform.
+    @author StablePay <hi@stablepay.io>
+ */
 interface ISettings {
 
     /** Events */
     
     /**
-        @dev This event is emitted when the StablePay platform is paused due to maintenance reasons.
+        @notice This event is emitted when the platform is paused due to maintenance reasons.
      */
     event PlatformPaused (
         address indexed thisContract,
@@ -13,7 +17,7 @@ interface ISettings {
     );
 
     /**
-        @dev This event is emitted when the StablePay platform is unpaused.
+        @notice This event is emitted when the platform is unpaused.
      */
     event PlatformUnpaused (
         address indexed thisContract,
@@ -21,7 +25,7 @@ interface ISettings {
     );
 
     /**
-        @dev This event is emitted when the platform fee is updated.
+        @notice This event is emitted when the platform fee is updated.
      */
     event PlatformFeeUpdated (
         address indexed thisContract,
@@ -30,7 +34,7 @@ interface ISettings {
     );
 
     /**
-        @dev This event is emitted when a token availability is updated.
+        @notice This event is emitted when a token availability is updated.
      */
     event TokenAvailabilityUpdated (
         address indexed thisContract,
@@ -42,20 +46,36 @@ interface ISettings {
 
     /** Functions */
 
-    function setPlatformFee(uint16 _fee) external returns (bool);
+    function setPlatformFee(uint16 fee) external returns (bool);
 
     function getPlatformFee() external view returns (uint16);
 
-    function pausePlatform(string _reason) external returns (bool);
+    /**
+        @notice It pauses the platform in emergency cases.
+        @dev The sender must be a super user (owner or admin) only.
 
-    function unpausePlatform(string _reason) external returns (bool);
+        @param reason the reason why the platform is being paused.
+     */
+    function pausePlatform(string calldata reason) external returns (bool);
 
+    /**
+        @notice It unpauses the platform in when an emergency issue was fixed.
+        @dev The sender must be a super user (owner or admin) only.
+
+        @param reason the reason why the platform is being unpaused.
+     */
+    function unpausePlatform(string calldata reason) external returns (bool);
+
+    /**
+        @notice It gets whether the platform is paused or not.
+        @return true if the platform is paused. Otherwise it returns false.
+     */
     function isPlatformPaused() external view returns (bool);
 
-    function disableTokenAvailability(address _tokenAddress) external returns (bool);
+    function disableTokenAvailability(address tokenAddress) external returns (bool);
 
-    function getTokenAvailability(address _tokenAddress) external view returns (bool available, uint256 minAmount, uint256 maxAmount);
+    function getTokenAvailability(address tokenAddress) external view returns (bool available, uint256 minAmount, uint256 maxAmount);
 
-    function setTokenAvailability(address _tokenAddress, uint256 _minAmount, uint256 _maxAmount) external returns (bool);
+    function setTokenAvailability(address tokenAddress, uint256 minAmount, uint256 maxAmount) external returns (bool);
 
 }

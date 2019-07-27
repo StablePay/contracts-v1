@@ -1,5 +1,6 @@
-const BigNumber = require('bignumber.js');
-const t = require('../util/TestUtil').title;
+const {
+    title: t,
+} = require('../util/consts');
 const withData = require('leche').withData;
 
 // Mock Smart Contracts

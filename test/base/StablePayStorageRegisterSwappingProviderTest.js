@@ -5,15 +5,16 @@ const StablePayStorageMock = artifacts.require("./StablePayStorageMock.sol");
 const Storage = artifacts.require("./Storage.sol");
 
 // Utils
-const util = require('ethereumjs-util');
-const t = require('../util/TestUtil').title;
+const {
+    title: t,
+    toBytes32,
+} = require('../util/consts');
 const registerProvider  = require('../util/events').registryProvider;
 
 contract('StablePayStorageRegisterSwappingProviderTest', accounts => {
     const owner = accounts[0];
     const account1 = accounts[1];
     const account2 = accounts[2];
-    const genericSmartContract = accounts[8];
 
     let stablePayStorage;
 
@@ -34,7 +35,7 @@ contract('StablePayStorageRegisterSwappingProviderTest', accounts => {
     }, function(providerAddress, providerOwner, providerTextKey, expectedErrorMessage, mustFail) {
         it(t('anUser', 'registerSwappingProvider', 'Should be able (or not) to register a provider.', mustFail), async function() {
             //Setup
-            const providerKey = util.bufferToHex(util.setLengthRight(providerTextKey, 32));
+            const providerKey = toBytes32(providerTextKey);
             
             //Invocation
             try {

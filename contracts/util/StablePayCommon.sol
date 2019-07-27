@@ -1,9 +1,9 @@
-pragma solidity 0.4.25;
+pragma solidity 0.5.3;
 
 contract StablePayCommon {
 
     struct SwappingProvider {
-        address providerAddress;
+        address payable providerAddress;
         address ownerAddress;
         uint256 createdAt;
         bool pausedByOwner;
@@ -33,11 +33,12 @@ contract StablePayCommon {
         address sourceToken;            // Source ERC20 token address.
         address targetToken;            // Target ERC20 token address.
         address toAddress;
-        address fromAddress;
+        address payable fromAddress;
         address makerAddress;           // Address that created the order.
         address takerAddress;           // Address that is allowed to fill the order. If set to 0, any address is allowed to fill the order.
         address feeRecipientAddress;    // Address that will recieve fees when order is filled.
         address senderAddress;          // Address that is allowed to call Exchange contract methods that affect this order. If set to 0, any address is allowed to call these methods.
+        //address actionAddress;
 
         bytes   signature;
         bytes   data;

@@ -1,4 +1,4 @@
-pragma solidity 0.4.25;
+pragma solidity 0.5.3;
 pragma experimental ABIEncoderV2;
 
 import "../erc20/ERC20.sol";
@@ -166,7 +166,7 @@ contract KyberSwappingProvider is ISwappingProvider {
         return (minRateValue, maxRateValue);
     }
 
-    function swapToken(StablePayCommon.Order _order)
+    function swapToken(StablePayCommon.Order memory _order)
     public
     isStablePay(msg.sender)
     isValidAddress(_order.toAddress)
@@ -211,7 +211,7 @@ contract KyberSwappingProvider is ISwappingProvider {
         return true;
     }
 
-    function swapEther(StablePayCommon.Order _order)
+    function swapEther(StablePayCommon.Order memory _order)
     public
     payable
     isStablePay(msg.sender)
