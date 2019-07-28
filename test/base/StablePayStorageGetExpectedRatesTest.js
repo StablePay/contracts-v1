@@ -88,12 +88,17 @@ contract('StablePayStorageGetExpectedRatesTest', accounts => {
                         from: providerData.owner
                     }
                 );
+                await stablePayStorage.unpauseByAdminSwappingProvider(
+                    providerKey, {
+                        from: owner // By Admin
+                    }
+                );
                 if(providerData.paused) {
                     await stablePayStorage.pauseSwappingProvider(
                         providerKey, {
                             from: providerData.owner
                         }
-                    );  
+                    );
                 }
             }
 
