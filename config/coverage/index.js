@@ -3,5 +3,5 @@ module.exports = {
     kyber: require('./kyber'),
     uniswap: require('./uniswap'),
     stablepay: require('./stablepay'),
-    maxGas: 20000000,
+    maxGas: 40000000,
 };
