@@ -33,7 +33,7 @@ contract('UniswapSwappingProviderGetExpectedRateTest', accounts => {
     withData({
 
             _1_withInvalidExchangeAddress: [tokenAddress, tokenAddress, "0x0000000000000000000000000000000000000000", account2, "1", false, "0", "0"],
-            _2_withUndefinedExchangeAddress: [tokenAddress, tokenAddress, undefined, account2, "1", true, "1", "1"]
+            //_2_withUndefinedExchangeAddress: [tokenAddress, tokenAddress, undefined, account2, "1", true, "1", "1"]
     }, function(sourceToken, targetToken, exchangeAddress, tokenAddress, value, isSupportedExpected, minRateExpected, maxRateExpected) {
         it(t('anUser', 'getExpectedRate', 'Should be able to get the expected rate.', false), async function() {
             //Setup
@@ -57,4 +57,5 @@ contract('UniswapSwappingProviderGetExpectedRateTest', accounts => {
             assert.equal(expectedRateResult.maxRate, web3.utils.toWei(maxRateExpected, 'ether'));
         });
     });
+
 });
