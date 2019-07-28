@@ -26,6 +26,8 @@ const SafeMath = artifacts.require("./util/SafeMath.sol");
 const AddressLib = artifacts.require("./util/AddressLib.sol");
 
 // Official Smart Contracts
+const PostActionRegistry = artifacts.require("./base/PostActionRegistry.sol");
+const TransferToPostAction = artifacts.require("./base/action/TransferToPostAction.sol");
 const Settings = artifacts.require("./base/Settings.sol");
 const Role = artifacts.require("./base/Role.sol");
 const Vault = artifacts.require("./base/Vault.sol");
@@ -42,7 +44,7 @@ const UniswapSwappingProvider = artifacts.require("./providers/UniswapSwappingPr
 const UniswapFactoryInterface = artifacts.require("./uniswap/UniswapFactoryInterface.sol");
 const UniswapTemplateExchangeInterface = artifacts.require("./uniswap/UniswapExchangeInterface.sol");
 
-const allowedNetworks = ['ganache', 'test', 'coverage', 'develop'];
+const allowedNetworks = ['ganache ', 'test', 'coverage', 'develop'];
 
 module.exports = function(deployer, network, accounts) {
   console.log(`Deploying smart contracts to '${network}'.`)
@@ -103,9 +105,6 @@ module.exports = function(deployer, network, accounts) {
       uniswapContracts.factory = uniswapFactory.address;
     }
 
-
-
-
     const deployerApp = new DeployerApp(deployer, web3, owner, network, ["test", "ganache", "coverage"]);
     
     await deployerApp.addContractInfoByTransactionInfo(SafeMath, txInfo);
@@ -141,15 +140,29 @@ module.exports = function(deployer, network, accounts) {
     ]);
     await deployerApp.deploy(StablePayBase, Storage.address, {gas: maxGasForDeploying});
 
+    await deployerApp.links(PostActionRegistry, [
+      SafeMath
+    ]);
+    await deployerApp.deploy(PostActionRegistry, Storage.address, {gas: maxGasForDeploying});
+
     /***********************************
      Deploy swapping token providers.
      ***********************************/
-
 
     const stablePayInstance = await StablePay.deployed();
     const stablePayStorageInstance = await StablePayStorage.deployed();
 
     await deployerApp.deployMockIf(CustomSwappingProviderMock, stablePayInstance.address);
+
+    await deployerApp.links(TransferToPostAction, [
+      SafeMath
+    ]);
+    await deployerApp.deploy(TransferToPostAction, Storage.address, {gas: maxGasForDeploying});
+
+    const postActionRegistryInstance = await PostActionRegistry.deployed();
+    await postActionRegistryInstance.registerPostAction(TransferToPostAction.address);
+    await postActionRegistryInstance.setPostActionAsDefault(TransferToPostAction.address);
+    deployerApp.addData('PostAction_Default', TransferToPostAction.address);
 
     /** Deploying Kyber swap provider. */
     await deployerApp.links(KyberSwappingProvider, [

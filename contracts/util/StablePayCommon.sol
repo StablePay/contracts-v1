@@ -38,11 +38,26 @@ contract StablePayCommon {
         address takerAddress;           // Address that is allowed to fill the order. If set to 0, any address is allowed to fill the order.
         address feeRecipientAddress;    // Address that will recieve fees when order is filled.
         address senderAddress;          // Address that is allowed to call Exchange contract methods that affect this order. If set to 0, any address is allowed to call these methods.
-        //address actionAddress;
+        address postActionAddress;
 
         bytes   signature;
         bytes   data;
         bytes   makerAssetData;           // Encoded data that can be decoded by a specified proxy contract when transferring makerAsset. The last byte references the id of this proxy.
         bytes   takerAssetData;           // Encoded data that can be decoded by a specified proxy contract when transferring takerAsset. The last byte references the id of this proxy.
+    }
+
+    struct PostActionData {
+        uint256 sourceAmount;
+        uint256 targetAmount;
+        uint256 minRate;
+        uint256 maxRate;
+        uint256 feeAmount;
+
+        address sourceToken;
+        address targetToken;
+        address toAddress;
+        address payable fromAddress;
+
+        bytes   data;
     }
 }

@@ -10,12 +10,21 @@ interface IPostAction {
     /** Events */
 
     event ActionExecuted(
-        address thisContract,
-        bytes32 data
+        address indexed thisContract,
+        uint256 sourceAmount,
+        uint256 targetAmount,
+        uint256 feeAmount,
+        address sourceToken,
+        address targetToken,
+        address toAddress,
+        address externalAddress,
+        address payable fromAddress,
+        bytes32 actionKey,
+        bytes data
     );
     
     /** Functions */
 
-    function execute(StablePayCommon.Order calldata order, uint feeAmount) external returns (bool);
+    function execute(StablePayCommon.PostActionData calldata postActionData) external returns (bool);
 
 }

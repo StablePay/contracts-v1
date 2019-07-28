@@ -5,6 +5,8 @@ import "../erc20/ERC20.sol";
 import "../base/Base.sol";
 import "../interface/ISettings.sol";
 import "../interface/IProviderRegistry.sol";
+import "../interface/IPostActionRegistry.sol";
+import "../interface/IPostAction.sol";
 import "../interface/IStablePay.sol";
 import "../util/SafeMath.sol";
 import "../util/Bytes32ArrayLib.sol";
@@ -19,6 +21,7 @@ contract StablePayBase is Base, IStablePay {
     uint256 constant internal AVOID_DECIMALS = 100000000000000;
 
     string constant internal STABLE_PAY_STORAGE_NAME = "StablePayStorage";
+    string constant internal POST_ACTION_REGISTRY_NAME = "PostActionRegistry";
 
     /** Properties */
 
@@ -40,6 +43,16 @@ contract StablePayBase is Base, IStablePay {
         require(available, "Token address is not available.");
         require(amount >= minAmount, "Amount >= min amount.");
         require(amount <= maxAmount, "Amount <= max amount.");
+        _;
+    }
+
+    modifier isPostActionValid(address postAction) {
+        bool isPostAction = getPostActionRegistry().isRegisteredPostAction(postAction);
+        require(
+            postAction == address(0x0) ||
+            isPostAction,
+            "Post action is not valid."
+        );
         _;
     }
 
@@ -85,6 +98,14 @@ contract StablePayBase is Base, IStablePay {
         returns (IProviderRegistry) {
         address stablePayStorageAddress = _storage.getAddress(keccak256(abi.encodePacked(CONTRACT_NAME, STABLE_PAY_STORAGE_NAME)));
         return IProviderRegistry(stablePayStorageAddress);
+    }
+
+    function getPostActionRegistry()
+        internal
+        view
+        returns (IPostActionRegistry) {
+        address postActionRegistryAddress = _storage.getAddress(keccak256(abi.encodePacked(CONTRACT_NAME, POST_ACTION_REGISTRY_NAME)));
+        return IPostActionRegistry(postActionRegistryAddress);
     }
 
     /**
@@ -265,19 +286,48 @@ contract StablePayBase is Base, IStablePay {
     }
 
     /**
-        @dev Calculate the 'to' amount based on the order target amount and platform fee amount.
-        @dev Transfer the 'to' amount to 'to' address defined in order.
+        @notice Calculate the 'to' amount based on the order target amount and platform fee amount.
+        @notice Transfer the 'to' amount to 'to' address defined in order.
+
+        @return the process was done, and the amount transfered to the 'to' account.
      */
     function calculateAndTransferToAmount(StablePayCommon.Order memory order, uint feeAmount)
     internal
     returns (bool success, uint toAmount)
     {
+        address postActionAddress = getPostActionRegistry().getPostActionOrDefault(order.postActionAddress);
+
         // Calculate the 'to' amount.
         uint256 currentToAmount = order.targetAmount.sub(feeAmount);
-        // Transfer the 'to' amount to the 'to' address.
-        bool result = ERC20(order.targetToken).transfer(order.toAddress, currentToAmount);
-        require(result, "Transfer to 'to' address failed.");
-        return (true, currentToAmount);
+
+        // Transfer the 'to' amount to the post action.
+        bool transferToPostActionResult = ERC20(order.targetToken).transfer(postActionAddress, currentToAmount);
+        require(transferToPostActionResult, "Transfer to 'to' address failed.");
+
+        StablePayCommon.PostActionData memory postActionData = createPostActionData(order, feeAmount);
+
+        IPostAction postAction = IPostAction(postActionAddress);
+        bool postActionExecutionResult = postAction.execute(postActionData);
+
+        return (postActionExecutionResult, currentToAmount);
+    }
+
+    function createPostActionData(StablePayCommon.Order memory order, uint feeAmount)
+    internal
+    pure
+    returns (StablePayCommon.PostActionData memory) {
+        return StablePayCommon.PostActionData({
+            sourceAmount: order.sourceAmount,
+            targetAmount: order.targetAmount,
+            minRate: order.minRate,
+            maxRate: order.maxRate,
+            feeAmount: feeAmount,
+            sourceToken: order.sourceToken,
+            targetToken: order.targetToken,
+            toAddress: order.toAddress,
+            fromAddress: order.fromAddress,
+            data: order.data
+        });
     }
 
     /**
@@ -372,15 +422,25 @@ contract StablePayBase is Base, IStablePay {
         return false;
     }
 
-    function transferWithTokens(StablePayCommon.Order memory order, bytes32[] memory providerKeys)
-    public
+    function requireTransferWithTokens(StablePayCommon.Order memory order, bytes32[] memory providerKeys)
+    internal
     isNotPaused()
     nonReentrant()
+    isPostActionValid(order.postActionAddress)
     isTokenAvailable(order.targetToken, order.targetAmount)
     areOrderAmountsValidToken(order)
     isSender(msg.sender, order.fromAddress)
+    returns (bool) {
+        providerKeys;
+        return true;
+    }
+
+    function transferWithTokens(StablePayCommon.Order memory order, bytes32[] memory providerKeys)
+    public
     returns (bool)
     {
+        requireTransferWithTokens(order, providerKeys);
+
         // Transfer tokens if source / target tokens are equal.
         if(transferTokensIfTokensAreEquals(order)) {
             return true;
@@ -449,16 +509,26 @@ contract StablePayBase is Base, IStablePay {
         return false;
     }
 
-    function transferWithEthers(StablePayCommon.Order memory order, bytes32[] memory providerKeys)
-    public
+    function requireTransferWithEthers(StablePayCommon.Order memory order, bytes32[] memory providerKeys)
+    internal
     isNotPaused()
     nonReentrant()
+    isPostActionValid(order.postActionAddress)
     isTokenAvailable(order.targetToken, order.targetAmount)
     areOrderAmountsValidEther(order)
     isSender(msg.sender, order.fromAddress)
+    returns (bool) {
+        providerKeys;
+        return true;
+    }
+
+    function transferWithEthers(StablePayCommon.Order memory order, bytes32[] memory providerKeys)
+    public
     payable
     returns (bool)
     {
+        requireTransferWithEthers(order, providerKeys);
+        
         require(providerKeys.length > 0, "Provider keys must not be empty.");
 
         for (uint256 index = 0; index < providerKeys.length; index = index.add(1)) {
