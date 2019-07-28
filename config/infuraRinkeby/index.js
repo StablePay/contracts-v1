@@ -1,5 +1,5 @@
 module.exports = {
-    network: 'mainnet',
+    network: 'rinkeby',
 	kyber: require('./kyber'),
     uniswap: require('./uniswap'),
     stablepay: require('./stablepay')

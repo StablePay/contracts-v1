@@ -13,4 +13,8 @@ ProviderKeyGenerator.prototype.generateKey = function(name, version) {
     };
 }
 
+ProviderKeyGenerator.prototype.fromBytes = function(bytes) {
+    return util.toBuffer(bytes).toString();
+}
+
 module.exports = ProviderKeyGenerator;

@@ -104,8 +104,8 @@ contract('StablePayPayWithTokenPerApiTest', (accounts) => {
                 targetTokenInstance
             ]);
             
-            const url = appConfig.getOrderFactoryUrl().get();
-            const stablePayWrapper = new StablePayWrapper(stablePay, new OrderDataBuilder(url), sourceTokenInstance, verbose);
+            const ordersUrl = `${appConfig.getStablePayApiUrl().get()}/orders`;
+            const stablePayWrapper = new StablePayWrapper(stablePay, new OrderDataBuilder(ordersUrl), sourceTokenInstance, verbose);
 
             // Invocation
             const data = {
