@@ -108,7 +108,7 @@ contract UniswapSwappingProvider is ISwappingProvider {
     returns (bool isSupported, uint minRate, uint maxRate) {
         require(address(_sourceToken) != address(0x0), "Source token != 0x0.");
         require(address(_targetToken) != address(0x0), "Target token != 0x0.");
-        require(_targetAmount > 0, "Source amount > 0.");
+        require(_targetAmount > 0, "Target amount > 0.");
 
 
         UniswapFactoryInterface uFactory = UniswapFactoryInterface(uniswapFactory);
