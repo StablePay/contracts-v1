@@ -12,7 +12,7 @@ const IStablePay = artifacts.require("./interface/IStablePay.sol");
 const ERC20 = artifacts.require("./interface/ERC20.sol");
 
 // Util classes
-const { ETH_ADDRESS } = require('../test/util/constants');
+const { ETH_ADDRESS } = require('../test/util/consts');
 const BigNumber = require('bignumber.js');
 const axios = require('axios');
 const assert = require('assert');

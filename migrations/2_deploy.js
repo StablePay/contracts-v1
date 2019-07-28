@@ -157,12 +157,10 @@ module.exports = function(deployer, network, accounts) {
     await deployerApp.links(TransferToPostAction, [
       SafeMath
     ]);
-    await deployerApp.deploy(TransferToPostAction, Storage.address, {gas: maxGasForDeploying});
+    await deployerApp.deploy(TransferToPostAction, Storage.address, {gas: maxGasForDeploying, from: owner});
 
     const postActionRegistryInstance = await PostActionRegistry.deployed();
     await postActionRegistryInstance.registerPostAction(TransferToPostAction.address);
-    await postActionRegistryInstance.setPostActionAsDefault(TransferToPostAction.address);
-    deployerApp.addData('PostAction_Default', TransferToPostAction.address);
 
     /** Deploying Kyber swap provider. */
     await deployerApp.links(KyberSwappingProvider, [

@@ -12,6 +12,12 @@ import "../util/SafeMath.sol";
 import "../util/Bytes32ArrayLib.sol";
 import "../providers/ISwappingProvider.sol";
 
+/**
+    @title This is the main smart contract in the StablePay platform.
+    
+    @author StablePay <hi@stablepay.io>
+
+ */
 contract StablePayBase is Base, IStablePay {
     using SafeMath for uint256;
     using Bytes32ArrayLib for bytes32[];

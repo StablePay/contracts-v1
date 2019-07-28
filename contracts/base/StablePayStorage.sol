@@ -283,7 +283,7 @@ contract StablePayStorage is Base, IProviderRegistry {
             ownerAddress: msg.sender,
             createdAt: now,
             pausedByOwner: false,
-            pausedByAdmin: false,
+            pausedByAdmin: true,
             exists: true
         });
         providersRegistry.add(_providerKey);
