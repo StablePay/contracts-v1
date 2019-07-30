@@ -8,7 +8,9 @@ const ERC20 = artifacts.require("./erc20/ERC20.sol");
 
 const leche = require('leche');
 const withData = leche.withData;
-const t = require('../test/util/TestUtil').title;
+const {
+    title: t,
+} = require('../test/util/consts');
 const Balances = require('../src/balances/Balances');
 const Amount = require('../src/amounts/Amount');
 const ProcessArgs = require('../src/utils/ProcessArgs');

@@ -1,4 +1,5 @@
 const OrderDataBuilder = require('./OrderDataBuilder');
+const { NULL_ADDRESS } =require('../../test/util/consts');
 
 class HardcodedOrderDataBuilder extends OrderDataBuilder {
     constructor() {
@@ -16,7 +17,8 @@ HardcodedOrderDataBuilder.prototype.build = async function(data) {
         targetToken,
         merchantAddress,
         customerAddress,
-        providerKey
+        providerKey,
+        postActionAddress
     } = data;
 
     const order = [
@@ -34,6 +36,7 @@ HardcodedOrderDataBuilder.prototype.build = async function(data) {
         targetToken,
         merchantAddress,
         customerAddress,
+        postActionAddress || NULL_ADDRESS,
 
         '0x0000000000000000000000000000000000000000',
         '0x0000000000000000000000000000000000000000',

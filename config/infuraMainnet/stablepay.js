@@ -1,15 +1,13 @@
+const BigNumber = require('bignumber.js');
+const DECIMALS = (new BigNumber(10)).pow(18);
+
 module.exports = {
     targetTokens: [
-        {
-            name: 'ETH',
-            minAmount: 0,
-            maxAmount: 2
-        },
-        {
-            name: 'DAI',
-            minAmount: 10,
-            maxAmount: 100
-        }
+		{
+			name: 'DAI',
+			minAmount: BigNumber("1").times(DECIMALS).toFixed(),
+			maxAmount: BigNumber("10").times(DECIMALS).toFixed()
+		}
     ],
 	contracts: {
 		StablePay: '0xB7BcE08Ba466e044366ecFcA17a949657AF893Db',

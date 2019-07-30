@@ -1,4 +1,4 @@
-pragma solidity 0.4.25;
+pragma solidity 0.5.3;
 pragma experimental ABIEncoderV2;
 
 import "../erc20/ERC20.sol";
@@ -27,35 +27,35 @@ contract StablePayStorage is Base, IProviderRegistry {
 
     /** Modifiers */
 
-    modifier swappingProviderExists(bytes32 _providerKey) {
-        require(providers[_providerKey].exists == true, "Swapping provider must exist.");
+    modifier swappingProviderExists(bytes32 providerKey) {
+        require(providers[providerKey].exists == true, "Swapping provider must exist.");
         _;
     }
 
-    modifier isSwappingProviderOwner(bytes32 _providerKey, address _owner) {
-        require(providers[_providerKey].ownerAddress == _owner, "Swapping provider owner is not valid.");
+    modifier isSwappingProviderOwner(bytes32 providerKey, address owner) {
+        require(providers[providerKey].ownerAddress == owner, "Swapping provider owner is not valid.");
         _;
     }
 
-    modifier isSwappingProviderPausedByOwner(bytes32 _providerKey) {
-        require(providers[_providerKey].pausedByOwner == true, "Swapping provider must be paused.");
+    modifier isSwappingProviderPausedByOwner(bytes32 providerKey) {
+        require(providers[providerKey].pausedByOwner == true, "Swapping provider must be paused.");
         _;
     }
 
-    modifier isSwappingProviderPausedByAdmin(bytes32 _providerKey) {
-        require(providers[_providerKey].pausedByAdmin == true, "Swapping provider must be paused.");
+    modifier isSwappingProviderPausedByAdmin(bytes32 providerKey) {
+        require(providers[providerKey].pausedByAdmin == true, "Swapping provider must be paused.");
         _;
     }
 
-    modifier isSwappingProviderNotPausedByAdmin(bytes32 _providerKey) {
-        require(providers[_providerKey].pausedByAdmin == false, "Swapping provider must not be paused by admin.");
+    modifier isSwappingProviderNotPausedByAdmin(bytes32 providerKey) {
+        require(providers[providerKey].pausedByAdmin == false, "Swapping provider must not be paused by admin.");
         _;
     }
 
-    modifier isSwappingProviderNewOrUpdate(bytes32 _providerKey, address _owner) {
-        StablePayCommon.SwappingProvider storage swappingProvider = providers[_providerKey];
+    modifier isSwappingProviderNewOrUpdate(bytes32 providerKey, address owner) {
+        StablePayCommon.SwappingProvider storage swappingProvider = providers[providerKey];
 
-        bool isNewOrUpdate =    ( swappingProvider.exists && swappingProvider.ownerAddress == _owner ) ||
+        bool isNewOrUpdate =    ( swappingProvider.exists && swappingProvider.ownerAddress == owner ) ||
                                 ( !swappingProvider.exists );
         require(isNewOrUpdate, "Swapping provider must be new or an update by owner.");
         _;
@@ -63,14 +63,14 @@ contract StablePayStorage is Base, IProviderRegistry {
 
     /** Constructor */
 
-    constructor(address _storageAddress)
-        public Base(_storageAddress) {
+    constructor(address storageAddress)
+        public Base(storageAddress) {
     }
 
     /** Fallback Method */
 	// TODO Review fallback function.
 
-    function () public payable {
+    function () external payable {
         require(msg.value > 0, "Msg value > 0");
         emit DepositReceived(
             address(this),
@@ -81,17 +81,17 @@ contract StablePayStorage is Base, IProviderRegistry {
 
     /** Functions */
 
-    function getExpectedRate(bytes32 _providerKey, ERC20 _src, ERC20 _dest, uint _srcQty)
+    function getExpectedRate(bytes32 providerKey, ERC20 sourceToken, ERC20 targetToken, uint targetAmount)
         public
         view
         returns (bool isSupported, uint minRate, uint maxRate) {
-        require(isSwappingProviderValid(_providerKey), "Provider must exist and be enabled.");
-        StablePayCommon.SwappingProvider memory swappingProvider = providers[_providerKey];
+        require(isSwappingProviderValid(providerKey), "Provider must exist and be enabled.");
+        StablePayCommon.SwappingProvider memory swappingProvider = providers[providerKey];
         ISwappingProvider iSwappingProvider = ISwappingProvider(swappingProvider.providerAddress);
-        return iSwappingProvider.getExpectedRate(_src, _dest, _srcQty);
+        return iSwappingProvider.getExpectedRate(sourceToken, targetToken, targetAmount);
     }
 
-    function getSupportedExpectedRatesCount(ERC20 _src, ERC20 _dest, uint _srcQty)
+    function getSupportedExpectedRatesCount(ERC20 sourceToken, ERC20 targetToken, uint targetAmount)
         internal
         view
         returns (uint) {
@@ -101,7 +101,7 @@ contract StablePayStorage is Base, IProviderRegistry {
             if(isSwappingProviderValid(_providerKey)) {
                 ISwappingProvider iSwappingProvider = ISwappingProvider(providers[_providerKey].providerAddress);
                 bool isSupported;
-                (isSupported, , ) = iSwappingProvider.getExpectedRate(_src, _dest, _srcQty);
+                (isSupported, , ) = iSwappingProvider.getExpectedRate(sourceToken, targetToken, targetAmount);
                 if(isSupported) {
                     count = count.add(1);
                 }
@@ -110,11 +110,11 @@ contract StablePayStorage is Base, IProviderRegistry {
         return count;
     }
 
-    function getExpectedRates(ERC20 _src, ERC20 _dest, uint _srcQty)
+    function getExpectedRates(ERC20 sourceToken, ERC20 targetToken, uint targetAmount)
         public
         view
-        returns (StablePayCommon.ExpectedRate[] expectedRates) {
-        expectedRates = new StablePayCommon.ExpectedRate[](getSupportedExpectedRatesCount(_src, _dest, _srcQty));
+        returns (StablePayCommon.ExpectedRate[] memory expectedRates) {
+        expectedRates = new StablePayCommon.ExpectedRate[](getSupportedExpectedRatesCount(sourceToken, targetToken, targetAmount));
         uint currentIndex = 0;
         for (uint256 index = 0; index < providersRegistry.length; index = index.add(1)) {
             bytes32 _providerKey = providersRegistry[index];
@@ -124,7 +124,7 @@ contract StablePayStorage is Base, IProviderRegistry {
                 uint minRate;
                 uint maxRate;
                 bool isSupported;
-                (isSupported, minRate, maxRate) = iSwappingProvider.getExpectedRate(_src, _dest, _srcQty);
+                (isSupported, minRate, maxRate) = iSwappingProvider.getExpectedRate(sourceToken, targetToken, targetAmount);
                 if(isSupported) {
                     expectedRates[currentIndex] = StablePayCommon.ExpectedRate({
                         providerKey: _providerKey,
@@ -139,7 +139,7 @@ contract StablePayStorage is Base, IProviderRegistry {
         return expectedRates;
     }
 
-    function getExpectedRateRange(ERC20 _src, ERC20 _dest, uint _srcQty)
+    function getExpectedRateRange(ERC20 sourceToken, ERC20 targetToken, uint targetAmount)
         public
         view
         returns (uint minRate, uint maxRate) {
@@ -154,7 +154,7 @@ contract StablePayStorage is Base, IProviderRegistry {
                     uint minRateProvider;
                     uint maxRateProvider;
                     bool isSupported;
-                    (isSupported, minRateProvider, maxRateProvider) = iSwappingProvider.getExpectedRate(_src, _dest, _srcQty);
+                    (isSupported, minRateProvider, maxRateProvider) = iSwappingProvider.getExpectedRate(sourceToken, targetToken, targetAmount);
                     
                     if(isSupported) {
                         if(minRateResult == 0 || minRateProvider > minRateResult) {
@@ -169,31 +169,31 @@ contract StablePayStorage is Base, IProviderRegistry {
             return (minRateResult, maxRateResult);
     }
 
-    function getSwappingProvider(bytes32 _providerKey)
+    function getSwappingProvider(bytes32 providerKey)
         public
         view
-        returns (StablePayCommon.SwappingProvider){
-        return providers[_providerKey];
+        returns (StablePayCommon.SwappingProvider memory){
+        return providers[providerKey];
     }
 
-    function isSwappingProviderPaused(bytes32 _providerKey)
+    function isSwappingProviderPaused(bytes32 providerKey)
         public
         view
         returns (bool){
-            return  providers[_providerKey].exists &&
+            return  providers[providerKey].exists &&
                     (
-                        providers[_providerKey].pausedByOwner ||
-                        providers[_providerKey].pausedByAdmin
+                        providers[providerKey].pausedByOwner ||
+                        providers[providerKey].pausedByAdmin
                     );
     }
 
-    function isSwappingProviderValid(bytes32 _providerKey)
+    function isSwappingProviderValid(bytes32 providerKey)
         public
         view
         returns (bool){
-            return  providers[_providerKey].exists &&
-                    !providers[_providerKey].pausedByOwner &&
-                    !providers[_providerKey].pausedByAdmin ;
+            return  providers[providerKey].exists &&
+                    !providers[providerKey].pausedByOwner &&
+                    !providers[providerKey].pausedByAdmin ;
     }
 
     function getProvidersRegistryCount()
@@ -269,21 +269,21 @@ contract StablePayStorage is Base, IProviderRegistry {
     }
 
     function registerSwappingProvider(
-        address _providerAddress,
+        address payable _providerAddress,
         bytes32 _providerKey
     )
     public
     isSwappingProviderNewOrUpdate(_providerKey, msg.sender)
     returns (bool)
     {
-        require(_providerAddress != 0x0, "Provider address must not be 0x0.");
+        require(_providerAddress != address(0x0), "Provider address must not be 0x0.");
 
         providers[_providerKey] = StablePayCommon.SwappingProvider({
             providerAddress: _providerAddress,
             ownerAddress: msg.sender,
             createdAt: now,
             pausedByOwner: false,
-            pausedByAdmin: false,
+            pausedByAdmin: true,
             exists: true
         });
         providersRegistry.add(_providerKey);

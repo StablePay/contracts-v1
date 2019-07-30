@@ -1,6 +1,5 @@
 const _ = require('lodash');
 const leche = require('leche');
-const withData = leche.withData;
 const uniswap = require('./uniswap');
 const BigNumber = require('bignumber.js');
 
@@ -11,26 +10,18 @@ const factory = artifacts.require("./uniswap/UniswapFactoryInterface.sol");
 const Token1 = artifacts.require("./erc20/EIP20.sol");
 const Token2 = artifacts.require("./erc20/EIP20.sol");
 
-const t = require('../util/TestUtil').title;
-
-
 const DECIMALS = (new BigNumber(10)).pow(18);
-const supply =  (new BigNumber(10).pow(10)).times(DECIMALS).toFixed();//web3.utils.toBN(new BigNumber(10000000000000000000000000000000000000000000000000000000000000000000000000000000000000000));
+const supply =  (new BigNumber(10).pow(10)).times(DECIMALS).toFixed();
 const approved = (new BigNumber(10).pow(8)).times(DECIMALS).toFixed();
 const initialLiquidity = (new BigNumber(10).pow(8)).times(DECIMALS).toFixed();
 
-console.log(supply)
-
-
 contract('deploy', function (accounts) {
     const owner = accounts[0];
-
 
     let uniswapFactory;
     let exchangeTemplate;
 
     let token1;
-    let token2;
 
     let token1ExchangeAddress;
     let token1Exchange;
@@ -62,14 +53,9 @@ contract('deploy', function (accounts) {
         exchangeTemplate = await exchange.at(exchangeTemplateResult.options.address);
 
         await uniswapFactory.initializeFactory(exchangeTemplate.address, {from: owner});
-
-        let templ =  await uniswapFactory.exchangeTemplate.call();
-        console.log('ttt', templ);
+        
         token1 = await Token1.new(supply, "a", 18, "A");
         token2 = await Token2.new(supply, "b", 18, "B");
-        console.log('token1 =>>>', token1.address);
-        console.log('token2 =>>>', token2.address);
-
 
         assert.equal(await uniswapFactory.tokenCount(), 0);
 
@@ -79,27 +65,10 @@ contract('deploy', function (accounts) {
 
         token1ExchangeAddress = await uniswapFactory.getExchange(token1.address);
         token1Exchange = await exchange.at(token1ExchangeAddress);
-        console.log('token1Exchange =>>>', token1ExchangeAddress);
-        console.log('token1Exchange =>>>', await token1Exchange.factoryAddress());
+        
         await token1.approve(token1ExchangeAddress, approved);
 
-       // const initialLiquidity = web3.utils.toBN(new BigNumber(10000000000000000000000000000000000000000));
         const current_block = await web3.eth.getBlock(await web3.eth.getBlockNumber());
-        //console.log('getEthToTokenOutputPrice =>>>', await token1Exchange.getEthToTokenOutputPrice(1000000000));
         await token1Exchange.addLiquidity(initialLiquidity, initialLiquidity, current_block.timestamp + 300, {value:100000000000000});
-        console.log('getEthToTokenOutputPrice =>>>', await token1Exchange.getEthToTokenOutputPrice(1000000000));
-
-
-    });
-
-    withData({
-        _1_: [false],
-
-    }, function(mustFail) {
-        it(t('owner', 'deploy', 'Should be able to deploy.', mustFail), async function() {
-            // Setup
-            console.log('=== =>>>', uniswapFactory.address)
-            console.log('=== =>>>', exchangeTemplate.address)
-        });
     });
 });

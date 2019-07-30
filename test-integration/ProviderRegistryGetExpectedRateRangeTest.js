@@ -1,5 +1,5 @@
 const Amount = require('../src/amounts/Amount');
-const { ETH_ADDRESS } = require('../test/util/constants');
+const { ETH_ADDRESS, title: t } = require('../test//util/consts');
 const ProcessArgs = require('../src/utils/ProcessArgs');
 const processArgs = new ProcessArgs();
 
@@ -8,7 +8,6 @@ const ERC20 = artifacts.require("./interface/ERC20.sol");
 
 const leche = require('leche');
 const withData = leche.withData;
-const t = require('../test/util/TestUtil').title;
 
 contract('ProviderRegistryExpectedRateRangeTest', (accounts) => {
     const appConf = require('../config')(processArgs.network());

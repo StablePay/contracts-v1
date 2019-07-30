@@ -5,8 +5,10 @@ const StablePayStorageMock = artifacts.require("./StablePayStorageMock.sol");
 const Storage = artifacts.require("./Storage.sol");
 
 // Utils
-const util = require('ethereumjs-util');
-const t = require('../util/TestUtil').title;
+const {
+    title: t,
+    toBytes32,
+} = require('../util/consts');
 const registerProvider  = require('../util/events').registryProvider;
 
 contract('StablePayStorageUnpauseSwappingProviderTest', accounts => {
@@ -35,7 +37,7 @@ contract('StablePayStorageUnpauseSwappingProviderTest', accounts => {
     }, function(providerOwner, pauseByAccount, paused, exists, providerTextKey, expectedErrorMessage, mustFail) {
         it(t('anUser', 'unpauseSwappingProvider', 'Should be able (or not) to pause a provider.', mustFail), async function() {
             //Setup
-            const providerKey = util.bufferToHex(util.setLengthRight(providerTextKey, 32));
+            const providerKey = toBytes32(providerTextKey);
             await stablePayStorage._registerSwappingProvider(
                 genericSmartContract,
                 providerKey,

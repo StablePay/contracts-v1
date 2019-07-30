@@ -1,30 +1,26 @@
-pragma solidity 0.4.25;
+pragma solidity 0.5.3;
 
 import "./Base.sol";
+import "../interface/IRole.sol";
 
-contract Role is Base {
+/**
+    @title This manages the roles to access to the platform.
+    @author StablePay <hi@stablepay.io>
+    @notice This smart contract manages the roles for each address who access to the platform.
+ */
+contract Role is Base, IRole {
+
+    /** Constants */
+    string constant internal ROLE_NAME = "Role";
 
     /** Events */
-
-    event RoleAdded(
-        address indexed anAddress,
-        string roleName
-    );
-
-    event RoleRemoved(
-        address indexed anAddress,
-        string roleName
-    );
-
-    event OwnershipTransferred(
-        address indexed previousOwner, 
-        address indexed newOwner
-    );
 
     /** Modifier */
 
     /**
-        @dev Only allow access from the latest version of the role contract
+        @notice It checks whether this smart contract is the last version.
+        @dev It checks getting the address for the contract name 'Role'.
+        @dev If it is not the last version, it throws a require error.
      */
     modifier onlyLatestRole() {
         require(address(this) == _storage.getAddress(keccak256(abi.encodePacked(CONTRACT_NAME, ROLE_NAME))), "Only the latest version contract.");
@@ -33,52 +29,77 @@ contract Role is Base {
   
     /** Constructor */
 
-    constructor(address _storageAddress)  public Base(_storageAddress) {
-        // Set the version
-        version = 1;
-    }
+    /**
+        @notice It creates a new Role instance associated to an Eternal Storage implementation.
+        @param storageAddress the Eternal Storage implementation.
+        @dev The Eternal Storage implementation must implement the IStorage interface.
+     */
+    constructor(address storageAddress)  public Base(storageAddress) {}
 
-     /**
-    * @dev Allows the current owner to transfer control of the contract to a newOwner.
-    * @param _newOwner The address to transfer ownership to.
-    */
-    function transferOwnership(address _newOwner) public onlyLatestRole onlyOwner {
+    /**
+        @notice It transfers the ownership of the platform to another address.
+        @param newOwner The address to transfer ownership to.
+     */
+    function transferOwnership(address newOwner) public onlyLatestRole onlyOwner {
         // Legit address?
-        require(_newOwner != 0x0,"Address != 0x0.");
+        require(newOwner != address(0x0),"Address != 0x0.");
         // Check the role exists 
         roleCheck("owner", msg.sender);
         // Remove current role
         _storage.deleteBool(keccak256(abi.encodePacked("access.role", "owner", msg.sender)));
         // Add new owner
-        _storage.setBool(keccak256(abi.encodePacked("access.role", "owner", _newOwner)), true);
+        _storage.setBool(keccak256(abi.encodePacked("access.role", "owner", newOwner)), true);
 
-        emit OwnershipTransferred(msg.sender, _newOwner);
+        emit OwnershipTransferred(msg.sender, newOwner);
     }
 
     /** Admin Role Methods */
 
-   /**
-   * @dev Give an address access to this role
-   */
-    function adminRoleAdd(string _role, address _address) public onlyLatestRole onlySuperUser {
-        roleAdd(_role, _address);
+    /**
+        @notice It adds a role to a specific address.
+        @dev The sender must be a super user (owner or admin) only.
+
+        @param aRole the role name to give to the address.
+        @param anAddress the address which will receive the role.
+        @return true if the role is added. Otherwise it returns false.
+     */
+    function adminRoleAdd(string calldata aRole, address anAddress)
+    external
+    onlyLatestRole
+    onlySuperUser
+    returns (bool){
+        roleAdd(aRole, anAddress);
+        return true;
     }
 
     /**
-   * @dev Remove an address access to this role
-   */
-    function adminRoleRemove(string _role, address _address) public onlyLatestRole onlySuperUser {
-        roleRemove(_role, _address);
+        @notice It removes a role to a specific address.
+        @dev The sender must be a super user (owner or admin).
+
+        @param aRole the role name to remove from the address.
+        @param anAddress the address which will be removed from the role.
+        @return true if the role is removed. Otherwise it returns false.
+     */
+    function adminRoleRemove(string calldata aRole, address anAddress)
+    external
+    onlyLatestRole
+    onlySuperUser
+    returns (bool){
+        roleRemove(aRole, anAddress);
+        return true;
     }
 
     /** Internal Role Methods */
    
     /**
-   * @dev Give an address access to this role
-   */
-    function roleAdd(string _role, address _address) internal {
+        @notice It gives a role to a specific address.
+        
+        @param _role the role name to give to the address.
+        @param _address the address which will receive the role.
+     */
+    function roleAdd(string memory _role, address _address) internal {
         // Legit address?
-        require(_address != 0x0, "Address != 0x0.");
+        require(_address != address(0x0), "Address != 0x0.");
         require(keccak256(abi.encodePacked(_role)) != keccak256(""), "Role must not be empty.");
 
         // Only one owner to rule them all
@@ -90,9 +111,12 @@ contract Role is Base {
     }
 
     /**
-    * @dev Remove an address' access to this role
-    */
-    function roleRemove(string _role, address _address) internal {
+        @notice It removes a role to a specific address.
+
+        @param _role the role name to remove from the address.
+        @param _address the address which will be removed from the role.
+     */
+    function roleRemove(string memory _role, address _address) internal {
         // Only an owner can transfer their access
         require(!roleHas("owner", _address), "Only owner can transfer their access.");
         // Remove from storage

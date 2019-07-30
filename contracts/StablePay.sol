@@ -1,4 +1,4 @@
-pragma solidity 0.4.25;
+pragma solidity 0.5.3;
 
 import "./base/proxy/ProxyBase.sol";
 
@@ -14,22 +14,22 @@ contract StablePay is ProxyBase {
     /** Modifiers */
 
     /** Constructor */
-    constructor(address _storage)
-      ProxyBase(_storage, STABLE_PAY)
+    constructor(address storageAddress)
+      ProxyBase(storageAddress, STABLE_PAY)
       public {
     }
 
     /**
     * @dev ERC897, the address the proxy would delegate calls to
     */
-    function implementation() public view returns (address) {
+    function implementation() external view returns (address) {
         return getTargetAddress(targetId);
     }
 
     /**
      * @dev ERC897, whether it is a forwarding (1) or an upgradeable (2) proxy
      */
-    function proxyType() public pure returns (uint256 proxyTypeId) {
+    function proxyType() external pure returns (uint256 proxyTypeId) {
         return UPGRADEABLE;
     }
 }

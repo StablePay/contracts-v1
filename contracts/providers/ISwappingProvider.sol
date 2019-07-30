@@ -1,4 +1,4 @@
-pragma solidity 0.4.25;
+pragma solidity 0.5.3;
 pragma experimental ABIEncoderV2;
 
 import "../util/SafeMath.sol";
@@ -120,7 +120,7 @@ contract ISwappingProvider {
         @dev Base on that, this function get the diff balance between what the sender sent and paid. The diff is transfer back to the sender.
         @dev Remember: After the swapping the final balance is lower than initial balance.
      */
-    function transferDiffEtherBalanceIfApplicable(address to, uint sentAmount, uint initialBalance, uint finalBalance)
+    function transferDiffEtherBalanceIfApplicable(address payable to, uint sentAmount, uint initialBalance, uint finalBalance)
     internal
     returns (bool)
     {
@@ -160,14 +160,14 @@ contract ISwappingProvider {
         @dev After the transfer, the StablePay contract will check the transfer result.
         @param order info to perform the swapping.
      */
-    function swapToken(StablePayCommon.Order order) public returns (bool);
+    function swapToken(StablePayCommon.Order memory order) public returns (bool);
 
     /**
         @dev Perform the swapping between ether and a token.
         @dev Before finishing this function must transfer the target tokens to the StablePay smart contract in order to continue with the swapping process.
         @param order info to perform the swapping. 
      */
-    function swapEther(StablePayCommon.Order order) public payable returns (bool);
+    function swapEther(StablePayCommon.Order memory order) public payable returns (bool);
 
     /**
         @dev Calculate the expected values (min and max) to perform the swapping.

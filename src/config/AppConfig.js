@@ -1,9 +1,9 @@
 require('dotenv').config();
 const KeyValue = require('./KeyValue');
 
-const DEFAULT_GAS_WEI = 4600000;
-const DEFAULT_ADDRESS_COUNT = 10;
-const DEFAULT_ADDRESS_INDEX = 0;
+const DEFAULT_GAS_WEI = "4600000";
+const DEFAULT_ADDRESS_COUNT = "10";
+const DEFAULT_ADDRESS_INDEX = "0";
 const DEFAULT_GAS_GWEI_PRICE = '20';
 const DEFAULT_PRINT_DEPLOY_COST = false;
 

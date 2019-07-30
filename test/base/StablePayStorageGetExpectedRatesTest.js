@@ -7,8 +7,10 @@ const Storage = artifacts.require("./base/Storage.sol");
 const StablePay = artifacts.require("./StablePay.sol");
 
 // Utils
-const util = require('ethereumjs-util');
-const t = require('../util/TestUtil').title;
+const {
+    title: t,
+    toBytes32,
+} = require('../util/consts');
 
 contract('StablePayStorageGetExpectedRatesTest', accounts => {
     const owner = accounts[0];
@@ -79,11 +81,16 @@ contract('StablePayStorageGetExpectedRatesTest', accounts => {
                 const maxRateWei = await web3.utils.toWei(providerData.maxRate, 'ether');
                 const newSwappingProvider = await CustomSwappingProviderMock.new(newStablePay.address);
                 await newSwappingProvider.setExpectedRate(providerData.isSupported, minRateWei, maxRateWei);
-                const providerKey = util.bufferToHex(util.setLengthRight(providerData.providerText, 32)); 
+                const providerKey = toBytes32(providerData.providerText);
                 await stablePayStorage.registerSwappingProvider(
                     newSwappingProvider.address,
                     providerKey, {
                         from: providerData.owner
+                    }
+                );
+                await stablePayStorage.unpauseByAdminSwappingProvider(
+                    providerKey, {
+                        from: owner // By Admin
                     }
                 );
                 if(providerData.paused) {
@@ -91,7 +98,7 @@ contract('StablePayStorageGetExpectedRatesTest', accounts => {
                         providerKey, {
                             from: providerData.owner
                         }
-                    );  
+                    );
                 }
             }
 

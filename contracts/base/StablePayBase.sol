@@ -1,20 +1,33 @@
-pragma solidity 0.4.25;
+pragma solidity 0.5.3;
 pragma experimental ABIEncoderV2;
 
 import "../erc20/ERC20.sol";
 import "../base/Base.sol";
 import "../interface/ISettings.sol";
 import "../interface/IProviderRegistry.sol";
+import "../interface/IPostActionRegistry.sol";
+import "../interface/IPostAction.sol";
 import "../interface/IStablePay.sol";
 import "../util/SafeMath.sol";
 import "../util/Bytes32ArrayLib.sol";
 import "../providers/ISwappingProvider.sol";
 
+/**
+    @title This is the main smart contract in the StablePay platform.
+    
+    @author StablePay <hi@stablepay.io>
+
+ */
 contract StablePayBase is Base, IStablePay {
     using SafeMath for uint256;
     using Bytes32ArrayLib for bytes32[];
 
     /** Constants */
+
+    uint256 constant internal AVOID_DECIMALS = 100000000000000;
+
+    string constant internal STABLE_PAY_STORAGE_NAME = "StablePayStorage";
+    string constant internal POST_ACTION_REGISTRY_NAME = "PostActionRegistry";
 
     /** Properties */
 
@@ -27,32 +40,42 @@ contract StablePayBase is Base, IStablePay {
         _;
     }
 
-    modifier isTokenAvailable(address _tokenAddress, uint256 _amount) {
+    modifier isTokenAvailable(address tokenAddress, uint256 amount) {
         bool available;
         uint256 minAmount;
         uint256 maxAmount;
         // TODO move this logic to the Settings smart contract.
-        (available, minAmount, maxAmount) = getSettings().getTokenAvailability(_tokenAddress);
+        (available, minAmount, maxAmount) = getSettings().getTokenAvailability(tokenAddress);
         require(available, "Token address is not available.");
-        require(_amount >= minAmount, "Amount >= min amount.");
-        require(_amount <= maxAmount, "Amount <= max amount.");
+        require(amount >= minAmount, "Amount >= min amount.");
+        require(amount <= maxAmount, "Amount <= max amount.");
         _;
     }
 
-    modifier areOrderAmountsValidToken(StablePayCommon.Order _order) {
-        require(_order.sourceAmount > 0, "Source amount > 0.");
-        require(_order.targetAmount > 0, "Target amount > 0.");
+    modifier isPostActionValid(address postAction) {
+        bool isPostAction = getPostActionRegistry().isRegisteredPostAction(postAction);
+        require(
+            postAction == address(0x0) ||
+            isPostAction,
+            "Post action is not valid."
+        );
         _;
     }
-    modifier areOrderAmountsValidEther(StablePayCommon.Order _order) {
-        require(_order.targetAmount > 0, "Target amount > 0.");
+
+    modifier areOrderAmountsValidToken(StablePayCommon.Order memory order) {
+        require(order.sourceAmount > 0, "Source amount > 0.");
+        require(order.targetAmount > 0, "Target amount > 0.");
+        _;
+    }
+    modifier areOrderAmountsValidEther(StablePayCommon.Order memory order) {
+        require(order.targetAmount > 0, "Target amount > 0.");
         _;
     }
 
     /** Constructor */
 
-    constructor(address _storageAddress)
-        public Base(_storageAddress) {
+    constructor(address storageAddress)
+        public Base(storageAddress) {
     }
 
     /** Fallback Method */
@@ -83,21 +106,29 @@ contract StablePayBase is Base, IStablePay {
         return IProviderRegistry(stablePayStorageAddress);
     }
 
+    function getPostActionRegistry()
+        internal
+        view
+        returns (IPostActionRegistry) {
+        address postActionRegistryAddress = _storage.getAddress(keccak256(abi.encodePacked(CONTRACT_NAME, POST_ACTION_REGISTRY_NAME)));
+        return IPostActionRegistry(postActionRegistryAddress);
+    }
+
     /**
         @dev Get the swapping provider struct for a given provider key.
      */
-    function getSwappingProvider(bytes32 _providerKey)
+    function getSwappingProvider(bytes32 providerKey)
         public
         view
-        returns (StablePayCommon.SwappingProvider){
-        return getProviderRegistry().getSwappingProvider(_providerKey);
+        returns (StablePayCommon.SwappingProvider memory){
+        return getProviderRegistry().getSwappingProvider(providerKey);
     }
 
     /**
         @dev Calculates the fee amount based on the target amount and the pre configured platform fee value.
         @dev Uses the AVOID_DECIMALS in order to avoid loss precision in division operations.
      */
-    function getFeeAmount(StablePayCommon.Order order)
+    function getFeeAmount(StablePayCommon.Order memory order)
     internal
     view
     returns (uint256) {
@@ -219,7 +250,7 @@ contract StablePayBase is Base, IStablePay {
         @dev Base on that, this function get the diff balance between what the sender sent and paid. The diff is transfer back to the sender.
         @dev Remember: After the swapping the final balance is lower than initial balance.
      */
-    function transferDiffEtherBalanceIfApplicable(address to, uint sentAmount, uint initialBalance, uint finalBalance)
+    function transferDiffEtherBalanceIfApplicable(address payable to, uint sentAmount, uint initialBalance, uint finalBalance)
     internal
     returns (bool, uint)
     {
@@ -249,7 +280,7 @@ contract StablePayBase is Base, IStablePay {
         @dev Calculate the platform fee amount based on the order target amount and platform fee.
         @dev Transfer the calculated fee amount. 
      */
-    function calculateAndTransferFee(StablePayCommon.Order order)
+    function calculateAndTransferFee(StablePayCommon.Order memory order)
     internal
     returns (bool success, uint feeAmount)
     {
@@ -261,26 +292,55 @@ contract StablePayBase is Base, IStablePay {
     }
 
     /**
-        @dev Calculate the 'to' amount based on the order target amount and platform fee amount.
-        @dev Transfer the 'to' amount to 'to' address defined in order.
+        @notice Calculate the 'to' amount based on the order target amount and platform fee amount.
+        @notice Transfer the 'to' amount to 'to' address defined in order.
+
+        @return the process was done, and the amount transfered to the 'to' account.
      */
-    function calculateAndTransferToAmount(StablePayCommon.Order order, uint feeAmount)
+    function calculateAndTransferToAmount(StablePayCommon.Order memory order, uint feeAmount)
     internal
     returns (bool success, uint toAmount)
     {
+        address postActionAddress = getPostActionRegistry().getPostActionOrDefault(order.postActionAddress);
+
         // Calculate the 'to' amount.
         uint256 currentToAmount = order.targetAmount.sub(feeAmount);
-        // Transfer the 'to' amount to the 'to' address.
-        bool result = ERC20(order.targetToken).transfer(order.toAddress, currentToAmount);
-        require(result, "Transfer to 'to' address failed.");
-        return (true, currentToAmount);
+
+        // Transfer the 'to' amount to the post action.
+        bool transferToPostActionResult = ERC20(order.targetToken).transfer(postActionAddress, currentToAmount);
+        require(transferToPostActionResult, "Transfer to 'to' address failed.");
+
+        StablePayCommon.PostActionData memory postActionData = createPostActionData(order, feeAmount);
+
+        IPostAction postAction = IPostAction(postActionAddress);
+        bool postActionExecutionResult = postAction.execute(postActionData);
+
+        return (postActionExecutionResult, currentToAmount);
+    }
+
+    function createPostActionData(StablePayCommon.Order memory order, uint feeAmount)
+    internal
+    pure
+    returns (StablePayCommon.PostActionData memory) {
+        return StablePayCommon.PostActionData({
+            sourceAmount: order.sourceAmount,
+            targetAmount: order.targetAmount,
+            minRate: order.minRate,
+            maxRate: order.maxRate,
+            feeAmount: feeAmount,
+            sourceToken: order.sourceToken,
+            targetToken: order.targetToken,
+            toAddress: order.toAddress,
+            fromAddress: order.fromAddress,
+            data: order.data
+        });
     }
 
     /**
         @dev Transfer tokens to the 'to' address if source / target tokens are equal.
         @dev It returns true when source and target tokens are equals. Otherwise it returns false.
      */
-    function transferTokensIfTokensAreEquals(StablePayCommon.Order order)
+    function transferTokensIfTokensAreEquals(StablePayCommon.Order memory order)
     internal
     returns (bool){
         // Verify if token addresses are equal.
@@ -307,7 +367,7 @@ contract StablePayBase is Base, IStablePay {
         @dev It executes the swapping process associated to an order for a specific provider key.
         @dev It returns true if the swapping was executed successfully. Otherwise, it returns false.
      */
-    function doTransferWithTokens(StablePayCommon.Order order, bytes32 _providerKey)
+    function doTransferWithTokens(StablePayCommon.Order memory order, bytes32 _providerKey)
     internal
     returns (bool)
     {
@@ -368,23 +428,33 @@ contract StablePayBase is Base, IStablePay {
         return false;
     }
 
-    function transferWithTokens(StablePayCommon.Order order, bytes32[] _providerKeys)
-    public
+    function requireTransferWithTokens(StablePayCommon.Order memory order, bytes32[] memory providerKeys)
+    internal
     isNotPaused()
     nonReentrant()
+    isPostActionValid(order.postActionAddress)
     isTokenAvailable(order.targetToken, order.targetAmount)
     areOrderAmountsValidToken(order)
     isSender(msg.sender, order.fromAddress)
+    returns (bool) {
+        providerKeys;
+        return true;
+    }
+
+    function transferWithTokens(StablePayCommon.Order memory order, bytes32[] memory providerKeys)
+    public
     returns (bool)
     {
+        requireTransferWithTokens(order, providerKeys);
+
         // Transfer tokens if source / target tokens are equal.
         if(transferTokensIfTokensAreEquals(order)) {
             return true;
         }
-        require(_providerKeys.length > 0, "Provider keys must not be empty.");
+        require(providerKeys.length > 0, "Provider keys must not be empty.");
 
-        for (uint256 index = 0; index < _providerKeys.length; index = index.add(1)) {
-            bytes32 _providerKey = _providerKeys[index];
+        for (uint256 index = 0; index < providerKeys.length; index = index.add(1)) {
+            bytes32 _providerKey = providerKeys[index];
             bool swapSuccess = doTransferWithTokens(order, _providerKey);
             if(swapSuccess) {
                 return true;
@@ -393,7 +463,7 @@ contract StablePayBase is Base, IStablePay {
         require(false, "Swapping token could not be processed.");
     }
 
-    function doTransferWithEthers(StablePayCommon.Order order, bytes32 _providerKey)
+    function doTransferWithEthers(StablePayCommon.Order memory order, bytes32 _providerKey)
     internal
     returns (bool)
     {
@@ -445,21 +515,31 @@ contract StablePayBase is Base, IStablePay {
         return false;
     }
 
-    function transferWithEthers(StablePayCommon.Order order, bytes32[] _providerKeys)
-    public
+    function requireTransferWithEthers(StablePayCommon.Order memory order, bytes32[] memory providerKeys)
+    internal
     isNotPaused()
     nonReentrant()
+    isPostActionValid(order.postActionAddress)
     isTokenAvailable(order.targetToken, order.targetAmount)
     areOrderAmountsValidEther(order)
     isSender(msg.sender, order.fromAddress)
+    returns (bool) {
+        providerKeys;
+        return true;
+    }
+
+    function transferWithEthers(StablePayCommon.Order memory order, bytes32[] memory providerKeys)
+    public
     payable
     returns (bool)
     {
-        require(_providerKeys.length > 0, "Provider keys must not be empty.");
+        requireTransferWithEthers(order, providerKeys);
+        
+        require(providerKeys.length > 0, "Provider keys must not be empty.");
 
-        for (uint256 index = 0; index < _providerKeys.length; index = index.add(1)) {
-            bytes32 _providerKey = _providerKeys[index];
-            bool swapSuccess = doTransferWithEthers(order, _providerKey);
+        for (uint256 index = 0; index < providerKeys.length; index = index.add(1)) {
+            bytes32 providerKey = providerKeys[index];
+            bool swapSuccess = doTransferWithEthers(order, providerKey);
             if(swapSuccess) {
                 return true;
             }
@@ -468,36 +548,36 @@ contract StablePayBase is Base, IStablePay {
         return true;
     }
 
-    function emitExecutionTransferFailedEvent(StablePayCommon.Order _order, address _providerAddress, bytes32 _providerKey)
+    function emitExecutionTransferFailedEvent(StablePayCommon.Order memory order, address providerAddress, bytes32 providerKey)
     internal {
         emit ExecutionTransferFailed(
             address(this),
-            _providerAddress,
-            _order.sourceToken,
-            _order.targetToken,
-            _order.fromAddress,
-            _order.toAddress,
+            providerAddress,
+            order.sourceToken,
+            order.targetToken,
+            order.fromAddress,
+            order.toAddress,
             now,
-            _providerKey,
-            _order.data
+            providerKey,
+            order.data
         );
     }
 
-    function emitExecutionTransferSuccessEvent(StablePayCommon.Order _order, uint feeAmount, uint toAmount, uint amountDiff, bytes32 _providerKey)
+    function emitExecutionTransferSuccessEvent(StablePayCommon.Order memory order, uint feeAmount, uint toAmount, uint amountDiff, bytes32 providerKey)
     internal {
         // Note: Provider address is not added due to a Stack too deep error. It can be taken from provider key.
-        uint16 platformFee = _order.sourceToken == _order.targetToken ? 0 : getSettings().getPlatformFee();
+        uint16 platformFee = order.sourceToken == order.targetToken ? 0 : getSettings().getPlatformFee();
         emit ExecutionTransferSuccess(
-            _providerKey,
-            _order.sourceToken,
-            _order.targetToken,
-            _order.fromAddress,
-            _order.toAddress,
-            _order.sourceAmount.sub(amountDiff),
+            providerKey,
+            order.sourceToken,
+            order.targetToken,
+            order.fromAddress,
+            order.toAddress,
+            order.sourceAmount.sub(amountDiff),
             toAmount,
             feeAmount,
             platformFee,
-            _order.data
+            order.data
         );
 
     }

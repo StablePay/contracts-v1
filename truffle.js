@@ -33,7 +33,7 @@ module.exports = {
 	},
 	compilers: {
 		solc: {
-			version: "0.4.25",
+			version: "0.5.3",
 			optimizer: {
 				enabled: true,
 				runs: 200
@@ -42,6 +42,9 @@ module.exports = {
 	},
 	api_keys: {
 		etherscan: etherscanApiKeyValue
+	},
+	verify: {
+		preamble: "Author: StablePay <hi@stablepay.io>.\nVersion: 1.0.0"
 	},
 	plugins: [
 		'truffle-plugin-verify'
@@ -67,6 +70,13 @@ module.exports = {
 			confirmations: 0,
 			timeoutBlocks: 50,
 			skipDryRun: true
+		},
+		coverage: {
+			host: "127.0.0.1",
+			network_id: "*",
+			port: 8555,		// <-- If you change this, also set the port option in .solcover.js.
+			gas: 0xfffffffffff,	// <-- Use this high gas value
+			gasPrice: 0x01	// <-- Use this low gas price
 		},
 		infuraRinkeby: {
 			provider: function() {

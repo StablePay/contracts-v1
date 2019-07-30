@@ -6,11 +6,9 @@ tslint.json
 yarn.lock
 .idea
 .vscode
-coverage/
+/coverage
 coverageEnv/
 coverage.json
-/.soliumignore
-/.soliumrc.json
 /.node*
 .env
 full-ganache-db/
@@ -19,3 +17,4 @@ kyber_db/
 resources/**/
 .DS_Store
 resources/.DS_Store
+/db

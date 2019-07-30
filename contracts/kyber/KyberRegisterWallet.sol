@@ -1,7 +1,7 @@
-pragma solidity 0.4.25;
+pragma solidity 0.5.3;
 
 interface KyberRegisterWallet {
 
-    function registerWallet(address wallet) public;
+    function registerWallet(address wallet) external;
 
 }
