@@ -7,7 +7,6 @@ import "../../base/Base.sol";
     @author StablePay <hi@stablepay.io>
  */
 contract BaseMock is Base {
-
     /** Constructor */
 
     /**
@@ -15,67 +14,37 @@ contract BaseMock is Base {
         @param _storage the Eternal Storage implementation.
         @dev The Eternal Storage implementation must implement the IStorage interface.
      */
-    constructor (
-        address _storage
-    )
-    public
-    Base(
-        _storage
-    ) {
-    }
+    constructor(address _storage) public Base(_storage) {}
 
     /** Functions */
 
     /**
         @notice Mock function to test the modifier nonReentrant.
      */
-    function _nonReentrant()
-        public
-        nonReentrant()
-        {}
+    function _nonReentrant() public nonReentrant() {}
 
     /**
         @notice Mock function to test the modifier onlyOwner.
      */
-    function _onlyOwner()
-        public
-        view
-        onlyOwner()
-        {}
+    function _onlyOwner() public view onlyOwner() {}
 
     /**
         @notice Mock function to test the modifier onlyAdmin.
      */
-    function _onlyAdmin()
-        public
-        view
-        onlyAdmin()
-        {}
+    function _onlyAdmin() public view onlyAdmin() {}
 
     /**
         @notice Mock function to test the modifier onlySuperUser.
      */
-    function _onlySuperUser()
-        public
-        view
-        onlySuperUser()
-        {}
+    function _onlySuperUser() public view onlySuperUser() {}
 
     /**
         @notice Mock function to test the modifier onlyRole.
      */
-    function _onlyRole(string memory role)
-        public
-        view
-        onlyRole(role)
-        {}
+    function _onlyRole(string memory role) public view onlyRole(role) {}
 
     /**
         @notice Mock function to test the modifier isNotPaused.
      */
-    function _isNotPaused()
-        public
-        view
-        isNotPaused()
-        {}       
+    function _isNotPaused() public view isNotPaused() {}
 }

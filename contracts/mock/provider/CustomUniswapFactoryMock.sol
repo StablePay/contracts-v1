@@ -14,37 +14,28 @@ contract CustomUniswapFactoryMock is UniswapFactoryInterface {
     }
 
     // Create Exchange
-    function createExchange(address _token)
-    external
-    returns (address) {
+    function createExchange(address _token) external returns (address) {
         _token;
         return exchange;
     }
 
     // Get Exchange and Token Info
-    function getExchange(address _token)
-    external
-    view returns (address) {
+    function getExchange(address _token) external view returns (address) {
         _token;
         return exchange;
     }
 
-    function getToken(address _exchange)
-    external
-    view returns (address) {
+    function getToken(address _exchange) external view returns (address) {
         _exchange;
         return token;
     }
 
-    function getTokenWithId(uint256 tokenId)
-    external
-    view returns (address){
+    function getTokenWithId(uint256 tokenId) external view returns (address) {
         tokenId;
         return token;
     }
 
-    function initializeFactory(address template)
-    external {
+    function initializeFactory(address template) external {
         template;
     }
 }

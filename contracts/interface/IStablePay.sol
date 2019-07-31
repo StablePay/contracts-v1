@@ -4,7 +4,6 @@ pragma experimental ABIEncoderV2;
 import "../util/StablePayCommon.sol";
 
 contract IStablePay {
-
     /** Events */
 
     /**
@@ -17,7 +16,7 @@ contract IStablePay {
         address targetToken,
         address from,
         address to,
-        uint timestamp,
+        uint256 timestamp,
         bytes32 providerKey,
         bytes data
     );
@@ -31,9 +30,9 @@ contract IStablePay {
         address targetToken,
         address from,
         address to,
-        uint fromAmount,
-        uint toAmount,
-        uint feeAmount,
+        uint256 fromAmount,
+        uint256 toAmount,
+        uint256 feeAmount,
         uint16 platformFee,
         bytes data
     );
@@ -41,10 +40,10 @@ contract IStablePay {
     /**
         @dev This event is emitted when a deposit is received.
      */
-    event DepositReceived (
+    event DepositReceived(
         address indexed thisContract,
         address from,
-        uint amount
+        uint256 amount
     );
 
     /**
@@ -56,22 +55,25 @@ contract IStablePay {
         address from,
         address sourceToken,
         address targetToken,
-        uint amount
+        uint256 amount
     );
 
     /** Functions */
 
-    function transferWithTokens(StablePayCommon.Order memory order, bytes32[] memory providerKeys)
-    public
-    returns (bool);
+    function transferWithTokens(
+        StablePayCommon.Order memory order,
+        bytes32[] memory providerKeys
+    ) public returns (bool);
 
-    function transferWithEthers(StablePayCommon.Order memory order, bytes32[] memory providerKeys)
-    public
-    payable
-    returns (bool);
+    function transferWithEthers(
+        StablePayCommon.Order memory order,
+        bytes32[] memory providerKeys
+    ) public payable returns (bool);
 
-    function emitPaymentSentEvent(StablePayCommon.Order memory order, uint256 amountSent)
-    internal {
+    function emitPaymentSentEvent(
+        StablePayCommon.Order memory order,
+        uint256 amountSent
+    ) internal {
         emit PaymentSent(
             address(this),
             order.toAddress,

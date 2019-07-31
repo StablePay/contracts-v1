@@ -5,29 +5,22 @@ pragma solidity 0.5.3;
     @author StablePay <hi@stablepay.io>
  */
 interface ISettings {
-
     /** Events */
-    
+
     /**
         @notice This event is emitted when the platform is paused due to maintenance reasons.
      */
-    event PlatformPaused (
-        address indexed thisContract,
-        string reason
-    );
+    event PlatformPaused(address indexed thisContract, string reason);
 
     /**
         @notice This event is emitted when the platform is unpaused.
      */
-    event PlatformUnpaused (
-        address indexed thisContract,
-        string reason
-    );
+    event PlatformUnpaused(address indexed thisContract, string reason);
 
     /**
         @notice This event is emitted when the platform fee is updated.
      */
-    event PlatformFeeUpdated (
+    event PlatformFeeUpdated(
         address indexed thisContract,
         uint16 oldPlatformFee,
         uint16 newPlatformFee
@@ -36,7 +29,7 @@ interface ISettings {
     /**
         @notice This event is emitted when a token availability is updated.
      */
-    event TokenAvailabilityUpdated (
+    event TokenAvailabilityUpdated(
         address indexed thisContract,
         address tokenAddress,
         uint256 minAmount,
@@ -72,10 +65,19 @@ interface ISettings {
      */
     function isPlatformPaused() external view returns (bool);
 
-    function disableTokenAvailability(address tokenAddress) external returns (bool);
+    function disableTokenAvailability(address tokenAddress)
+        external
+        returns (bool);
 
-    function getTokenAvailability(address tokenAddress) external view returns (bool available, uint256 minAmount, uint256 maxAmount);
+    function getTokenAvailability(address tokenAddress)
+        external
+        view
+        returns (bool available, uint256 minAmount, uint256 maxAmount);
 
-    function setTokenAvailability(address tokenAddress, uint256 minAmount, uint256 maxAmount) external returns (bool);
+    function setTokenAvailability(
+        address tokenAddress,
+        uint256 minAmount,
+        uint256 maxAmount
+    ) external returns (bool);
 
 }

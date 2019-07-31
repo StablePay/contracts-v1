@@ -6,10 +6,9 @@ import "../../base/Base.sol";
 import "../../interface/IPostAction.sol";
 
 contract PostActionBase is Base, IPostAction {
-
     /** Constants */
 
-    string constant internal STABLEPAY_NAME = "StablePay";
+    string internal constant STABLEPAY_NAME = "StablePay";
 
     /** Properties */
 
@@ -18,24 +17,25 @@ contract PostActionBase is Base, IPostAction {
     /** Modifiers */
 
     modifier isStablePay(address _anAddress) {
-        require(getStablePayAddress() == _anAddress, "Address must be StablePay");
+        require(
+            getStablePayAddress() == _anAddress,
+            "Address must be StablePay"
+        );
         _;
     }
 
     /** Constructor */
 
-    constructor(address storageAddress)
-        public Base(storageAddress) {
-    }
+    constructor(address storageAddress) public Base(storageAddress) {}
 
     /** Fallback Method */
 
     /** Functions */
 
-    function getStablePayAddress()
-    internal
-    view
-    returns (address) {
-        return _storage.getAddress(keccak256(abi.encodePacked(CONTRACT_NAME, STABLEPAY_NAME)));
+    function getStablePayAddress() internal view returns (address) {
+        return
+            _storage.getAddress(
+                keccak256(abi.encodePacked(CONTRACT_NAME, STABLEPAY_NAME))
+            );
     }
 }

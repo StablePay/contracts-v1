@@ -5,7 +5,6 @@ pragma solidity 0.5.3;
     @author StablePay <hi@stablepay.io>
  */
 contract IStorage {
- 
     /** Set Functions */
 
     /**
@@ -20,7 +19,7 @@ contract IStorage {
         @param _key key to associated to the value.
         @param _value value to store with the key.
      */
-    function setUint(bytes32 _key, uint _value) external;
+    function setUint(bytes32 _key, uint256 _value) external;
 
     /**
         @notice It sets a key / string pair.
@@ -48,7 +47,7 @@ contract IStorage {
         @param _key key to associated to the value.
         @param _value value to store with the key.
      */
-    function setInt(bytes32 _key, int _value) external;
+    function setInt(bytes32 _key, int256 _value) external;
 
     /**
         @notice It sets a key / uint16 pair.
@@ -82,7 +81,7 @@ contract IStorage {
         @param _key key to associated to the value to delete.
      */
     function deleteBytes(bytes32 _key) external;
-    
+
     /**
         @notice It deletes a bool value asociated to a specific key.
         @param _key key to associated to the value to delete.
@@ -113,7 +112,7 @@ contract IStorage {
         @notice It gets an uint value associated to a key.
         @param _key key to get the current value.
      */
-    function getUint(bytes32 _key) external view returns (uint);
+    function getUint(bytes32 _key) external view returns (uint256);
 
     /**
         @notice It gets a string value associated to a key.
@@ -137,7 +136,7 @@ contract IStorage {
         @notice It gets an int value associated to a key.
         @param _key key to get the current value.
      */
-    function getInt(bytes32 _key) external view returns (int);
+    function getInt(bytes32 _key) external view returns (int256);
 
     /**
         @notice It gets an uint26 value associated to a key.

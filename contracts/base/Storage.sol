@@ -9,16 +9,15 @@ import "../interface/IStorage.sol";
     @dev To see more details about the Eternal Storage pattern: https://fravoll.github.io/solidity-patterns/eternal_storage.html
  */
 contract Storage is IStorage {
-
     /**** Storage Types *******/
-  
-    mapping(bytes32 => string)     private stringStorage;
-    mapping(bytes32 => address)    private addressStorage;
-    mapping(bytes32 => bytes)      private bytesStorage;
-    mapping(bytes32 => bool)       private boolStorage;
-    mapping(bytes32 => int256)     private intStorage;
-    mapping(bytes32 => uint256)    private uIntStorage;
-    mapping(bytes32 => uint16)     private uInt16Storage;
+
+    mapping(bytes32 => string) private stringStorage;
+    mapping(bytes32 => address) private addressStorage;
+    mapping(bytes32 => bytes) private bytesStorage;
+    mapping(bytes32 => bool) private boolStorage;
+    mapping(bytes32 => int256) private intStorage;
+    mapping(bytes32 => uint256) private uIntStorage;
+    mapping(bytes32 => uint16) private uInt16Storage;
 
     /** Modifiers */
 
@@ -30,13 +29,24 @@ contract Storage is IStorage {
         // The owner and other contracts are only allowed to set the storage upon deployment to register the initial contracts/settings, afterwards their direct access is disabled
         if (boolStorage[keccak256("contract.storage.initialised")] == true) {
             // Make sure the access is permitted to only contracts in our control
-            require(addressStorage[keccak256(abi.encodePacked("contract.address", msg.sender))] != address(0x0), "Sender is not a valid contract.");
+            require(
+                addressStorage[keccak256(
+                        abi.encodePacked("contract.address", msg.sender)
+                    )] !=
+                    address(0x0),
+                "Sender is not a valid contract."
+            );
         } else {
-            require(boolStorage[keccak256(abi.encodePacked("access.role", "owner", msg.sender))], "Sender is not an owner.");
+            require(
+                boolStorage[keccak256(
+                    abi.encodePacked("access.role", "owner", msg.sender)
+                )],
+                "Sender is not an owner."
+            );
         }
         _;
     }
-    
+
     /**
         @notice It creates an Eternal Storage implementation instance.
         @dev It saves the sender as an owner.
@@ -44,11 +54,13 @@ contract Storage is IStorage {
     constructor() public {
         // Set the main owner upon deployment
         // TODO implement ownable using access.role to allow admins
-        boolStorage[keccak256(abi.encodePacked("access.role", "owner", msg.sender))] = true;
+        boolStorage[keccak256(
+            abi.encodePacked("access.role", "owner", msg.sender)
+        )] = true;
     }
 
     /** Get Functions */
-   
+
     /**
         @notice It gets an address value associated to a key.
         @param _key key to get the current value.
@@ -61,7 +73,7 @@ contract Storage is IStorage {
         @notice It gets an uint value associated to a key.
         @param _key key to get the current value.
      */
-    function getUint(bytes32 _key) external view returns (uint) {
+    function getUint(bytes32 _key) external view returns (uint256) {
         return uIntStorage[_key];
     }
 
@@ -93,7 +105,7 @@ contract Storage is IStorage {
         @notice It gets an int value associated to a key.
         @param _key key to get the current value.
      */
-    function getInt(bytes32 _key) external view returns (int) {
+    function getInt(bytes32 _key) external view returns (int256) {
         return intStorage[_key];
     }
 
@@ -112,7 +124,10 @@ contract Storage is IStorage {
         @param _key key to associated to the value.
         @param _value value to store with the key.
      */
-    function setAddress(bytes32 _key, address _value) external onlyKnownContracts {
+    function setAddress(bytes32 _key, address _value)
+        external
+        onlyKnownContracts
+    {
         addressStorage[_key] = _value;
     }
 
@@ -121,7 +136,7 @@ contract Storage is IStorage {
         @param _key key to associated to the value.
         @param _value value to store with the key.
      */
-    function setUint(bytes32 _key, uint _value) external onlyKnownContracts {
+    function setUint(bytes32 _key, uint256 _value) external onlyKnownContracts {
         uIntStorage[_key] = _value;
     }
 
@@ -130,7 +145,10 @@ contract Storage is IStorage {
         @param _key key to associated to the value.
         @param _value value to store with the key.
      */
-    function setString(bytes32 _key, string calldata _value) external onlyKnownContracts {
+    function setString(bytes32 _key, string calldata _value)
+        external
+        onlyKnownContracts
+    {
         stringStorage[_key] = _value;
     }
 
@@ -139,7 +157,10 @@ contract Storage is IStorage {
         @param _key key to associated to the value.
         @param _value value to store with the key.
      */
-    function setBytes(bytes32 _key, bytes calldata _value) external onlyKnownContracts {
+    function setBytes(bytes32 _key, bytes calldata _value)
+        external
+        onlyKnownContracts
+    {
         bytesStorage[_key] = _value;
     }
 
@@ -157,7 +178,7 @@ contract Storage is IStorage {
         @param _key key to associated to the value.
         @param _value value to store with the key.
      */
-    function setInt(bytes32 _key, int _value) external onlyKnownContracts {
+    function setInt(bytes32 _key, int256 _value) external onlyKnownContracts {
         intStorage[_key] = _value;
     }
 
@@ -166,7 +187,10 @@ contract Storage is IStorage {
         @param _key key to associated to the value.
         @param _value value to store with the key.
      */
-    function setUint16(bytes32 _key, uint16 _value) external onlyKnownContracts {
+    function setUint16(bytes32 _key, uint16 _value)
+        external
+        onlyKnownContracts
+    {
         uInt16Storage[_key] = _value;
     }
 

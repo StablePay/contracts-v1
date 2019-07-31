@@ -11,9 +11,8 @@ import "../interface/IUpgrade.sol";
     @dev It must be executed by an owner.
  */
 contract Upgrade is Base, IUpgrade {
-
     /** Constants */
-    string constant internal CONTRACT_ADDRESS = "contract.address";
+    string internal constant CONTRACT_ADDRESS = "contract.address";
 
     /** Events */
 
@@ -24,7 +23,7 @@ contract Upgrade is Base, IUpgrade {
         @param _storageAddress the Eternal Storage implementation.
         @dev The Eternal Storage implementation must implement the IStorage interface.
      */
-    constructor(address _storageAddress) Base(_storageAddress) public {}
+    constructor(address _storageAddress) public Base(_storageAddress) {}
 
     /** Functions */
 
@@ -35,18 +34,26 @@ contract Upgrade is Base, IUpgrade {
         @param _upgradedContractAddress the new smart contract address.
         @return true if the contract is updated. Otherwise it returns false.
      */
-    function upgradeContract(string calldata _name, address _upgradedContractAddress)
-    external
-    onlySuperUser
-    returns (bool){
-        address oldContractAddress = _storage.getAddress(keccak256(abi.encodePacked(CONTRACT_NAME, _name)));
-        
-        require(oldContractAddress != address(0x0), "Old contract address must not be 0x0.");
-        require(oldContractAddress != _upgradedContractAddress, "Old and new contract addresses must not be equals.");
-        uint oldContractBalance = oldContractAddress.balance;
+    function upgradeContract(
+        string calldata _name,
+        address _upgradedContractAddress
+    ) external onlySuperUser returns (bool) {
+        address oldContractAddress = _storage.getAddress(
+            keccak256(abi.encodePacked(CONTRACT_NAME, _name))
+        );
 
-        if( oldContractBalance > 0 ) {
-            emit PendingBalance (
+        require(
+            oldContractAddress != address(0x0),
+            "Old contract address must not be 0x0."
+        );
+        require(
+            oldContractAddress != _upgradedContractAddress,
+            "Old and new contract addresses must not be equals."
+        );
+        uint256 oldContractBalance = oldContractAddress.balance;
+
+        if (oldContractBalance > 0) {
+            emit PendingBalance(
                 address(this),
                 oldContractAddress,
                 _upgradedContractAddress,
@@ -54,12 +61,27 @@ contract Upgrade is Base, IUpgrade {
                 oldContractBalance
             );
         }
-        
-        _storage.setAddress(keccak256(abi.encodePacked(CONTRACT_NAME, _name)), _upgradedContractAddress);
-        _storage.setAddress(keccak256(abi.encodePacked(CONTRACT_ADDRESS, _upgradedContractAddress)), _upgradedContractAddress);
-        _storage.deleteAddress(keccak256(abi.encodePacked(CONTRACT_ADDRESS, oldContractAddress)));
 
-        emit ContractUpgraded(address(this), oldContractAddress, _upgradedContractAddress, _name);
+        _storage.setAddress(
+            keccak256(abi.encodePacked(CONTRACT_NAME, _name)),
+            _upgradedContractAddress
+        );
+        _storage.setAddress(
+            keccak256(
+                abi.encodePacked(CONTRACT_ADDRESS, _upgradedContractAddress)
+            ),
+            _upgradedContractAddress
+        );
+        _storage.deleteAddress(
+            keccak256(abi.encodePacked(CONTRACT_ADDRESS, oldContractAddress))
+        );
+
+        emit ContractUpgraded(
+            address(this),
+            oldContractAddress,
+            _upgradedContractAddress,
+            _name
+        );
         return true;
     }
 }

@@ -6,8 +6,8 @@ pragma solidity 0.5.3;
     @dev It delegates the invocation calls to a specific smart contract.
  */
 contract IERCProxy {
-    uint256 constant public FORWARDING = 1;
-    uint256 constant public UPGRADEABLE = 2;
+    uint256 public constant FORWARDING = 1;
+    uint256 public constant UPGRADEABLE = 2;
 
     /**
         @notice It gets the proxy type (FORWARDING or UPGRADEABLE).

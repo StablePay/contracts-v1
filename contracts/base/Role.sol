@@ -9,9 +9,8 @@ import "../interface/IRole.sol";
     @notice This smart contract manages the roles for each address who access to the platform.
  */
 contract Role is Base, IRole {
-
     /** Constants */
-    string constant internal ROLE_NAME = "Role";
+    string internal constant ROLE_NAME = "Role";
 
     /** Events */
 
@@ -23,10 +22,16 @@ contract Role is Base, IRole {
         @dev If it is not the last version, it throws a require error.
      */
     modifier onlyLatestRole() {
-        require(address(this) == _storage.getAddress(keccak256(abi.encodePacked(CONTRACT_NAME, ROLE_NAME))), "Only the latest version contract.");
+        require(
+            address(this) ==
+                _storage.getAddress(
+                    keccak256(abi.encodePacked(CONTRACT_NAME, ROLE_NAME))
+                ),
+            "Only the latest version contract."
+        );
         _;
     }
-  
+
     /** Constructor */
 
     /**
@@ -34,21 +39,30 @@ contract Role is Base, IRole {
         @param storageAddress the Eternal Storage implementation.
         @dev The Eternal Storage implementation must implement the IStorage interface.
      */
-    constructor(address storageAddress)  public Base(storageAddress) {}
+    constructor(address storageAddress) public Base(storageAddress) {}
 
     /**
         @notice It transfers the ownership of the platform to another address.
         @param newOwner The address to transfer ownership to.
      */
-    function transferOwnership(address newOwner) public onlyLatestRole onlyOwner {
+    function transferOwnership(address newOwner)
+        public
+        onlyLatestRole
+        onlyOwner
+    {
         // Legit address?
-        require(newOwner != address(0x0),"Address != 0x0.");
-        // Check the role exists 
+        require(newOwner != address(0x0), "Address != 0x0.");
+        // Check the role exists
         roleCheck("owner", msg.sender);
         // Remove current role
-        _storage.deleteBool(keccak256(abi.encodePacked("access.role", "owner", msg.sender)));
+        _storage.deleteBool(
+            keccak256(abi.encodePacked("access.role", "owner", msg.sender))
+        );
         // Add new owner
-        _storage.setBool(keccak256(abi.encodePacked("access.role", "owner", newOwner)), true);
+        _storage.setBool(
+            keccak256(abi.encodePacked("access.role", "owner", newOwner)),
+            true
+        );
 
         emit OwnershipTransferred(msg.sender, newOwner);
     }
@@ -64,10 +78,11 @@ contract Role is Base, IRole {
         @return true if the role is added. Otherwise it returns false.
      */
     function adminRoleAdd(string calldata aRole, address anAddress)
-    external
-    onlyLatestRole
-    onlySuperUser
-    returns (bool){
+        external
+        onlyLatestRole
+        onlySuperUser
+        returns (bool)
+    {
         roleAdd(aRole, anAddress);
         return true;
     }
@@ -81,16 +96,17 @@ contract Role is Base, IRole {
         @return true if the role is removed. Otherwise it returns false.
      */
     function adminRoleRemove(string calldata aRole, address anAddress)
-    external
-    onlyLatestRole
-    onlySuperUser
-    returns (bool){
+        external
+        onlyLatestRole
+        onlySuperUser
+        returns (bool)
+    {
         roleRemove(aRole, anAddress);
         return true;
     }
 
     /** Internal Role Methods */
-   
+
     /**
         @notice It gives a role to a specific address.
         
@@ -100,12 +116,21 @@ contract Role is Base, IRole {
     function roleAdd(string memory _role, address _address) internal {
         // Legit address?
         require(_address != address(0x0), "Address != 0x0.");
-        require(keccak256(abi.encodePacked(_role)) != keccak256(""), "Role must not be empty.");
+        require(
+            keccak256(abi.encodePacked(_role)) != keccak256(""),
+            "Role must not be empty."
+        );
 
         // Only one owner to rule them all
-        require(keccak256(abi.encodePacked(_role)) != keccak256("owner"), "Only one owner.");
+        require(
+            keccak256(abi.encodePacked(_role)) != keccak256("owner"),
+            "Only one owner."
+        );
         // Add it
-        _storage.setBool(keccak256(abi.encodePacked("access.role", _role, _address)), true);
+        _storage.setBool(
+            keccak256(abi.encodePacked("access.role", _role, _address)),
+            true
+        );
         // Log it
         emit RoleAdded(_address, _role);
     }
@@ -118,9 +143,14 @@ contract Role is Base, IRole {
      */
     function roleRemove(string memory _role, address _address) internal {
         // Only an owner can transfer their access
-        require(!roleHas("owner", _address), "Only owner can transfer their access.");
+        require(
+            !roleHas("owner", _address),
+            "Only owner can transfer their access."
+        );
         // Remove from storage
-        _storage.deleteBool(keccak256(abi.encodePacked("access.role", _role, _address)));
+        _storage.deleteBool(
+            keccak256(abi.encodePacked("access.role", _role, _address))
+        );
         // Log it
         emit RoleRemoved(_address, _role);
     }

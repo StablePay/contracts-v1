@@ -162,6 +162,10 @@ An script can be executed using the command below:
 
 > Note: Some scripts requires admin privilegies. Please, check your configured mnemonic value.
 
+#### Prettier Lint Plugin
+
+The project uses the [prettier solidity plugin](https://github.com/prettier-solidity/prettier-plugin-solidity).
+
 ---
 
 ## Contact Us

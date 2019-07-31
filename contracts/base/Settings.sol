@@ -10,13 +10,12 @@ import "../interface/ISettings.sol";
     @notice It allows configure some aspect in the platform once it is deployed.
  */
 contract Settings is Base, ISettings {
-
     /** Constants */
 
-    string constant internal TOKEN_AVAILABLE = "token.available";
-    string constant internal TOKEN_MAX_AMOUNT = "token.maxAmount";
-    string constant internal TOKEN_MIN_AMOUNT = "token.minAmount";
-    string constant internal PLATFORM_FEE = "config.platform.fee";
+    string internal constant TOKEN_AVAILABLE = "token.available";
+    string internal constant TOKEN_MAX_AMOUNT = "token.maxAmount";
+    string internal constant TOKEN_MIN_AMOUNT = "token.minAmount";
+    string internal constant PLATFORM_FEE = "config.platform.fee";
 
     /** Constructor */
 
@@ -25,32 +24,22 @@ contract Settings is Base, ISettings {
         @param storageAddress the Eternal Storage implementation.
         @dev The Eternal Storage implementation must implement the IStorage interface.
      */
-    constructor(address storageAddress)
-    public
-    Base(storageAddress) {}
+    constructor(address storageAddress) public Base(storageAddress) {}
 
     /** Modifiers */
 
     /** Functions */
 
-    function getPlatformFee()
-    external
-    view
-    returns (uint16){
+    function getPlatformFee() external view returns (uint16) {
         return _storage.getUint16(keccak256(abi.encodePacked(PLATFORM_FEE)));
     }
 
-    function setPlatformFee(uint16 _fee)
-    external
-    onlySuperUser
-    returns (bool) {
-        uint16 oldPlatformFee = _storage.getUint16(keccak256(abi.encodePacked(PLATFORM_FEE)));
-        _storage.setUint16(keccak256(abi.encodePacked(PLATFORM_FEE)), _fee);
-        emit PlatformFeeUpdated(
-            address(this),
-            oldPlatformFee,
-            _fee
+    function setPlatformFee(uint16 _fee) external onlySuperUser returns (bool) {
+        uint16 oldPlatformFee = _storage.getUint16(
+            keccak256(abi.encodePacked(PLATFORM_FEE))
         );
+        _storage.setUint16(keccak256(abi.encodePacked(PLATFORM_FEE)), _fee);
+        emit PlatformFeeUpdated(address(this), oldPlatformFee, _fee);
         return true;
     }
 
@@ -61,15 +50,13 @@ contract Settings is Base, ISettings {
         @param reason the reason why the platform is being paused.
      */
     function pausePlatform(string calldata reason)
-    external
-    onlySuperUser
-    returns (bool) {
+        external
+        onlySuperUser
+        returns (bool)
+    {
         _storage.setBool(keccak256(abi.encodePacked(STATE_PAUSED)), true);
 
-        emit PlatformPaused(
-            address(this),
-            reason
-        );
+        emit PlatformPaused(address(this), reason);
     }
 
     /**
@@ -79,15 +66,13 @@ contract Settings is Base, ISettings {
         @param reason the reason why the platform is being unpaused.
      */
     function unpausePlatform(string calldata reason)
-    external
-    onlySuperUser
-    returns (bool) {
+        external
+        onlySuperUser
+        returns (bool)
+    {
         _storage.setBool(keccak256(abi.encodePacked(STATE_PAUSED)), false);
 
-        emit PlatformUnpaused(
-            address(this),
-            reason
-        );
+        emit PlatformUnpaused(address(this), reason);
     }
 
     /**
@@ -107,12 +92,20 @@ contract Settings is Base, ISettings {
     }
 
     function disableTokenAvailability(address _tokenAddress)
-    external
-    onlySuperUser
-    returns (bool){
-        _storage.setBool(keccak256(abi.encodePacked(TOKEN_AVAILABLE, _tokenAddress)), false);
-        uint256 minAmount = _storage.getUint(keccak256(abi.encodePacked(TOKEN_MIN_AMOUNT, _tokenAddress)));
-        uint256 maxAmount = _storage.getUint(keccak256(abi.encodePacked(TOKEN_MAX_AMOUNT, _tokenAddress)));
+        external
+        onlySuperUser
+        returns (bool)
+    {
+        _storage.setBool(
+            keccak256(abi.encodePacked(TOKEN_AVAILABLE, _tokenAddress)),
+            false
+        );
+        uint256 minAmount = _storage.getUint(
+            keccak256(abi.encodePacked(TOKEN_MIN_AMOUNT, _tokenAddress))
+        );
+        uint256 maxAmount = _storage.getUint(
+            keccak256(abi.encodePacked(TOKEN_MAX_AMOUNT, _tokenAddress))
+        );
 
         emit TokenAvailabilityUpdated(
             address(this),
@@ -125,23 +118,40 @@ contract Settings is Base, ISettings {
     }
 
     function getTokenAvailability(address _tokenAddress)
-    external
-    view
-    returns (bool available, uint256 minAmount, uint256 maxAmount){
-        available = _storage.getBool(keccak256(abi.encodePacked(TOKEN_AVAILABLE, _tokenAddress)));
-        minAmount = _storage.getUint(keccak256(abi.encodePacked(TOKEN_MIN_AMOUNT, _tokenAddress)));
-        maxAmount = _storage.getUint(keccak256(abi.encodePacked(TOKEN_MAX_AMOUNT, _tokenAddress)));
+        external
+        view
+        returns (bool available, uint256 minAmount, uint256 maxAmount)
+    {
+        available = _storage.getBool(
+            keccak256(abi.encodePacked(TOKEN_AVAILABLE, _tokenAddress))
+        );
+        minAmount = _storage.getUint(
+            keccak256(abi.encodePacked(TOKEN_MIN_AMOUNT, _tokenAddress))
+        );
+        maxAmount = _storage.getUint(
+            keccak256(abi.encodePacked(TOKEN_MAX_AMOUNT, _tokenAddress))
+        );
         return (available, minAmount, maxAmount);
     }
 
-    function setTokenAvailability(address _tokenAddress, uint256 _minAmount, uint256 _maxAmount)
-    external
-    onlySuperUser
-    returns (bool) {
+    function setTokenAvailability(
+        address _tokenAddress,
+        uint256 _minAmount,
+        uint256 _maxAmount
+    ) external onlySuperUser returns (bool) {
         require(_minAmount < _maxAmount, "Min amount < max amount.");
-        _storage.setBool(keccak256(abi.encodePacked(TOKEN_AVAILABLE, _tokenAddress)), true);
-        _storage.setUint(keccak256(abi.encodePacked(TOKEN_MIN_AMOUNT, _tokenAddress)), _minAmount);
-        _storage.setUint(keccak256(abi.encodePacked(TOKEN_MAX_AMOUNT, _tokenAddress)), _maxAmount);
+        _storage.setBool(
+            keccak256(abi.encodePacked(TOKEN_AVAILABLE, _tokenAddress)),
+            true
+        );
+        _storage.setUint(
+            keccak256(abi.encodePacked(TOKEN_MIN_AMOUNT, _tokenAddress)),
+            _minAmount
+        );
+        _storage.setUint(
+            keccak256(abi.encodePacked(TOKEN_MAX_AMOUNT, _tokenAddress)),
+            _maxAmount
+        );
 
         emit TokenAvailabilityUpdated(
             address(this),
