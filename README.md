@@ -3,13 +3,13 @@
 ---
 ## Description
 
-This is the official [StablePay](https://stablepay.io) repository for the smart contracts.
+Official [StablePay](https://stablepay.io) smart contracts repository.
 
 [![CircleCI](https://circleci.com/gh/StablePay/stablepay_contracts_dev.svg?style=svg&circle-token=acfb08abb88ef07bae7c052df5910d6df4c96745)](https://circleci.com/gh/StablePay/stablepay_contracts_dev)
 
 ## What is StablePay?
 
-[StablePay](https://stablepay.io) is a decentralized platform for the new internet of money. [StablePay](https://stablepay.io) allows people to send/receive any ERC20 token and ether and receive any ERC20 token or ether in a secured and easy way.
+[StablePay](https://stablepay.io) is a decentralized platform for the new internet of money. [StablePay](https://stablepay.io) allows people to send any ERC20 token or ether and receive any ERC20 token or ether in a secured and easy way.
 
 > StablePay was one of the **bounty prize winners** in ETHSanFrancisco 2018.
 
@@ -102,7 +102,7 @@ $ npm install truffle -g
 
 The platform needs some env variables to be configured properly. In order to configure them, create a `.env` file based on the `.env.template` file.
 
-Once the file was created, it needs to setup some values. Please, follow the instruction to setup these values before executing any command.
+Then follow the instructions in the .env to setup the correct values before executing any command.
 
 #### Infura
 
