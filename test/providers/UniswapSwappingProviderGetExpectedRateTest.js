@@ -5,33 +5,42 @@ const CustomUniswapExchangeMock = artifacts.require("./mock/CustomUniswapExchang
 const CustomUniswapFactoryMock = artifacts.require("./mock/CustomUniswapFactoryMock.sol");
 const UniswapSwappingProvider = artifacts.require("./UniswapSwappingProvider.sol");
 const StablePay = artifacts.require("./StablePay.sol");
+const Token1 = artifacts.require("./services/erc20/EIP20.sol");
+const Token2 = artifacts.require("./services/erc20/EIP20.sol");
 
 // Utils
 const {
-    title: t,
+    title:t
 } = require('../util/consts');
+const supply =  10000;
 
 contract('UniswapSwappingProviderGetExpectedRateTest', accounts => {
-    const account1 = accounts[1];
-    const account2 = accounts[2];
+    const owner = accounts[0];
+    let account1 = accounts[1];
+    let account2 = accounts[2];
+    let tokenAddress =  accounts[2];
 
-    let stablePay;
+
 
     beforeEach('beforeEach', async () => {
         stablePay = await StablePay.deployed();
         assert(stablePay);
         assert(stablePay.address);
+
+        const token1 = await Token1.new(supply, "a", 18, "A");
+        tokenAddress = token1.address;
+
+
     });
 /*
     withData({
-        _1_withInvalidExchangeAddress: [account1, account1, "0x0000000000000000000000000000000000000000", account2, "1", false, "0", "0"],
-        _2_withUndefinedExchangeAddress: [account1, account1, undefined, account2, "1", true, "1", "1"]
+            _1_withInvalidExchangeAddress: [tokenAddress, tokenAddress, "0x0000000000000000000000000000000000000000", account2, "1", false, "0", "0"],
+            _2_withUndefinedExchangeAddress: [tokenAddress, tokenAddress, undefined, account2, "1", true, "1", "1"]
     }, function(sourceToken, targetToken, exchangeAddress, tokenAddress, value, isSupportedExpected, minRateExpected, maxRateExpected) {
         it(t('anUser', 'getExpectedRate', 'Should be able to get the expected rate.', false), async function() {
             //Setup
             const valueWei = web3.utils.toWei(value, 'ether');
-            const exchange = await CustomUniswapExchangeMock.new(valueWei, valueWei, valueWei, valueWei);
-
+            const exchange = await CustomUniswapExchangeMock.new(valueWei, valueWei, valueWei, valueWei, tokenAddress);
             const finalExchangeAddress = exchangeAddress === undefined ? exchange.address : exchangeAddress;
             const uniswapFactory = await CustomUniswapFactoryMock.new(finalExchangeAddress, tokenAddress);
             const factoryAddress = uniswapFactory.address;

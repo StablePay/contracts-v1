@@ -1,7 +1,7 @@
 pragma solidity 0.5.3;
 pragma experimental ABIEncoderV2;
 
-import "../erc20/ERC20.sol";
+import "../services/erc20/ERC20.sol";
 import "../base/Base.sol";
 import "../util/SafeMath.sol";
 import "../util/Bytes32ArrayLib.sol";
@@ -157,10 +157,10 @@ contract StablePayStorage is Base, IProviderRegistry {
                     (isSupported, minRateProvider, maxRateProvider) = iSwappingProvider.getExpectedRate(sourceToken, targetToken, targetAmount);
                     
                     if(isSupported) {
-                        if(minRateResult == 0 || minRateProvider > minRateResult) {
+                        if(minRateResult == 0 || minRateProvider < minRateResult) {
                             minRateResult = minRateProvider;
                         }
-                        if(maxRateResult == 0 || maxRateProvider < maxRateResult) {
+                        if(maxRateResult == 0 || maxRateProvider > maxRateResult) {
                             maxRateResult = maxRateProvider;
                         }
                     }

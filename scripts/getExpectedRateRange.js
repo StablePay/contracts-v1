@@ -8,7 +8,7 @@
  */
 // Smart contracts
 const IProviderRegistry = artifacts.require("./interface/IProviderRegistry.sol");
-const ERC20 = artifacts.require("./erc20/ERC20.sol");
+const ERC20 = artifacts.require("./services/erc20/ERC20.sol");
 
 // Util classes
 const assert = require('assert');

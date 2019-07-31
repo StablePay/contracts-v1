@@ -77,6 +77,8 @@ contract('ProviderRegistryGetExpectedRateTest', (accounts) => {
         _21_Uniswap_ETH_to_30_DAI: [stablepayProviders.Uniswap, 'ETH', '12', 'DAI', true],
         _22_Kyber_ETH_to_10_DAI: [stablepayProviders.Kyber, 'ETH', '29.98', 'DAI', true],
         _22_Uniswap_ETH_to_10_DAI: [stablepayProviders.Uniswap, 'ETH', '29.98', 'DAI', true],
+        _23_Kyber_DAI_to_1_ETH: [stablepayProviders.Kyber, 'DAI', '1', 'ETH', true],
+        _23_Uniswap_DAI_to_1_ETH: [stablepayProviders.Uniswap, 'DAI', '1', 'ETH', true],
     }, function(providerKey, sourceTokenName, targetAmountUnit, targetTokenName, isSupportedExpected) {
         it(t('anUser', 'getExpectedRate', `Should be able to get expected rate for: ${sourceTokenName} -> ${targetAmountUnit} ${targetTokenName}.`), async function() {
             // Setup

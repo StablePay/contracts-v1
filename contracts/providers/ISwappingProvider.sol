@@ -3,7 +3,7 @@ pragma experimental ABIEncoderV2;
 
 import "../util/SafeMath.sol";
 import "../util/StablePayCommon.sol";
-import "../erc20/ERC20.sol";
+import "../services/erc20/ERC20.sol";
 
 contract ISwappingProvider {
     using SafeMath for uint256;

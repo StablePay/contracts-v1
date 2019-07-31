@@ -9,7 +9,7 @@
 const appConfig = require('../src/config');
 
 // Smart contracts
-const KyberRegisterWallet = artifacts.require("./kyber/KyberRegisterWallet.sol");
+const KyberRegisterWallet = artifacts.require("./services/kyber/KyberRegisterWallet.sol");
 
 // Util classes
 const util = require('util');

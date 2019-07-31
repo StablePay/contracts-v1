@@ -1,0 +1,313 @@
+App configuration was validated.
+
+Compiling your contracts...
+===========================
+> Everything is up to date, there is nothing to compile.
+
+
+Starting migrations...
+======================
+> Network name:    'infuraRopsten'
+> Network id:      3
+> Block gas limit: 0x7a121d
+
+
+1_initial_migration.js
+======================
+
+   Replacing 'Migrations'
+   ----------------------
+   > transaction hash:    0x96ad8442832cc9064c893dbc7691b19c407d61e48b2050c94563c79c779cd810
+   > Blocks: 0            Seconds: 4
+   > contract address:    0x947E4C3b64eD8CeBF95e968115C690DE100A21FA
+   > block number:        6094030
+   > block timestamp:     1564521317
+   > account:             0x3322Aa20b1359dfB4c78a0Ed1AA1c6d2759b605c
+   > balance:             60.825439747870355709
+   > gas used:            273226
+   > gas price:           20 gwei
+   > value sent:          0 ETH
+   > total cost:          0.00546452 ETH
+
+
+   > Saving migration to chain.
+   > Saving artifacts
+   -------------------------------------
+   > Total cost:          0.00546452 ETH
+
+
+2_deploy.js
+===========
+Deploying smart contracts to 'infuraRopsten'.
+
+   Deploying 'SafeMath'
+   --------------------
+   > transaction hash:    0xefc416a5a01921af60bb89ebbf13ca03e9f200cf3100ecbff7829553e068721d
+   > Blocks: 0            Seconds: 8
+   > contract address:    0x2f8ac2B6878FDD9c0A361651c7f79A94857D879a
+   > block number:        6094033
+   > block timestamp:     1564521360
+   > account:             0x3322Aa20b1359dfB4c78a0Ed1AA1c6d2759b605c
+   > balance:             60.823101667870355709
+   > gas used:            74876
+   > gas price:           20 gwei
+   > value sent:          0 ETH
+   > total cost:          0.00149752 ETH
+
+
+   Deploying 'Bytes32ArrayLib'
+   ---------------------------
+   > transaction hash:    0x6e6b17dcf23d5bf3df2df009dde4a81d686a60e368e8f7e1a5cdc42871c3cffc
+   > Blocks: 2            Seconds: 20
+   > contract address:    0x8a97BAd3eB3E477175B16c5e1471cB8ceBb7CA3d
+   > block number:        6094036
+   > block timestamp:     1564521395
+   > account:             0x3322Aa20b1359dfB4c78a0Ed1AA1c6d2759b605c
+   > balance:             60.821604147870355709
+   > gas used:            74876
+   > gas price:           20 gwei
+   > value sent:          0 ETH
+   > total cost:          0.00149752 ETH
+
+
+   Deploying 'Storage'
+   -------------------
+   > transaction hash:    0x4f3b010ca6ad4b4f77f012ff97dc7f14a056c01044bebb9a541b21fa06b0e8a7
+   > Blocks: 1            Seconds: 12
+   > contract address:    0x4B24f0BFaC7a73d1583951386B6E67e3310C1549
+   > block number:        6094038
+   > block timestamp:     1564521408
+   > account:             0x3322Aa20b1359dfB4c78a0Ed1AA1c6d2759b605c
+   > balance:             60.745213687870355709
+   > gas used:            3819523
+   > gas price:           20 gwei
+   > value sent:          0 ETH
+   > total cost:          0.07639046 ETH
+
+
+   Deploying 'StablePayCommon'
+   ---------------------------
+   > transaction hash:    0x8a927a9ba32f18900e389b73d904839c315561063a6f7da2e9278ff2b95a04e7
+   > Blocks: 1            Seconds: 8
+   > contract address:    0x2E07c1a2D5A37eA11969Cb025144f899f94b40Ed
+   > block number:        6094043
+   > block timestamp:     1564521435
+   > account:             0x3322Aa20b1359dfB4c78a0Ed1AA1c6d2759b605c
+   > balance:             60.743835247870355709
+   > gas used:            68922
+   > gas price:           20 gwei
+   > value sent:          0 ETH
+   > total cost:          0.00137844 ETH
+
+
+   Deploying 'AddressLib'
+   ----------------------
+   > transaction hash:    0xc5cad9d3bb1287bd43fbfe7d5b9f374e014af0eec64c34faffdff1d2f16e8a8e
+   > Blocks: 3            Seconds: 24
+   > contract address:    0x67Cf661a0b9cd451dE4341a9C004fae286029DFC
+   > block number:        6094046
+   > block timestamp:     1564521452
+   > account:             0x3322Aa20b1359dfB4c78a0Ed1AA1c6d2759b605c
+   > balance:             60.742337727870355709
+   > gas used:            74876
+   > gas price:           20 gwei
+   > value sent:          0 ETH
+   > total cost:          0.00149752 ETH
+
+
+   Deploying 'StablePayStorage'
+   ----------------------------
+   > transaction hash:    0xd04394568893e772845ce983aaae690b04f37dcaff7857fe7e199054317fd15e
+   > Blocks: 2            Seconds: 20
+   > contract address:    0x091125c1eD0E1C2cAA9AC6c98864bc8bC92C3114
+   > block number:        6094049
+   > block timestamp:     1564521490
+   > account:             0x3322Aa20b1359dfB4c78a0Ed1AA1c6d2759b605c
+   > balance:             60.678320707870355709
+   > gas used:            3200851
+   > gas price:           20 gwei
+   > value sent:          0 ETH
+   > total cost:          0.06401702 ETH
+
+
+   Deploying 'Settings'
+   --------------------
+   > transaction hash:    0xe3597d8cb6983993d86eae6c22470563eab3ee02359fedeb9ca84b1a7f4cba9b
+   > Blocks: 1            Seconds: 4
+   > contract address:    0xbE7c5318e7423364CD0A7dDAC069a8163Faf7350
+   > block number:        6094051
+   > block timestamp:     1564521499
+   > account:             0x3322Aa20b1359dfB4c78a0Ed1AA1c6d2759b605c
+   > balance:             60.619632267870355709
+   > gas used:            2934422
+   > gas price:           20 gwei
+   > value sent:          0 ETH
+   > total cost:          0.05868844 ETH
+
+
+   Deploying 'Upgrade'
+   -------------------
+   > transaction hash:    0x3c599c0c3f9d5cdd3b5f75c4927cedeb6d304580cbbf27f163ab4e95486d5dce
+   > Blocks: 1            Seconds: 20
+   > contract address:    0xE0D645c48E50901de530807fa9469f93d8947e79
+   > block number:        6094054
+   > block timestamp:     1564521533
+   > account:             0x3322Aa20b1359dfB4c78a0Ed1AA1c6d2759b605c
+   > balance:             60.592757207870355709
+   > gas used:            1343753
+   > gas price:           20 gwei
+   > value sent:          0 ETH
+   > total cost:          0.02687506 ETH
+
+
+   Deploying 'Role'
+   ----------------
+   > transaction hash:    0x514f5ae8747f529d59bd927cbbee0c8ad2731054fea42f9a9d58eaf38203fa04
+   > Blocks: 1            Seconds: 16
+   > contract address:    0x7111C228acD5dCe233FC5eb42099924D7d3f486f
+   > block number:        6094056
+   > block timestamp:     1564521551
+   > account:             0x3322Aa20b1359dfB4c78a0Ed1AA1c6d2759b605c
+   > balance:             60.547997007870355709
+   > gas used:            2238010
+   > gas price:           20 gwei
+   > value sent:          0 ETH
+   > total cost:          0.0447602 ETH
+
+
+   Deploying 'Vault'
+   -----------------
+   > transaction hash:    0x2a9ed2b004824b279deb84d64a00542fc50a1becc5034565c5a536bc38a25b5c
+   > Blocks: 1            Seconds: 36
+   > contract address:    0xE448f25F06E00800CBb0E98A468881Dcb8cF729b
+   > block number:        6094059
+   > block timestamp:     1564521567
+   > account:             0x3322Aa20b1359dfB4c78a0Ed1AA1c6d2759b605c
+   > balance:             60.525618587870355709
+   > gas used:            1118921
+   > gas price:           20 gwei
+   > value sent:          0 ETH
+   > total cost:          0.02237842 ETH
+
+
+   Deploying 'StablePay'
+   ---------------------
+   > transaction hash:    0xe013e4b3d783ef650bc652f89deb0ae3d4883e4531b87aa18f30fa01dcc02d18
+   > Blocks: 2            Seconds: 20
+   > contract address:    0xE2309FbcC7Dffac163E177db6184b14B09f7b0C9
+   > block number:        6094062
+   > block timestamp:     1564521613
+   > account:             0x3322Aa20b1359dfB4c78a0Ed1AA1c6d2759b605c
+   > balance:             60.501363927870355709
+   > gas used:            1212733
+   > gas price:           20 gwei
+   > value sent:          0 ETH
+   > total cost:          0.02425466 ETH
+
+
+   Deploying 'StablePayBase'
+   -------------------------
+   > transaction hash:    0x5f2037b66467b5eb3424336ec81764e2fcf9219dda51547df65ad94494efa1f3
+   > Blocks: 1            Seconds: 48
+   > contract address:    0xb9729DB0B2821Af1d638d28a96Fe155e48Ed05Da
+   > block number:        6094064
+   > block timestamp:     1564521662
+   > account:             0x3322Aa20b1359dfB4c78a0Ed1AA1c6d2759b605c
+   > balance:             60.395789507870355709
+   > gas used:            5278721
+   > gas price:           20 gwei
+   > value sent:          0 ETH
+   > total cost:          0.10557442 ETH
+
+
+   Deploying 'PostActionRegistry'
+   ------------------------------
+   > transaction hash:    0xd268b2501e538358e3aef26bdd9bd9de88bff7b7833e008a098d00a7f86b057d
+   > Blocks: 0            Seconds: 8
+   > contract address:    0x468842B9680b891E204F71cB5cB3770320990755
+   > block number:        6094068
+   > block timestamp:     1564521695
+   > account:             0x3322Aa20b1359dfB4c78a0Ed1AA1c6d2759b605c
+   > balance:             60.359796007870355709
+   > gas used:            1799675
+   > gas price:           20 gwei
+   > value sent:          0 ETH
+   > total cost:          0.0359935 ETH
+
+
+   Deploying 'TransferToPostAction'
+   --------------------------------
+   > transaction hash:    0x4d33f8780007aadd427d891da438e6603286ffeff0aa5231e68762b30ad75709
+   > Blocks: 2            Seconds: 28
+   > contract address:    0x9dcef3037E7E8d3E45755D48FD63243Da0023064
+   > block number:        6094071
+   > block timestamp:     1564521714
+   > account:             0x3322Aa20b1359dfB4c78a0Ed1AA1c6d2759b605c
+   > balance:             60.332198787870355709
+   > gas used:            1379861
+   > gas price:           20 gwei
+   > value sent:          0 ETH
+   > total cost:          0.02759722 ETH
+
+
+   Deploying 'KyberSwappingProvider'
+   ---------------------------------
+   > transaction hash:    0x0a579d66b7b48887d8b8b226055180a9ad9f86c450e1cca58b605a60cd2c592d
+   > Blocks: 2            Seconds: 16
+   > contract address:    0x8902131c1066b9890e39ec32cB76B021CA295D07
+   > block number:        6094075
+   > block timestamp:     1564521750
+   > account:             0x3322Aa20b1359dfB4c78a0Ed1AA1c6d2759b605c
+   > balance:             60.278527627870355709
+   > gas used:            2634325
+   > gas price:           20 gwei
+   > value sent:          0 ETH
+   > total cost:          0.0526865 ETH
+
+
+   Deploying 'UniswapSwappingProvider'
+   -----------------------------------
+   > transaction hash:    0x6fa819a336a5b54e23fa0b02b8e449a4fc06cb5b3068b715e903b4f48ae9bac7
+   > Blocks: 1            Seconds: 4
+   > contract address:    0x9b04778C455ee800367673fC8988788a7706b6fa
+   > block number:        6094079
+   > block timestamp:     1564521778
+   > account:             0x3322Aa20b1359dfB4c78a0Ed1AA1c6d2759b605c
+   > balance:             60.213058947870355709
+   > gas used:            3111322
+   > gas price:           20 gwei
+   > value sent:          0 ETH
+   > total cost:          0.06222644 ETH
+
+Storing contract info 'SafeMath' => 0x2f8ac2B6878FDD9c0A361651c7f79A94857D879a
+Storing contract info 'Bytes32ArrayLib' => 0x8a97BAd3eB3E477175B16c5e1471cB8ceBb7CA3d
+Storing contract info 'Storage' => 0x4B24f0BFaC7a73d1583951386B6E67e3310C1549
+Storing contract info 'StablePayCommon' => 0x2E07c1a2D5A37eA11969Cb025144f899f94b40Ed
+Storing contract info 'AddressLib' => 0x67Cf661a0b9cd451dE4341a9C004fae286029DFC
+Storing contract info 'StablePayStorage' => 0x091125c1eD0E1C2cAA9AC6c98864bc8bC92C3114
+Storing contract info 'Settings' => 0xbE7c5318e7423364CD0A7dDAC069a8163Faf7350
+Storing contract info 'Upgrade' => 0xE0D645c48E50901de530807fa9469f93d8947e79
+Storing contract info 'Role' => 0x7111C228acD5dCe233FC5eb42099924D7d3f486f
+Storing contract info 'Vault' => 0xE448f25F06E00800CBb0E98A468881Dcb8cF729b
+Storing contract info 'StablePay' => 0xE2309FbcC7Dffac163E177db6184b14B09f7b0C9
+Storing contract info 'StablePayBase' => 0xb9729DB0B2821Af1d638d28a96Fe155e48Ed05Da
+Storing contract info 'PostActionRegistry' => 0x468842B9680b891E204F71cB5cB3770320990755
+Storing contract info 'TransferToPostAction' => 0x9dcef3037E7E8d3E45755D48FD63243Da0023064
+Storing contract info 'KyberSwappingProvider' => 0x8902131c1066b9890e39ec32cB76B021CA295D07
+Storing contract info 'UniswapSwappingProvider' => 0x9b04778C455ee800367673fC8988788a7706b6fa
+Setting platform owner to address 0x3322Aa20b1359dfB4c78a0Ed1AA1c6d2759b605c.
+Disabling direct access to storage.
+ Token 'DAI' availability  configured: Address: '0xaD6D458402F60fD3Bd25163575031ACDce07538D' - MinAmount: '10000000000000000000' - MaxAmount: '100000000000000000000'.
+
+   ⠋ Saving migration to chain.JSON file created at './build/1564522746827_infuraRopsten.json'.
+JSON file created at './build/contracts.json'.
+   > Saving migration to chain.
+   > Saving artifacts
+   -------------------------------------
+   > Total cost:          0.60731334 ETH
+
+
+Summary
+=======
+> Total deployments:   17
+> Final cost:          0.61277786 ETH

@@ -4,11 +4,11 @@ const uniswap = require('./uniswap');
 const BigNumber = require('bignumber.js');
 
 
-const exchange = artifacts.require("./uniswap/UniswapExchangeInterface.sol");
-const factory = artifacts.require("./uniswap/UniswapFactoryInterface.sol");
+const exchange = artifacts.require("./services/uniswap/UniswapExchangeInterface.sol");
+const factory = artifacts.require("./services/uniswap/UniswapFactoryInterface.sol");
 
-const Token1 = artifacts.require("./erc20/EIP20.sol");
-const Token2 = artifacts.require("./erc20/EIP20.sol");
+const Token1 = artifacts.require("./services/erc20/EIP20.sol");
+const Token2 = artifacts.require("./services/erc20/EIP20.sol");
 
 const DECIMALS = (new BigNumber(10)).pow(18);
 const supply =  (new BigNumber(10).pow(10)).times(DECIMALS).toFixed();

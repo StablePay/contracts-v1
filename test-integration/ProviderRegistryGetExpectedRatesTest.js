@@ -55,6 +55,7 @@ contract('ProviderRegistryGetExpectedRatesTest', (accounts) => {
         _20_ETH_to_47_25_DAI: ['ETH', '47.25', 'DAI', 2],
         _21_ETH_to_12_DAI: ['ETH', '12', 'DAI', 2],
         _22_ETH_to_29_98_DAI: ['ETH', '29.98', 'DAI', 2],
+        _23_DAI_to_1_ETH: ['DAI', '1', 'ETH', 2],
     }, function(sourceTokenName, targetAmountUnit, targetTokenName, lengthExpected) {
         it(t('anUser', 'getExpectedRates', `Should be able to get expected rate for: ${sourceTokenName} -> ${targetAmountUnit} ${targetTokenName}.`), async function() {
             // Setup
