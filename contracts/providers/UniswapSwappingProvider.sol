@@ -9,7 +9,8 @@ import "../util/StablePayCommon.sol";
 import "../util/SafeMath.sol";
 
 /**
-    @dev Stable Pay Uniswap provider.
+    @title  Uniswap  Swapping provider.
+    @author StablePay <hi@stablepay.io>
  */
 contract UniswapSwappingProvider is ISwappingProvider {
     address public uniswapFactory;

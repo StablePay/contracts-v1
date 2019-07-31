@@ -7,8 +7,11 @@ import "../util/StablePayCommon.sol";
 import "./ISwappingProvider.sol";
 
 /**
-    https://developer.kyber.network/docs/VendorsGuide/#converting-from-erc20
-    https://developer.kyber.network/docs/KyberNetworkProxy/#getexpectedrate
+    @title Kyber Network Swapping provider
+    @author StablePay <hi@stablepay.io>
+
+    @notice  https://developer.kyber.network/docs/VendorsGuide/#converting-from-erc20
+    @notice https://developer.kyber.network/docs/KyberNetworkProxy/#getexpectedrate
  */
 contract KyberSwappingProvider is ISwappingProvider {
     ERC20 internal constant ETH_TOKEN_ADDRESS = ERC20(

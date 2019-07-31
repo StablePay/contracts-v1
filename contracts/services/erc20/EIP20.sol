@@ -86,7 +86,7 @@ contract EIP20 {
         return allowed[_owner][_spender];
     }
 
-    function time() public view returns (uint256 balance) {
+    function time() public view returns (uint256 timestamp) {
         return block.timestamp;
     }
 }
