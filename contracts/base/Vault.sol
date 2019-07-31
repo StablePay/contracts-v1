@@ -1,59 +1,72 @@
-pragma solidity 0.4.25;
+pragma solidity 0.5.3;
 
-import "../erc20/ERC20.sol";
+import "../services/erc20/ERC20.sol";
 import "./Base.sol";
 import "../interface/IVault.sol";
 
+/**
+    @title This manages the Ether transferred to any smart contract.
+    @author StablePay <hi@stablepay.io>
+    @notice It is used as a Vault because any smart contract transfer the ether to this smart contract.
+ */
 contract Vault is Base, IVault {
     
     /** Constants */
 
     /** Variables */
 
-    /** Events */
-
-    /**
-      @dev This event is emitted when any tokens amount is withdrawn from the contract.
-     */
-    event TokensWithdrawn (
-      address indexed thisContract,
-      address erc20Contract,
-      address who,
-      address to,
-      uint256 amount
-    );
-
-    event EthersWithdrawn (
-      address indexed thisContract,
-      address who,
-      address to,
-      uint256 amount
-    );
-
     /** Modifiers */
 
     /** Constructor */
+
+    /**
+        @notice It creates a new Vault instance associated to an Eternal Storage implementation.
+        @param _storage the Eternal Storage implementation.
+        @dev The Eternal Storage implementation must implement the IStorage interface.
+     */
     constructor(address _storage)
       Base(_storage)
       public {
     }
 
-    /** Functions */
+    /** Fallback Method */
 
-    function () payable public {
-      require(msg.value > 0, "Msg value > 0.");
-      emit DepositReceived(address(this), msg.sender, msg.value);
+    /**
+      @notice It receives the ether transferred.
+      @dev If the ether is zero, it throws a require error.
+     */
+    function () external payable {
+        require(msg.value > 0, "Msg value > 0.");
+        emit DepositReceived(
+            address(this),
+            msg.sender,
+            msg.value
+        );
     }
 
+    /** Functions */
+
+    /**
+      @notice It is used to deposit ether to the Vault by default.
+      @dev This function is used by the Base smart contract in the fallback function to transfer any ether received.
+      @return true if it received the ether transferred. Otherwise it returns false.
+     */
     function deposit()
       payable
       external
       returns (bool){
         require(msg.value > 0, "Msg value > 0.");
-
         emit DepositReceived(address(this), msg.sender, msg.value);
+        return true;
     }
 
+    /**
+      @notice It verifies if a specific address has more than a specific amount of tokens in a specific ERC20 token.
+      @param _contractAddress ERC20 token address.
+      @param _anAddress address to verify the balance.
+      @param _amount the minimum amount of token to verify.
+      @return true if the address has more than the specific amount of the ERC20 token.
+     */
     function hasBalanceInErc(address _contractAddress, address _anAddress, uint256 _amount)
       internal
       view
@@ -61,6 +74,11 @@ contract Vault is Base, IVault {
         return ERC20(_contractAddress).balanceOf(_anAddress) >= _amount;
     }
 
+    /**
+      @notice It transfers a specific amount of tokens to an address.
+      @dev It checks whether this contract has at least the amount.
+      @return true if it transfers the tokens. Otherwise it returns false.
+     */
     function transferTokens(address _tokenAddress, address _toAddress, uint256 _amount)
       external
       onlySuperUser()
@@ -81,13 +99,18 @@ contract Vault is Base, IVault {
       return true;
     }
 
-    function transferEthers(address _toAddress, uint256 _amount)
+    /**
+      @notice It transfers a specific amount of ether to an address.
+      @dev It checks if this smart contract has at least the amount of ether.
+      @return true if it transfers the ether. Otherwise it returns false.
+     */
+    function transferEthers(address payable _toAddress, uint256 _amount)
       external
       onlySuperUser()
       nonReentrant()
       returns (bool)
       {
-      require(address(this).balance > _amount, "Contract has not enough balance.");
+      require(address(this).balance >= _amount, "Contract has not enough balance.");
       
       _toAddress.transfer(_amount);
       

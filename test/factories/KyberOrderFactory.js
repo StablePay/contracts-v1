@@ -1,4 +1,4 @@
-const { NULL_ADDRESS, ZERO } =require('../util/constants');
+const { NULL_ADDRESS } =require('../util/consts');
 const util = require('ethereumjs-util');
 const BaseOrderFactory = require('./BaseOrderFactory');
 const EMPTY_BYTES_32 = util.bufferToHex(util.setLengthRight(``, 32));
@@ -14,7 +14,9 @@ class KyberOrderFactory extends BaseOrderFactory {
             targetAmount,
             minRate,
             maxRate,
-            merchantAddress
+            merchantAddress,
+            customerAddress,
+            postActionAddress,
         } = data;
         this.sourceToken = sourceToken;
         this.targetToken = targetToken;
@@ -23,6 +25,8 @@ class KyberOrderFactory extends BaseOrderFactory {
         this.minRate = minRate;
         this.maxRate = maxRate;
         this.merchantAddress = merchantAddress;
+        this.customerAddress = customerAddress;
+        this.postActionAddress = postActionAddress || NULL_ADDRESS;
     }
 }
 
@@ -42,10 +46,12 @@ KyberOrderFactory.prototype.createOrder = function() {
         this.sourceToken,
         this.targetToken,
         this.merchantAddress,
+        this.customerAddress,
         NULL_ADDRESS, // Address that created the order
         NULL_ADDRESS, // Address that is allowed to fill the order. If set to 0, any address is allowed to fill the order.
         NULL_ADDRESS, // Address that will recieve fees when order is filled.
         NULL_ADDRESS, // Address that is allowed to call Exchange contract methods that affect this order. If set to 0, any address is allowed to call these methods.
+        this.postActionAddress,
 
         EMPTY_BYTES_32, // Signature
         EMPTY_BYTES_32, // Data

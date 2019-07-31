@@ -1,8 +1,7 @@
-const _0x = require('./0x');
-const kyber = require('./kyber');
-
 module.exports = {
-    network: 'ganache',
-    zerox: _0x,
-	kyber: kyber
+    network: 'test',
+	kyber: require('./kyber'),
+    uniswap: require('./uniswap'),
+    stablepay: require('./stablepay'),
+    maxGas: 6000000,
 };

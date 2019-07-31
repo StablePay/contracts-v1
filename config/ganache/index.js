@@ -1,6 +1,7 @@
 module.exports = {
     network: 'ganache',
-    zerox: require('./0x'),
 	kyber: require('./kyber'),
-    stablepay: require('./stablepay')
+    uniswap: require('./uniswap'),
+    stablepay: require('./stablepay'),
+    maxGas: 6000000,
 };

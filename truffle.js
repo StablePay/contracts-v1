@@ -11,36 +11,44 @@
  *     gasPrice: 10000000000,
  *   },
  */
+const appConfig = require('./src/config');
 
-require('dotenv').config();
 const Web3 = require('web3');
-
-const DEFAULT_GAS_WEI = 4600000;
-const DEFAULT_ADDRESS_COUNT = 10;
-const DEFAULT_ADDRESS_INDEX = 0;
-const DEFAULT_GAS_GWEI_PRICE = '20';
 
 const web3 = new Web3();
 const HDWalletProvider = require('truffle-hdwallet-provider');
 
-const addressCountValue = process.env['ADDRESS_COUNT_KEY'] || DEFAULT_ADDRESS_COUNT;
-const mnemonicKeyValue = process.env['MNEMONIC_KEY'] || '';
-const infuraKeyValue = process.env['INFURA_KEY'] || '';
-
-if (infuraKeyValue === '' || mnemonicKeyValue === '') {
-	console.log('WARNING: The infura key or/and mnemonic key are empty. They should not be empty.');
-}
-
-const gasKeyValue = process.env['GAS_WEI_KEY'] || DEFAULT_GAS_WEI;
-const gasPriceKeyValue = process.env['GAS_PRICE_GWEI_KEY'] || DEFAULT_GAS_GWEI_PRICE;
+const addressCountValue = appConfig.getAddressCount().get();
+const mnemonicKeyValue = appConfig.getMnemonic().get();
+const infuraKeyValue = appConfig.getInfuraKey().get();
+const gasKeyValue = appConfig.getGasWei().get();
+const gasPriceKeyValue = appConfig.getGasPriceGwei().get();
+const defaultAddressIndex = appConfig.getDefaultAddressIndex().get();
+const etherscanApiKeyValue = appConfig.getEtherscanApiKey().get();
 
 module.exports = {
 	web3: Web3,
+	mocha: {
+		enableTimeouts: false,
+	},
 	compilers: {
 		solc: {
-			version: "0.4.25",
+			version: "0.5.3",
+			optimizer: {
+				enabled: true,
+				runs: 200
+			}
 		}
 	},
+	api_keys: {
+		etherscan: etherscanApiKeyValue
+	},
+	verify: {
+		preamble: "Author: StablePay <hi@stablepay.io>.\nVersion: 1.0.0"
+	},
+	plugins: [
+		'truffle-plugin-verify'
+	],
 	networks: {
 		geth: {
 			host: 'localhost',
@@ -55,7 +63,7 @@ module.exports = {
 				return new HDWalletProvider(
 					mnemonicKeyValue,
 					`http://localhost:8545`,
-					DEFAULT_ADDRESS_INDEX,
+					defaultAddressIndex,
 					addressCountValue
 				);
 			},
@@ -63,12 +71,19 @@ module.exports = {
 			timeoutBlocks: 50,
 			skipDryRun: true
 		},
+		coverage: {
+			host: "127.0.0.1",
+			network_id: "*",
+			port: 8555,		// <-- If you change this, also set the port option in .solcover.js.
+			gas: 0xfffffffffff,	// <-- Use this high gas value
+			gasPrice: 0x01	// <-- Use this low gas price
+		},
 		infuraRinkeby: {
 			provider: function() {
 				return new HDWalletProvider(
 					mnemonicKeyValue,
-					`https://rinkeby.infura.io/${infuraKeyValue}`,
-					DEFAULT_ADDRESS_INDEX,
+					`https://rinkeby.infura.io/v3/${infuraKeyValue}`,
+					defaultAddressIndex,
 					addressCountValue
 				);
 			},
@@ -80,8 +95,8 @@ module.exports = {
 			provider: function() {
 				return new HDWalletProvider(
 					mnemonicKeyValue,
-					`https://kovan.infura.io/${infuraKeyValue}`,
-					DEFAULT_ADDRESS_INDEX,
+					`https://kovan.infura.io/v3/${infuraKeyValue}`,
+					defaultAddressIndex,
 					addressCountValue
 				);
 			},
@@ -93,21 +108,22 @@ module.exports = {
 			provider: function() {
 				return new HDWalletProvider(
 					mnemonicKeyValue,
-					`https://ropsten.infura.io/${infuraKeyValue}`,
-					DEFAULT_ADDRESS_INDEX,
+					`https://ropsten.infura.io/v3/${infuraKeyValue}`,
+					defaultAddressIndex,
 					addressCountValue
 				);
 			},
 			gas: gasKeyValue,
 			gasPrice: web3.utils.toWei(gasPriceKeyValue, 'gwei'),
-			network_id: '3'
+			network_id: '3',
+			skipDryRun: true,
 		},
 		infuraMainnet: {
 			provider: function() {
 				return new HDWalletProvider(
 					mnemonicKeyValue,
-					`https://mainnet.infura.io/${infuraKeyValue}`,
-					DEFAULT_ADDRESS_INDEX,
+					`https://mainnet.infura.io/v3/${infuraKeyValue}`,
+					defaultAddressIndex,
 					addressCountValue
 				);
 			},
@@ -119,8 +135,8 @@ module.exports = {
 			provider: function() {
 				return new HDWalletProvider(
 					mnemonicKeyValue,
-					`https://infuranet.infura.io/${infuraKeyValue}`,
-					DEFAULT_ADDRESS_INDEX,
+					`https://infuranet.infura.io/v3/${infuraKeyValue}`,
+					defaultAddressIndex,
 					addressCountValue
 				);
 			},

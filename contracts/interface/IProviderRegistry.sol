@@ -1,7 +1,7 @@
-pragma solidity 0.4.25;
+pragma solidity 0.5.3;
 pragma experimental ABIEncoderV2;
 
-import "../erc20/ERC20.sol";
+import "../services/erc20/ERC20.sol";
 import "../util/StablePayCommon.sol";
 
 interface IProviderRegistry {
@@ -27,40 +27,42 @@ interface IProviderRegistry {
         address indexed providerAddress
     );
 
+    /**
+        @dev This event is emitted when a specific swapping provider is unpaused.
+     */
     event SwappingProviderUnpaused(
         address indexed thisContract,
         address indexed providerAddress
     );
 
-    /*** Methods ***************/
+    /** Functions */
 
-    // TODO Modify to getExpectedAmount ?
-    function getExpectedRate(bytes32 _providerKey, ERC20 _src, ERC20 _dest, uint _srcQty)
+    function getExpectedRate(bytes32 providerKey, ERC20 sourceToken, ERC20 targetToken, uint targetAmount)
         external
         view
         returns (bool isSupported, uint minRate, uint maxRate);
 
-    function getExpectedRates(ERC20 _src, ERC20 _dest, uint _srcQty)
+    function getExpectedRates(ERC20 sourceToken, ERC20 targetToken, uint targetAmount)
         external
         view
-        returns (StablePayCommon.ExpectedRate[]);
+        returns (StablePayCommon.ExpectedRate[] memory);
 
-    function getExpectedRateRange(ERC20 _src, ERC20 _dest, uint _srcQty)
+    function getExpectedRateRange(ERC20 sourceToken, ERC20 targetToken, uint targetAmount)
         external
         view
         returns (uint minRate, uint maxRate);
 
-    function getSwappingProvider(bytes32 _providerKey)
+    function getSwappingProvider(bytes32 providerKey)
         external
         view
-        returns (StablePayCommon.SwappingProvider);
+        returns (StablePayCommon.SwappingProvider memory);
 
-    function isSwappingProviderPaused(bytes32 _providerKey)
+    function isSwappingProviderPaused(bytes32 providerKey)
         external
         view
         returns (bool);
 
-    function isSwappingProviderValid(bytes32 _providerKey)
+    function isSwappingProviderValid(bytes32 providerKey)
         external
         view
         returns (bool);
@@ -70,25 +72,25 @@ interface IProviderRegistry {
         view
         returns (uint256);
 
-    function pauseByAdminSwappingProvider(bytes32 _providerKey)
+    function pauseByAdminSwappingProvider(bytes32 providerKey)
         external
         returns (bool);
 
-    function unpauseByAdminSwappingProvider(bytes32 _providerKey)
+    function unpauseByAdminSwappingProvider(bytes32 providerKey)
         external
         returns (bool);
 
-    function pauseSwappingProvider(bytes32 _providerKey)
+    function pauseSwappingProvider(bytes32 providerKey)
         external
         returns (bool);
 
-    function unpauseSwappingProvider(bytes32 _providerKey)
+    function unpauseSwappingProvider(bytes32 providerKey)
         external
         returns (bool);
 
     function registerSwappingProvider(
-        address _providerAddress,
-        bytes32 _providerKey
+        address payable providerAddress,
+        bytes32 providerKey
     )
     external
     returns (bool);

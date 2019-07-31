@@ -70,6 +70,7 @@ module.exports = {
         SwapTokenToToken: "0x0000000000000000000000000000000000000000",
         Trade: "0x0000000000000000000000000000000000000000",
         PermissionlessOrderbookReserveLister: '0x84afa106fbf9b45e369724024cae14e8c7529c26',
-        KyberNetworkENSResolver: '0x1982131C7D6959ff7768EE39c023Ad002d8c9759'
+        KyberNetworkENSResolver: '0x1982131C7D6959ff7768EE39c023Ad002d8c9759',
+        KyberRegisterWallet: '0xECa04bB23612857650D727B8ed008f80952654ee',
     }
 };
