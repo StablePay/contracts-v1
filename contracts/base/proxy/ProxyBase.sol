@@ -9,7 +9,6 @@ import "./DelegateProxy.sol";
     @dev It implements a fallback function to invoke the delegate call.
  */
 contract ProxyBase is DelegateProxy, Base {
-
     string public targetId;
 
     /**
@@ -18,14 +17,17 @@ contract ProxyBase is DelegateProxy, Base {
         @param aTargetId the smart contract name to delegate the calls.
         @dev The Eternal Storage implementation must implement the IStorage interface.
      */
-    constructor(address _storageAddress, string memory aTargetId) public Base(_storageAddress) {
+    constructor(address _storageAddress, string memory aTargetId)
+        public
+        Base(_storageAddress)
+    {
         targetId = aTargetId;
     }
 
     /**
         @notice The fallback function where the call are delegated.
      */
-    function () external payable {
+    function() external payable {
         address target = getTargetAddress(targetId);
         require(target != address(0x0), "Target address != 0x0"); // if contract code hasn't been set yet, don't call
         delegatedFwd(target, msg.data);
@@ -44,8 +46,15 @@ contract ProxyBase is DelegateProxy, Base {
         @param aTargetId the target id values associated to a contract address.
         @return the target address associated to a target id.
      */
-    function getTargetAddress(string memory aTargetId) internal view returns (address) {
-        return _storage.getAddress(keccak256(abi.encodePacked(CONTRACT_NAME, aTargetId)));
+    function getTargetAddress(string memory aTargetId)
+        internal
+        view
+        returns (address)
+    {
+        return
+            _storage.getAddress(
+                keccak256(abi.encodePacked(CONTRACT_NAME, aTargetId))
+            );
     }
 
     /**
@@ -55,15 +64,18 @@ contract ProxyBase is DelegateProxy, Base {
         @return true if the transfer is done. Otherwise it returns false.
      */
     function transferEthers(address payable toAddress, uint256 amount)
-      external
-      onlySuperUser()
-      nonReentrant()
-      returns (bool)
-      {
-      require(address(this).balance >= amount, "Contract has not enough balance.");
-      
-      toAddress.transfer(amount);
+        external
+        onlySuperUser()
+        nonReentrant()
+        returns (bool)
+    {
+        require(
+            address(this).balance >= amount,
+            "Contract has not enough balance."
+        );
 
-      return true;
+        toAddress.transfer(amount);
+
+        return true;
     }
 }

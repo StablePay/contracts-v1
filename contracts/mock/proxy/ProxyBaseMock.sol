@@ -3,7 +3,6 @@ pragma solidity 0.5.3;
 import "../../base/proxy/ProxyBase.sol";
 
 contract ProxyBaseMock is ProxyBase {
-    
     /** Constants */
 
     /** Variables */
@@ -14,9 +13,9 @@ contract ProxyBaseMock is ProxyBase {
 
     /** Constructor */
     constructor(address _storage, string memory _targetId)
-      ProxyBase(_storage, _targetId)
-      public {
-    }
+        public
+        ProxyBase(_storage, _targetId)
+    {}
 
     /**
     * @dev ERC897, the address the proxy would delegate calls to
@@ -32,7 +31,11 @@ contract ProxyBaseMock is ProxyBase {
         return UPGRADEABLE;
     }
 
-    function _getTargetAddress(string memory _targetId) public view returns (address) {
+    function _getTargetAddress(string memory _targetId)
+        public
+        view
+        returns (address)
+    {
         return super.getTargetAddress(_targetId);
     }
 }

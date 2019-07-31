@@ -5,7 +5,6 @@ pragma solidity 0.5.3;
     @author StablePay <hi@stablepay.io>
  */
 contract ITransferMock {
-    
     /** Events */
 
     /** Functions */

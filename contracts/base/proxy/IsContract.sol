@@ -7,7 +7,6 @@ pragma solidity 0.5.3;
     @notice It may be implemented using a library.
  */
 contract IsContract {
-
     /**
         @notice It verifies whether an address is a contract or an user address.
         @dev NOTE: this should NEVER be used for authentication (see pitfalls: https://github.com/fergarrui/ethereum-security/tree/master/contracts/extcodesize).
@@ -22,7 +21,9 @@ contract IsContract {
         }
 
         uint256 size;
-        assembly { size := extcodesize(targetAddress) }
+        assembly {
+            size := extcodesize(targetAddress)
+        }
         return size > 0;
     }
 }

@@ -3,7 +3,6 @@ pragma solidity 0.5.3;
 import "../../base/proxy/DelegateProxy.sol";
 
 contract DelegateProxyMock is DelegateProxy {
-    
     /** Constants */
 
     /** Variables */
@@ -32,7 +31,7 @@ contract DelegateProxyMock is DelegateProxy {
         return UPGRADEABLE;
     }
 
-    function () external payable {
+    function() external payable {
         delegatedFwd(target, msg.data);
     }
 }

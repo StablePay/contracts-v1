@@ -5,7 +5,6 @@ import "../services/erc20/ERC20.sol";
 import "../util/StablePayCommon.sol";
 
 interface IProviderRegistry {
-    
     /** Events */
 
     /**
@@ -37,20 +36,27 @@ interface IProviderRegistry {
 
     /** Functions */
 
-    function getExpectedRate(bytes32 providerKey, ERC20 sourceToken, ERC20 targetToken, uint targetAmount)
+    function getExpectedRate(
+        bytes32 providerKey,
+        ERC20 sourceToken,
+        ERC20 targetToken,
+        uint256 targetAmount
+    )
         external
         view
-        returns (bool isSupported, uint minRate, uint maxRate);
+        returns (bool isSupported, uint256 minRate, uint256 maxRate);
 
-    function getExpectedRates(ERC20 sourceToken, ERC20 targetToken, uint targetAmount)
-        external
-        view
-        returns (StablePayCommon.ExpectedRate[] memory);
+    function getExpectedRates(
+        ERC20 sourceToken,
+        ERC20 targetToken,
+        uint256 targetAmount
+    ) external view returns (StablePayCommon.ExpectedRate[] memory);
 
-    function getExpectedRateRange(ERC20 sourceToken, ERC20 targetToken, uint targetAmount)
-        external
-        view
-        returns (uint minRate, uint maxRate);
+    function getExpectedRateRange(
+        ERC20 sourceToken,
+        ERC20 targetToken,
+        uint256 targetAmount
+    ) external view returns (uint256 minRate, uint256 maxRate);
 
     function getSwappingProvider(bytes32 providerKey)
         external
@@ -67,10 +73,7 @@ interface IProviderRegistry {
         view
         returns (bool);
 
-    function getProvidersRegistryCount()
-        external
-        view
-        returns (uint256);
+    function getProvidersRegistryCount() external view returns (uint256);
 
     function pauseByAdminSwappingProvider(bytes32 providerKey)
         external
@@ -80,9 +83,7 @@ interface IProviderRegistry {
         external
         returns (bool);
 
-    function pauseSwappingProvider(bytes32 providerKey)
-        external
-        returns (bool);
+    function pauseSwappingProvider(bytes32 providerKey) external returns (bool);
 
     function unpauseSwappingProvider(bytes32 providerKey)
         external
@@ -91,7 +92,5 @@ interface IProviderRegistry {
     function registerSwappingProvider(
         address payable providerAddress,
         bytes32 providerKey
-    )
-    external
-    returns (bool);
+    ) external returns (bool);
 }

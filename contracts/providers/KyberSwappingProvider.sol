@@ -7,15 +7,19 @@ import "../util/StablePayCommon.sol";
 import "./ISwappingProvider.sol";
 
 /**
-    https://developer.kyber.network/docs/VendorsGuide/#converting-from-erc20
-    https://developer.kyber.network/docs/KyberNetworkProxy/#getexpectedrate
+    @title Kyber Network Swapping provider
+    @author StablePay <hi@stablepay.io>
+
+    @notice  https://developer.kyber.network/docs/VendorsGuide/#converting-from-erc20
+    @notice https://developer.kyber.network/docs/KyberNetworkProxy/#getexpectedrate
  */
 contract KyberSwappingProvider is ISwappingProvider {
-
-    ERC20 constant internal ETH_TOKEN_ADDRESS = ERC20(0x00eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee);
-    uint constant internal ONE = 1;
-    uint constant internal TEN = 10;
-    uint constant internal ETH_DECIMALS = 18;
+    ERC20 internal constant ETH_TOKEN_ADDRESS = ERC20(
+        0x00eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+    );
+    uint256 internal constant ONE = 1;
+    uint256 internal constant TEN = 10;
+    uint256 internal constant ETH_DECIMALS = 18;
     address public proxy;
     address public feeAddress;
 
@@ -31,42 +35,55 @@ contract KyberSwappingProvider is ISwappingProvider {
     /** Constructor */
 
     constructor(address _stablePay, address _proxy, address _feeAddress)
-        public ISwappingProvider(_stablePay) {
+        public
+        ISwappingProvider(_stablePay)
+    {
         proxy = _proxy;
         feeAddress = _feeAddress;
     }
 
     /** Methods */
 
-    function isSupportedRate(uint _minRate, uint _maxRate)
-    internal
-    pure
-    returns (bool) {
+    function isSupportedRate(uint256 _minRate, uint256 _maxRate)
+        internal
+        pure
+        returns (bool)
+    {
         return _minRate > 0 && _maxRate > 0;
     }
 
     function getKyberNetworkProxy()
-    internal
-    view
-    returns (KyberNetworkProxyInterface) {
+        internal
+        view
+        returns (KyberNetworkProxyInterface)
+    {
         return KyberNetworkProxyInterface(proxy);
     }
 
-    function getInternalExpectedRate(ERC20 _sourceToken, ERC20 _targetToken, uint _sourceAmount)
-    internal
-    view
-    returns (bool isSupported, uint minRate, uint maxRate)
+    function getInternalExpectedRate(
+        ERC20 _sourceToken,
+        ERC20 _targetToken,
+        uint256 _sourceAmount
+    )
+        internal
+        view
+        returns (bool isSupported, uint256 minRate, uint256 maxRate)
     {
-        (minRate, maxRate) = getKyberNetworkProxy().getExpectedRate(_sourceToken, _targetToken, _sourceAmount);
+        (minRate, maxRate) = getKyberNetworkProxy().getExpectedRate(
+            _sourceToken,
+            _targetToken,
+            _sourceAmount
+        );
         isSupported = isSupportedRate(minRate, maxRate);
     }
 
-    function multiplyByDecimals(ERC20 _token, uint _amount)
-    internal
-    view
-    returns (uint) {
-        uint decimals = ETH_DECIMALS; // By default ETH decimals.
-        if(address(_token) != address(ETH_TOKEN_ADDRESS)) {
+    function multiplyByDecimals(ERC20 _token, uint256 _amount)
+        internal
+        view
+        returns (uint256)
+    {
+        uint256 decimals = ETH_DECIMALS; // By default ETH decimals.
+        if (address(_token) != address(ETH_TOKEN_ADDRESS)) {
             decimals = _token.decimals();
         }
         return _amount.mul(TEN ** decimals);
@@ -75,35 +92,55 @@ contract KyberSwappingProvider is ISwappingProvider {
     /*
         Calculates rates based on a min/max unit rate and a target amount.
     */
-    function calculateRates(ERC20 _sourceToken, ERC20 _targetToken, uint _minRate, uint _maxRate, uint _targetAmountWithDecimals)
-    internal
-    view
-    returns (uint, uint) {
-        uint minSourceAmountOne = _targetAmountWithDecimals.div(_minRate);
-        uint maxSourceAmountOne = _targetAmountWithDecimals.div(_maxRate);
+    function calculateRates(
+        ERC20 _sourceToken,
+        ERC20 _targetToken,
+        uint256 _minRate,
+        uint256 _maxRate,
+        uint256 _targetAmountWithDecimals
+    ) internal view returns (uint256, uint256) {
+        uint256 minSourceAmountOne = _targetAmountWithDecimals.div(_minRate);
+        uint256 maxSourceAmountOne = _targetAmountWithDecimals.div(_maxRate);
 
-        uint minRateMinSourceAmount;
-        uint maxRateMinSourceAmount;
-        (, minRateMinSourceAmount, maxRateMinSourceAmount) = getInternalExpectedRate(_sourceToken, _targetToken, minSourceAmountOne);
+        uint256 minRateMinSourceAmount;
+        uint256 maxRateMinSourceAmount;
+        (
+            ,
+            minRateMinSourceAmount,
+            maxRateMinSourceAmount
+        ) = getInternalExpectedRate(
+            _sourceToken,
+            _targetToken,
+            minSourceAmountOne
+        );
 
-        if(!isSupportedRate(minRateMinSourceAmount, maxRateMinSourceAmount)) {
+        if (!isSupportedRate(minRateMinSourceAmount, maxRateMinSourceAmount)) {
             return (minRateMinSourceAmount, maxRateMinSourceAmount);
         }
 
-        uint minRateMaxSourceAmount;
-        uint maxRateMaxSourceAmount;
-        (, minRateMaxSourceAmount, maxRateMaxSourceAmount) = getInternalExpectedRate(_sourceToken, _targetToken, maxSourceAmountOne);
-        if(!isSupportedRate(minRateMaxSourceAmount, maxRateMaxSourceAmount)) {
+        uint256 minRateMaxSourceAmount;
+        uint256 maxRateMaxSourceAmount;
+        (
+            ,
+            minRateMaxSourceAmount,
+            maxRateMaxSourceAmount
+        ) = getInternalExpectedRate(
+            _sourceToken,
+            _targetToken,
+            maxSourceAmountOne
+        );
+        if (!isSupportedRate(minRateMaxSourceAmount, maxRateMaxSourceAmount)) {
             return (minRateMaxSourceAmount, maxRateMaxSourceAmount);
         }
 
-        uint minRateValue = minRateMinSourceAmount < minRateMaxSourceAmount ? minRateMinSourceAmount : minRateMaxSourceAmount;
-        uint maxRateValue = maxRateMinSourceAmount > maxRateMaxSourceAmount ? maxRateMinSourceAmount : maxRateMaxSourceAmount;
+        uint256 minRateValue = minRateMinSourceAmount < minRateMaxSourceAmount
+            ? minRateMinSourceAmount
+            : minRateMaxSourceAmount;
+        uint256 maxRateValue = maxRateMinSourceAmount > maxRateMaxSourceAmount
+            ? maxRateMinSourceAmount
+            : maxRateMaxSourceAmount;
 
-        return (
-            minRateValue,
-            maxRateValue
-        );
+        return (minRateValue, maxRateValue);
     }
 
     /**
@@ -118,26 +155,43 @@ contract KyberSwappingProvider is ISwappingProvider {
         X = 1000 BAT
         1000 BAT => 10 DAI
      */
-    function getExpectedRate(ERC20 _sourceToken, ERC20 _targetToken, uint _targetAmount)
-    public
-    view
-    isValidAddress(address(_sourceToken))
-    isValidAddress(address(_targetToken))
-    returns (bool isSupported, uint minRate, uint maxRate)
+    function getExpectedRate(
+        ERC20 _sourceToken,
+        ERC20 _targetToken,
+        uint256 _targetAmount
+    )
+        public
+        view
+        isValidAddress(address(_sourceToken))
+        isValidAddress(address(_targetToken))
+        returns (bool isSupported, uint256 minRate, uint256 maxRate)
     {
         require(_targetAmount > 0, "Target amount > 0.");
 
-        (isSupported, minRate, maxRate) = getInternalExpectedRate(_sourceToken, _targetToken, multiplyByDecimals(_sourceToken, ONE));
+        (isSupported, minRate, maxRate) = getInternalExpectedRate(
+            _sourceToken,
+            _targetToken,
+            multiplyByDecimals(_sourceToken, ONE)
+        );
 
         // It is used to avoid loss decimals in the final result when it calculates rate with source amount.
         // That's the reason why it is multiplied by source token decimals.
-        uint targetAmountWithDecimals = multiplyByDecimals(_sourceToken, _targetAmount);
+        uint256 targetAmountWithDecimals = multiplyByDecimals(
+            _sourceToken,
+            _targetAmount
+        );
 
-        if( isSupported ) {
-            (uint minRateValue, uint maxRateValue) = calculateRates(_sourceToken, _targetToken, minRate, maxRate, targetAmountWithDecimals);
+        if (isSupported) {
+            (uint256 minRateValue, uint256 maxRateValue) = calculateRates(
+                _sourceToken,
+                _targetToken,
+                minRate,
+                maxRate,
+                targetAmountWithDecimals
+            );
             isSupported = isSupportedRate(minRateValue, maxRateValue);
 
-            if(isSupported) {
+            if (isSupported) {
                 minRate = targetAmountWithDecimals.div(minRateValue);
                 maxRate = targetAmountWithDecimals.div(maxRateValue);
             }
@@ -151,26 +205,33 @@ contract KyberSwappingProvider is ISwappingProvider {
         @dev It requires that the swapping is supported. if not, it throws a require error.
         @dev It returns the min/max expected rates of the target token.
      */
-    function getExpectedRateIfSupported(ERC20 _sourceToken, ERC20 _targetToken, uint sourceAmount)
-    internal
-    view
-    returns (uint minRate, uint maxRate)
-    {
-        uint minRateValue;
-        uint maxRateValue;
+    function getExpectedRateIfSupported(
+        ERC20 _sourceToken,
+        ERC20 _targetToken,
+        uint256 sourceAmount
+    ) internal view returns (uint256 minRate, uint256 maxRate) {
+        uint256 minRateValue;
+        uint256 maxRateValue;
         // Get expected rates for the swapping source/target tokens.
-        (minRateValue, maxRateValue) = getKyberNetworkProxy().getExpectedRate(_sourceToken, _targetToken, sourceAmount);
-        
+        (minRateValue, maxRateValue) = getKyberNetworkProxy().getExpectedRate(
+            _sourceToken,
+            _targetToken,
+            sourceAmount
+        );
+
         // Check whether the swapping is supported.
-        require(isSupportedRate(minRateValue, maxRateValue), "Swapping not supported. Verify source/target amount.");
+        require(
+            isSupportedRate(minRateValue, maxRateValue),
+            "Swapping not supported. Verify source/target amount."
+        );
         return (minRateValue, maxRateValue);
     }
 
     function swapToken(StablePayCommon.Order memory _order)
-    public
-    isStablePay(msg.sender)
-    isValidAddress(_order.toAddress)
-    returns (bool)
+        public
+        isStablePay(msg.sender)
+        isValidAddress(_order.toAddress)
+        returns (bool)
     {
         require(_order.sourceAmount > 0, "Source amount must be > 0");
 
@@ -179,13 +240,22 @@ contract KyberSwappingProvider is ISwappingProvider {
         ERC20 targetToken = ERC20(_order.targetToken);
 
         // Get expected rates if the swapping is supported.
-        uint minRate;
-        uint maxRate;
-        (minRate, maxRate) = getExpectedRateIfSupported(sourceToken, targetToken, _order.sourceAmount);
+        uint256 minRate;
+        uint256 maxRate;
+        (minRate, maxRate) = getExpectedRateIfSupported(
+            sourceToken,
+            targetToken,
+            _order.sourceAmount
+        );
 
         // Check the current source token balance is higher (or equals) to the order source amount.
-        uint256 sourceInitialTokenBalance = getTokenBalanceOf(_order.sourceToken);
-        require(sourceInitialTokenBalance >= _order.sourceAmount, "Not enough tokens in balance.");
+        uint256 sourceInitialTokenBalance = getTokenBalanceOf(
+            _order.sourceToken
+        );
+        require(
+            sourceInitialTokenBalance >= _order.sourceAmount,
+            "Not enough tokens in balance."
+        );
 
         // Set the spender's token allowance to tokenQty
         approveTokensTo(sourceToken, address(proxy), _order.sourceAmount);
@@ -206,16 +276,22 @@ contract KyberSwappingProvider is ISwappingProvider {
 
         // Transfer diff (initial - final) source token balance to the sender.
         // The initial balance is higher (or equals) than final source token balance.
-        transferDiffTokensIfApplicable(_order.sourceToken, msg.sender, _order.sourceAmount, sourceInitialTokenBalance, sourceFinalTokenBalance);
+        transferDiffTokensIfApplicable(
+            _order.sourceToken,
+            msg.sender,
+            _order.sourceAmount,
+            sourceInitialTokenBalance,
+            sourceFinalTokenBalance
+        );
 
         return true;
     }
 
     function swapEther(StablePayCommon.Order memory _order)
-    public
-    payable
-    isStablePay(msg.sender)
-    returns (bool)
+        public
+        payable
+        isStablePay(msg.sender)
+        returns (bool)
     {
         require(msg.value > 0, "Msg value must be > 0");
         require(_order.sourceAmount > 0, "Amount must be > 0");
@@ -227,13 +303,20 @@ contract KyberSwappingProvider is ISwappingProvider {
         ERC20 targetToken = ERC20(_order.targetToken);
 
         // Get expected rates if the swapping is supported.
-        uint minRate;
-        uint maxRate;
-        (minRate, maxRate) = getExpectedRateIfSupported(sourceToken, targetToken, _order.sourceAmount);
+        uint256 minRate;
+        uint256 maxRate;
+        (minRate, maxRate) = getExpectedRateIfSupported(
+            sourceToken,
+            targetToken,
+            _order.sourceAmount
+        );
 
         // Get ether balance before swapping execution, and validate it is higher (or equals) to order source amount.
         uint256 sourceInitialEtherBalance = getEtherBalance();
-        require(sourceInitialEtherBalance >= _order.sourceAmount, "Not enough ether in balance.");
+        require(
+            sourceInitialEtherBalance >= _order.sourceAmount,
+            "Not enough ether in balance."
+        );
 
         // Execute the swapping from ERC20 token to ETH.
         getKyberNetworkProxy().trade.value(msg.value)(
@@ -250,7 +333,12 @@ contract KyberSwappingProvider is ISwappingProvider {
         uint256 sourceFinalEtherBalance = getEtherBalance();
 
         // Transfer back to the sender the diff balance (Ether).
-        transferDiffEtherBalanceIfApplicable(_order.fromAddress, msg.value, sourceInitialEtherBalance, sourceFinalEtherBalance);
+        transferDiffEtherBalanceIfApplicable(
+            _order.fromAddress,
+            msg.value,
+            sourceInitialEtherBalance,
+            sourceFinalEtherBalance
+        );
 
         return true;
     }

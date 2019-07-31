@@ -32,7 +32,7 @@ interface IPostAction {
         bytes32 actionKey,
         bytes data
     );
-    
+
     /** Functions */
 
     /**
@@ -40,6 +40,8 @@ interface IPostAction {
         @param postActionData needed data to execute the action.
         @return true if the action is executed successfully. Otherwise it returns false.
      */
-    function execute(StablePayCommon.PostActionData calldata postActionData) external returns (bool);
+    function execute(StablePayCommon.PostActionData calldata postActionData)
+        external
+        returns (bool);
 
 }
