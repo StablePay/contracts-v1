@@ -5,14 +5,11 @@
   "main": "truffle.js",
   "scripts": {
     "lint:prettier": "prettier --write contracts/**/{*.sol,/**/**}",
-
     "test": "truffle test",
     "test:coverage": "scripts/coverage.sh",
     "test:ganache": "truffle test --network ganache",
-
     "deploy:ganache": "truffle migrate --reset --all --network ganache",
     "deploy:ropsten": "truffle migrate --reset --all --network infuraRopsten",
-
     "start:ganache": "ganache-cli --db ./db --accounts 10 --mnemonic 'gesture rather obey video awake genuine patient base soon parrot upset lounge' --networkId 5777 --debug"
   },
   "repository": {
@@ -66,21 +63,23 @@
     "chai": "4.1.2",
     "chai-as-promised": "^7.1.1",
     "chai-bignumber": "^2.0.2",
+    "coveralls": "^3.0.2",
     "cross-env": "^5.1.4",
     "dotenv": "5.0.1",
     "ethereum-types": "^1.0.5",
+    "ethereumjs-testrpc-sc": "6.4.5-sc.3",
     "ethereumjs-wallet": "0.6.0",
     "ganache-cli": "^6.1.8",
     "leche": "2.2.3",
     "make-promises-safe": "^1.1.0",
     "mocha": "5.0.4",
     "npm-run-all": "^4.1.2",
+    "prettier": "^1.18.2",
+    "prettier-plugin-solidity": "^1.0.0-alpha.27",
     "shx": "^0.2.2",
     "solidity-docgen": "^0.1.1",
     "truffle-assertions": "^0.8.0",
     "truffle-hdwallet-provider": "^1.0.2",
-    "coveralls": "^3.0.2",
-    "ethereumjs-testrpc-sc": "6.4.5-sc.3",
     "truffle-plugin-verify": "katat/truffle-plugin-verify"
   }
 }
