@@ -41,8 +41,8 @@ const KyberSwappingProvider = artifacts.require("./providers/KyberSwappingProvid
 
 const UniswapSwappingProvider = artifacts.require("./providers/UniswapSwappingProvider.sol");
 
-const UniswapFactoryInterface = artifacts.require("./uniswap/UniswapFactoryInterface.sol");
-const UniswapTemplateExchangeInterface = artifacts.require("./uniswap/UniswapExchangeInterface.sol");
+const UniswapFactoryInterface = artifacts.require("./services/uniswap/UniswapFactoryInterface.sol");
+const UniswapTemplateExchangeInterface = artifacts.require("./services/uniswap/UniswapExchangeInterface.sol");
 
 const allowedNetworks = ['ganache ', 'test', 'coverage', 'develop'];
 

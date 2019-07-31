@@ -11,10 +11,8 @@
 const IPostActionRegistry = artifacts.require("./interface/IPostActionRegistry.sol");
 
 // Util classes
-const util = require('util');
 const assert = require('assert');
 const ProcessArgs = require('../src/utils/ProcessArgs');
-const ProviderKeyGenerator = require('../src/utils/ProviderKeyGenerator');
 const processArgs = new ProcessArgs();
 
 /**
@@ -43,14 +41,18 @@ module.exports = async (callback) => {
         const sender = accounts[senderIndex];
         assert(sender, "Sender must be defined.");
 
+        const previousDefaultPostActionResult = await postActionRegistry.getDefaultPostAction();
+        console.log(`Current Post Action Default: ${previousDefaultPostActionResult}`);
+
         const setPostActionAsDefaultResult = await postActionRegistry.setPostActionAsDefault(postActionAddress);
         assert(setPostActionAsDefaultResult, 'Set post action as default is undefined.');
 
         const isRegisteredPostActionResult = await postActionRegistry.isRegisteredPostAction(postActionAddress);
         assert(isRegisteredPostActionResult.toString() === 'true', 'Post action is not registered.');
 
-        const getPostActionOrDefaultResult = await postActionRegistry.getDefaultPostAction();
-        assert(getPostActionOrDefaultResult.toString() === postActionAddress, 'Post action is not registered.');
+        const getNewDefaultPostActionResult = await postActionRegistry.getDefaultPostAction();
+        assert(getNewDefaultPostActionResult.toString() === postActionAddress, 'Post action is not registered.');
+        console.log(`New Default Post Action: ${getNewDefaultPostActionResult}`);
 
         console.log('>>>> The script finished successfully. <<<<');
         callback();

@@ -2,9 +2,9 @@ pragma solidity 0.5.3;
 pragma experimental ABIEncoderV2;
 
 import "./ISwappingProvider.sol";
-import "../erc20/ERC20.sol";
-import "../uniswap/UniswapExchangeInterface.sol";
-import "../uniswap/UniswapFactoryInterface.sol";
+import "../services/erc20/ERC20.sol";
+import "../services/uniswap/UniswapExchangeInterface.sol";
+import "../services/uniswap/UniswapFactoryInterface.sol";
 import "../util/StablePayCommon.sol";
 import "../util/SafeMath.sol";
 
@@ -124,27 +124,26 @@ contract UniswapSwappingProvider is ISwappingProvider {
             return (isSupported, rate, rate);
         }
 
-        UniswapExchangeInterface sourceExchange = UniswapExchangeInterface(uFactory.getExchange(_sourceToken));
+        UniswapExchangeInterface sourceExchange = UniswapExchangeInterface(uFactory.getExchange(address(_sourceToken)));
 
 
-        if(sourceExchange == address(0x0) || _sourceToken.balanceOf(address(sourceExchange)) == 0){
+        if(address(sourceExchange) == address(0x0) || _sourceToken.balanceOf(address(sourceExchange)) == 0){
             return (false, 0, 0);
         }
 
         if(ETH_ADDRESS == address (_targetToken)) {
-            isSupported =  sourceExchange != address(0x0);
+            isSupported =  address(sourceExchange) != address(0x0);
             if(isSupported) {
                 rate = sourceExchange.getTokenToEthOutputPrice(_targetAmount);
             }
             return (isSupported, rate, rate);
         }
 
-
-        if( targetExchange == address(0x0) || _targetToken.balanceOf(address(targetExchange)) == 0 ){
+        if( address(targetExchange) == address(0x0) || _targetToken.balanceOf(address(targetExchange)) == 0 ){
             return (false, 0, 0);
         }
 
-        isSupported = sourceExchange != address(0x0) && targetExchange != address(0x0);
+        isSupported = address(sourceExchange) != address(0x0) && address(targetExchange) != address(0x0);
         if(isSupported) {
             uint256 ethToBuyTargetToken = targetExchange.getEthToTokenOutputPrice(_targetAmount);
             rate = sourceExchange.getTokenToEthOutputPrice(ethToBuyTargetToken);

@@ -4,6 +4,6 @@ module.exports = {
     compileCommand: 'node --max-old-space-size=4096 ../node_modules/.bin/truffle compile --network coverage',
     skipFiles: [
         'mock/',
-        'erc20/',
+        'services/',
     ]
 }

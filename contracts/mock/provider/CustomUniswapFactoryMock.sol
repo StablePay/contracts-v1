@@ -1,6 +1,6 @@
 pragma solidity 0.5.3;
 
-import "../../uniswap/UniswapFactoryInterface.sol";
+import "../../services/uniswap/UniswapFactoryInterface.sol";
 
 contract CustomUniswapFactoryMock is UniswapFactoryInterface {
     // Public Variables

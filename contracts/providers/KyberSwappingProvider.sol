@@ -1,8 +1,8 @@
 pragma solidity 0.5.3;
 pragma experimental ABIEncoderV2;
 
-import "../erc20/ERC20.sol";
-import "../kyber/KyberNetworkProxyInterface.sol";
+import "../services/erc20/ERC20.sol";
+import "../services/kyber/KyberNetworkProxyInterface.sol";
 import "../util/StablePayCommon.sol";
 import "./ISwappingProvider.sol";
 

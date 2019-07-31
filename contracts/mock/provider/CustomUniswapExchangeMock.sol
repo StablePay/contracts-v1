@@ -1,6 +1,6 @@
 pragma solidity 0.5.3;
 
-import "../../uniswap/UniswapExchangeInterface.sol";
+import "../../services/uniswap/UniswapExchangeInterface.sol";
 
 contract CustomUniswapExchangeMock is UniswapExchangeInterface {
 

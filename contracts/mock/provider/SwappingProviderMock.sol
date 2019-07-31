@@ -1,7 +1,7 @@
 pragma solidity 0.5.3;
 pragma experimental ABIEncoderV2;
 
-import "../../erc20/ERC20.sol";
+import "../../services/erc20/ERC20.sol";
 import "../../providers/ISwappingProvider.sol";
 
 contract SwappingProviderMock is ISwappingProvider {

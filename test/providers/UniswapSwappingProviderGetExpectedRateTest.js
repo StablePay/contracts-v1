@@ -5,10 +5,13 @@ const CustomUniswapExchangeMock = artifacts.require("./mock/CustomUniswapExchang
 const CustomUniswapFactoryMock = artifacts.require("./mock/CustomUniswapFactoryMock.sol");
 const UniswapSwappingProvider = artifacts.require("./UniswapSwappingProvider.sol");
 const StablePay = artifacts.require("./StablePay.sol");
-const Token1 = artifacts.require("./erc20/EIP20.sol");
-const Token2 = artifacts.require("./erc20/EIP20.sol");
+const Token1 = artifacts.require("./services/erc20/EIP20.sol");
+const Token2 = artifacts.require("./services/erc20/EIP20.sol");
+
 // Utils
-const t = require('../util/TestUtil').title;
+const {
+    title:t
+} = require('../util/consts');
 const supply =  10000;
 
 contract('UniswapSwappingProviderGetExpectedRateTest', accounts => {
