@@ -4,7 +4,6 @@ import "../base/Base.sol";
 import "../util/SafeMath.sol";
 import "../interface/IPostActionRegistry.sol";
 
-
 /**
     @title This smart contract manages all the IPostAction smart contracts for the platform.
     @author StablePay <hi@stablepay.io>
@@ -15,14 +14,14 @@ contract PostActionRegistry is Base, IPostActionRegistry {
     using SafeMath for uint256;
 
     /** Constants */
-    string constant internal PLATFORM_DEFAULT_POST_ACTION = "config.platform.defaultPostAction";
+    string internal constant PLATFORM_DEFAULT_POST_ACTION = "config.platform.defaultPostAction";
 
     /** Properties */
 
     /**
         @dev This mapping is used to store actions.
      */
-    mapping (address => bool) public actions;
+    mapping(address => bool) public actions;
 
     /** Modifiers */
 
@@ -63,9 +62,7 @@ contract PostActionRegistry is Base, IPostActionRegistry {
         @param storageAddress the Eternal Storage implementation.
         @dev The Eternal Storage implementation must implement the IStorage interface.
      */
-    constructor(address storageAddress)
-        public Base(storageAddress) {
-    }
+    constructor(address storageAddress) public Base(storageAddress) {}
 
     /** Fallback Method */
 
@@ -79,12 +76,12 @@ contract PostActionRegistry is Base, IPostActionRegistry {
         @return true if the post action is registered. Otherwise it returns false.
      */
     function registerPostAction(address newPostAction)
-    external
-    onlySuperUser
-    isValidAddress(newPostAction)
-    postActionNotExists(newPostAction)
-    returns (bool) {
-
+        external
+        onlySuperUser
+        isValidAddress(newPostAction)
+        postActionNotExists(newPostAction)
+        returns (bool)
+    {
         actions[newPostAction] = true;
 
         emit NewPostActionRegistered(
@@ -104,19 +101,15 @@ contract PostActionRegistry is Base, IPostActionRegistry {
         @return true if the post action is unregistered. Otherwise it returns false.
      */
     function unregisterPostAction(address postAction)
-    external
-    onlySuperUser
-    isValidAddress(postAction)
-    postActionExists(postAction)
-    returns (bool) {
+        external
+        onlySuperUser
+        isValidAddress(postAction)
+        postActionExists(postAction)
+        returns (bool)
+    {
         actions[postAction] = false;
 
-        emit PostActionUnregistered(
-            address(this),
-            postAction,
-            msg.sender,
-            now
-        );
+        emit PostActionUnregistered(address(this), postAction, msg.sender, now);
         return true;
     }
 
@@ -126,16 +119,18 @@ contract PostActionRegistry is Base, IPostActionRegistry {
         @return true if post action is registered. Otherwise it returns false.
      */
     function isRegisteredPostAction(address postAction)
-    external
-    view
-    returns (bool) {
+        external
+        view
+        returns (bool)
+    {
         return isRegisteredPostActionInternal(postAction);
     }
 
     function isRegisteredPostActionInternal(address postAction)
-    internal
-    view
-    returns (bool) {
+        internal
+        view
+        returns (bool)
+    {
         return actions[postAction];
     }
 
@@ -143,18 +138,15 @@ contract PostActionRegistry is Base, IPostActionRegistry {
         @notice It gets the default post action.
         @return the default post action.
      */
-    function getDefaultPostAction()
-    external
-    view
-    returns (address) {
+    function getDefaultPostAction() external view returns (address) {
         return getDefaultPostActionInternal();
     }
 
-    function getDefaultPostActionInternal()
-    internal
-    view
-    returns (address) {
-        return _storage.getAddress(keccak256(abi.encodePacked(PLATFORM_DEFAULT_POST_ACTION)));
+    function getDefaultPostActionInternal() internal view returns (address) {
+        return
+            _storage.getAddress(
+                keccak256(abi.encodePacked(PLATFORM_DEFAULT_POST_ACTION))
+            );
     }
 
     /**
@@ -163,9 +155,10 @@ contract PostActionRegistry is Base, IPostActionRegistry {
         @return the post action passed as parameter if it is registered. Otherwise it returns the default post action.
      */
     function getPostActionOrDefault(address postAction)
-    external
-    view
-    returns (address) {
+        external
+        view
+        returns (address)
+    {
         bool isRegistered = isRegisteredPostActionInternal(postAction);
         return isRegistered ? postAction : getDefaultPostActionInternal();
     }
@@ -176,16 +169,23 @@ contract PostActionRegistry is Base, IPostActionRegistry {
         @return true if the post action is set as default. Otherwise it returns false.
      */
     function setPostActionAsDefault(address postAction)
-    external
-    onlySuperUser
-    isValidAddress(postAction)
-    postActionExists(postAction)
-    returns (bool) {
+        external
+        onlySuperUser
+        isValidAddress(postAction)
+        postActionExists(postAction)
+        returns (bool)
+    {
         address previousDefaultPostAction = getDefaultPostActionInternal();
-        require(previousDefaultPostAction != postAction, "New default post action must be != from current.");
+        require(
+            previousDefaultPostAction != postAction,
+            "New default post action must be != from current."
+        );
 
-        _storage.setAddress(keccak256(abi.encodePacked(PLATFORM_DEFAULT_POST_ACTION)), postAction);
-        
+        _storage.setAddress(
+            keccak256(abi.encodePacked(PLATFORM_DEFAULT_POST_ACTION)),
+            postAction
+        );
+
         emit NewDefaultPostAction(
             address(this),
             previousDefaultPostAction,

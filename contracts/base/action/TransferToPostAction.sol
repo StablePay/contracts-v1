@@ -4,11 +4,10 @@ pragma experimental ABIEncoderV2;
 import "./PostActionBase.sol";
 
 contract TransferToPostAction is PostActionBase {
-
     /** Constants */
 
-    address constant internal ADDRESS_EMPTY = address(0x0);
-    bytes32 constant internal DEFAULT_ACTION_DATA = "DefaultAction";
+    address internal constant ADDRESS_EMPTY = address(0x0);
+    bytes32 internal constant DEFAULT_ACTION_DATA = "DefaultAction";
 
     /** Properties */
 
@@ -18,25 +17,33 @@ contract TransferToPostAction is PostActionBase {
 
     /** Constructor */
 
-    constructor(address storageAddress)
-        public PostActionBase(storageAddress) {
-    }
+    constructor(address storageAddress) public PostActionBase(storageAddress) {}
 
     /** Fallback Method */
 
     /** Functions */
 
     function execute(StablePayCommon.PostActionData memory postActionData)
-    public
-    isStablePay(msg.sender)
-    returns (bool){
+        public
+        isStablePay(msg.sender)
+        returns (bool)
+    {
         // Calculate the 'to' amount.
-        uint256 currentToAmount = postActionData.targetAmount.sub(postActionData.feeAmount);
+        uint256 currentToAmount = postActionData.targetAmount.sub(
+            postActionData.feeAmount
+        );
 
-        require(ERC20(postActionData.targetToken).balanceOf(address(this)) >= currentToAmount, "Balance of ERC20 is not >= amount to transfer.");
-        
+        require(
+            ERC20(postActionData.targetToken).balanceOf(address(this)) >=
+                currentToAmount,
+            "Balance of ERC20 is not >= amount to transfer."
+        );
+
         // Transfer the 'to' amount to the 'to' address.
-        bool result = ERC20(postActionData.targetToken).transfer(postActionData.toAddress, currentToAmount);
+        bool result = ERC20(postActionData.targetToken).transfer(
+            postActionData.toAddress,
+            currentToAmount
+        );
         require(result, "Transfer to 'to' address failed.");
 
         emit ActionExecuted(

@@ -16,15 +16,15 @@ import "../interface/ISettings.sol";
 contract Base {
     /** Constants */
 
-    uint8 constant internal VERSION_ONE = 1;
-    string constant internal STATE_PAUSED = "state.paused";
+    uint8 internal constant VERSION_ONE = 1;
+    string internal constant STATE_PAUSED = "state.paused";
 
-    string constant internal SETTINGS_NAME = "Settings";
-    string constant internal VAULT_NAME = "Vault";
-    string constant internal CONTRACT_NAME = "contract.name";
-    string constant internal OWNER = "owner";
-    string constant internal ADMIN = "admin";
-    string constant internal ACCESS_ROLE = "access.role";
+    string internal constant SETTINGS_NAME = "Settings";
+    string internal constant VAULT_NAME = "Vault";
+    string internal constant CONTRACT_NAME = "contract.name";
+    string internal constant OWNER = "owner";
+    string internal constant ADMIN = "admin";
+    string internal constant ACCESS_ROLE = "access.role";
 
     /** Properties */
 
@@ -35,15 +35,15 @@ contract Base {
     bool private rentrancyLock = false;
 
     /** @dev The main storage contract where primary persistant storage is maintained. */
-    IStorage public _storage = IStorage(0);     
+    IStorage public _storage = IStorage(0);
 
     /** Events */
 
     /** @notice This event is emitted when a deposit is received. */
-    event DepositReceived (
+    event DepositReceived(
         address indexed thisContract,
         address from,
-        uint amount
+        uint256 amount
     );
 
     /** Modifiers */
@@ -76,8 +76,8 @@ contract Base {
     /** @notice Modifier to scope access to admins */
     modifier onlySuperUser() {
         require(
-            roleHas(OWNER, msg.sender) == true || 
-            roleHas(ADMIN, msg.sender) == true,
+            roleHas(OWNER, msg.sender) == true ||
+                roleHas(ADMIN, msg.sender) == true,
             "Msg sender does not have permission."
         );
         _;
@@ -96,7 +96,11 @@ contract Base {
         @notice It checks whether the platform is in paused state.
      */
     modifier isNotPaused() {
-        require(_storage.getBool(keccak256(abi.encodePacked(STATE_PAUSED))) == false, "Platform is paused.");
+        require(
+            _storage.getBool(keccak256(abi.encodePacked(STATE_PAUSED))) ==
+                false,
+            "Platform is paused."
+        );
         _;
     }
 
@@ -105,19 +109,15 @@ contract Base {
         @notice If ether value is zero, it throws an require error. 
         @dev If the transfer was succesfully, it emits an DepositReceived event.
      */
-    function () external payable {
+    function() external payable {
         require(msg.value > 0, "Msg value > 0.");
         bool depositResult = IVault(getVault()).deposit.value(msg.value)();
         require(depositResult, "The deposit was not successful.");
-        emit DepositReceived(
-            address(this),
-            msg.sender,
-            msg.value
-        );
+        emit DepositReceived(address(this), msg.sender, msg.value);
     }
 
     /** Constructor */
-   
+
     /**
         @notice It creates an instance associated to a IStorage instance.
         @dev It sets the main Storage address.
@@ -131,27 +131,23 @@ contract Base {
     }
 
     /** @notice It gets the current Settings smart contract configured in the platform. */
-    function getSettings()
-        internal
-        view
-        returns (ISettings) {
-        address settingsAddress = _storage.getAddress(keccak256(abi.encodePacked(CONTRACT_NAME, SETTINGS_NAME)));
+    function getSettings() internal view returns (ISettings) {
+        address settingsAddress = _storage.getAddress(
+            keccak256(abi.encodePacked(CONTRACT_NAME, SETTINGS_NAME))
+        );
         return ISettings(settingsAddress);
     }
 
     /** @notice It gets the current Vault smart contract address configured in the platform. */
-    function getVault()
-        internal
-        view
-        returns (address) {
-        return _storage.getAddress(keccak256(abi.encodePacked(CONTRACT_NAME, VAULT_NAME)));
+    function getVault() internal view returns (address) {
+        return
+            _storage.getAddress(
+                keccak256(abi.encodePacked(CONTRACT_NAME, VAULT_NAME))
+            );
     }
 
     /** @notice It gets the current Storage smart contract address configured in the platform. */
-    function getStorageAddress()
-        internal
-        view
-        returns (address) {
+    function getStorageAddress() internal view returns (address) {
         return address(_storage);
     }
 
@@ -161,8 +157,15 @@ contract Base {
         @param anAddress address to validate.
         @return true if the address has the role. Otherwise it returns false.
      */
-    function roleHas(string memory aRole, address anAddress) internal view returns (bool) {
-        return _storage.getBool(keccak256(abi.encodePacked(ACCESS_ROLE, aRole, anAddress)));
+    function roleHas(string memory aRole, address anAddress)
+        internal
+        view
+        returns (bool)
+    {
+        return
+            _storage.getBool(
+                keccak256(abi.encodePacked(ACCESS_ROLE, aRole, anAddress))
+            );
     }
 
     /**

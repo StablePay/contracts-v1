@@ -5,14 +5,16 @@ pragma solidity 0.5.3;
   @author StablePay <hi@stablepay.io>
  */
 library Bytes32ArrayLib {
-
     /**
       @notice It adds an bytes32 value to the array.
       @param self current array.
       @param newItem new item to add.
       @return the current array with the new item.
     */
-    function add(bytes32[] storage self, bytes32 newItem) internal returns (bytes32[] memory) {
+    function add(bytes32[] storage self, bytes32 newItem)
+        internal
+        returns (bytes32[] memory)
+    {
         require(newItem != 0x0, "Invalid value.");
         self.push(newItem);
         return self;
@@ -24,7 +26,10 @@ library Bytes32ArrayLib {
       @param index remove an item in a specific index.
       @return the current array without the item removed.
     */
-    function removeAt(bytes32[] storage self, uint index) internal returns (bytes32[] memory) {
+    function removeAt(bytes32[] storage self, uint256 index)
+        internal
+        returns (bytes32[] memory)
+    {
         if (index >= self.length) return self;
 
         bytes32 temp = self[self.length - 1];

@@ -8,7 +8,6 @@ import "./IOwnable.sol";
     @notice This smart contract manages the roles for each address who access to the platform.
  */
 contract IRole is IOwnable {
-
     /** Constants */
 
     /** Events */
@@ -18,20 +17,14 @@ contract IRole is IOwnable {
         @param anAddress address where the role was added.
         @param roleName role name associated to the address.
     */
-    event RoleAdded(
-        address indexed anAddress,
-        string roleName
-    );
+    event RoleAdded(address indexed anAddress, string roleName);
 
     /**
         @notice This event is emitted when a role is removed.
         @param anAddress address where the role was removed.
         @param roleName role name removed from the address.
     */
-    event RoleRemoved(
-        address indexed anAddress,
-        string roleName
-    );
+    event RoleRemoved(address indexed anAddress, string roleName);
 
     /**
         @notice This event is emitted when the platform owneship is transferred to a new address.
@@ -39,7 +32,7 @@ contract IRole is IOwnable {
         @param newOwner address which represents the new owner.
     */
     event OwnershipTransferred(
-        address indexed previousOwner, 
+        address indexed previousOwner,
         address indexed newOwner
     );
 
@@ -56,8 +49,8 @@ contract IRole is IOwnable {
         @return true if the role is added. Otherwise it returns false.
      */
     function adminRoleAdd(string calldata role, address anAddress)
-    external
-    returns (bool);
+        external
+        returns (bool);
 
     /**
         @notice It removes a role to a specific address.
@@ -68,6 +61,6 @@ contract IRole is IOwnable {
         @return true if the role is removed. Otherwise it returns false.
      */
     function adminRoleRemove(string calldata role, address anAddress)
-    external
-    returns (bool);
+        external
+        returns (bool);
 }

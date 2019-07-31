@@ -1,6 +1,5 @@
 pragma solidity 0.5.3;
 
-
 /**
     @title This manages the post action smart contracts for the platform.
 
@@ -9,7 +8,6 @@ pragma solidity 0.5.3;
     @dev Each post action is a smart contract which implements IPostAction interface.
  */
 interface IPostActionRegistry {
-    
     /** Events */
 
     /**
@@ -51,9 +49,7 @@ interface IPostActionRegistry {
         @param newPostAction the post action address to register.
         @return true if the post action is registered. Otherwise it returns false.
      */
-    function registerPostAction(address newPostAction)
-    external
-    returns (bool);
+    function registerPostAction(address newPostAction) external returns (bool);
 
     /**
         @notice It unregisters a already registered post action in the platform.
@@ -61,9 +57,7 @@ interface IPostActionRegistry {
         @param postAction the post action to unregister.
         @return true if the post action is unregistered. Otherwise it returns false.
      */
-    function unregisterPostAction(address postAction)
-    external
-    returns (bool);
+    function unregisterPostAction(address postAction) external returns (bool);
 
     /**
         @notice It tests whether a post action address is already registered.
@@ -71,9 +65,9 @@ interface IPostActionRegistry {
         @return true if post action is registered. Otherwise it returns false.
      */
     function isRegisteredPostAction(address postAction)
-    external
-    view
-    returns (bool);
+        external
+        view
+        returns (bool);
 
     /**
         @notice It gets the post action or the default post action if the post action passed a parameter is not valid (pre-registered).
@@ -81,25 +75,20 @@ interface IPostActionRegistry {
         @return the post action passed as parameter if it is registered. Otherwise it returns the default post action.
      */
     function getPostActionOrDefault(address postAction)
-    external
-    view
-    returns (address);
+        external
+        view
+        returns (address);
 
     /**
         @notice It gets the default post action.
         @return the default post action.
      */
-    function getDefaultPostAction()
-    external
-    view
-    returns (address);
+    function getDefaultPostAction() external view returns (address);
 
     /**
         @notice It sets a post action as default in the platform.
         @param postAction post action address to set as default in the platform.
         @return true if the post action is set as default. Otherwise it returns false.
      */
-    function setPostActionAsDefault(address postAction)
-    external
-    returns (bool);
+    function setPostActionAsDefault(address postAction) external returns (bool);
 }
