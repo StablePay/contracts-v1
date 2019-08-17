@@ -44,8 +44,9 @@ contract StablePayCommon {
     }
 
     struct PostActionData {
-        uint256 sourceAmount;
-        uint256 targetAmount;
+        uint256 sourceAmount; // Source amount defined in order
+        uint256 targetAmount; // Target amount defined in order
+        uint256 toAmount; // To amount calculated after substract the fee (targetAmount - feeAmount)
         uint256 minRate;
         uint256 maxRate;
         uint256 feeAmount;

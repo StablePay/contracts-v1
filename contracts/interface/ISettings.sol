@@ -39,6 +39,9 @@ interface ISettings {
 
     /** Functions */
 
+    // TODO Add function setCustomPlatformFee(address anAddress, uint16 customFee) external returns (bool);
+    // TODO Add function getCustomPlatformFee(address anAddress) external returns (uint16);
+    // TODO Add event CustomPlatformFee
     function setPlatformFee(uint16 fee) external returns (bool);
 
     function getPlatformFee() external view returns (uint16);
@@ -79,5 +82,10 @@ interface ISettings {
         uint256 minAmount,
         uint256 maxAmount
     ) external returns (bool);
+
+    function isTokenAvailable(
+        address tokenAddress,
+        uint256 amount
+    ) external view returns (bool);
 
 }

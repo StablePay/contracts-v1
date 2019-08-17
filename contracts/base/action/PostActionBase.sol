@@ -4,8 +4,11 @@ pragma experimental ABIEncoderV2;
 import "../../services/erc20/ERC20.sol";
 import "../../base/Base.sol";
 import "../../interface/IPostAction.sol";
+import "../../util/AddressLib.sol";
 
 contract PostActionBase is Base, IPostAction {
+    using AddressLib for address;
+
     /** Constants */
 
     string internal constant STABLEPAY_NAME = "StablePay";
@@ -17,10 +20,7 @@ contract PostActionBase is Base, IPostAction {
     /** Modifiers */
 
     modifier isStablePay(address _anAddress) {
-        require(
-            getStablePayAddress() == _anAddress,
-            "Address must be StablePay"
-        );
+        getStablePayAddress().requireEqualTo(_anAddress, "Address must be StablePay");
         _;
     }
 

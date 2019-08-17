@@ -4,7 +4,7 @@ const {
 const withData = require('leche').withData;
 
 // Mock Smart Contracts
-const StandardTokenMock = artifacts.require("./mock/StandardTokenMock.sol");
+const StandardTokenMock = artifacts.require("./mock/token/StandardTokenMock.sol");
 const StablePayBaseMock = artifacts.require("./mock/StablePayBaseMock.sol");
 
 // Smart Contracts

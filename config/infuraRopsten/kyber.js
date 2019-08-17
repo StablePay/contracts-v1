@@ -13,6 +13,7 @@ module.exports = {
         alice: '0x0000000000000000000000000000000000000000'
     },
     tokens: {
+        DAI_COMPOUND: '0xB5E5D0F8C0cbA267CD3D7035d6AdC8eBA7Df7Cdd',
         EOS: "0xd5b4218b950a53ff07985e2d88346925c335eae7",
         OMG: "0x4bfba4a8f28755cb2061c413459ee562c6b9c51b",
         SALT: "0xb47f1a9b121ba114d5e98722a8948e274d0f4042",

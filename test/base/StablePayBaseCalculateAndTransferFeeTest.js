@@ -7,7 +7,7 @@ const KyberOrderFactory = require('../factories/KyberOrderFactory');
 
 // Mock Smart Contracts
 const StablePayBaseMock = artifacts.require("./mock/StablePayBaseMock.sol");
-const StandardTokenMock = artifacts.require("./mock/StandardTokenMock.sol");
+const StandardTokenMock = artifacts.require("./mock/token/StandardTokenMock.sol");
 
 // Smart Contracts
 const Storage = artifacts.require("./base/Storage.sol");

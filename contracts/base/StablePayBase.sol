@@ -16,7 +16,6 @@ import "../providers/ISwappingProvider.sol";
     @title This is the main smart contract in the StablePay platform.
     
     @author StablePay <hi@stablepay.io>
-
  */
 contract StablePayBase is Base, IStablePay {
     using SafeMath for uint256;
@@ -41,16 +40,8 @@ contract StablePayBase is Base, IStablePay {
     }
 
     modifier isTokenAvailable(address tokenAddress, uint256 amount) {
-        bool available;
-        uint256 minAmount;
-        uint256 maxAmount;
-        // TODO move this logic to the Settings smart contract.
-        (available, minAmount, maxAmount) = getSettings().getTokenAvailability(
-            tokenAddress
-        );
-        require(available, "Token address is not available.");
-        require(amount >= minAmount, "Amount >= min amount.");
-        require(amount <= maxAmount, "Amount <= max amount.");
+        bool isAvailable = getSettings().isTokenAvailable(tokenAddress, amount);
+        require(isAvailable, "Token amount is not available (> or <).");
         _;
     }
 
@@ -70,6 +61,7 @@ contract StablePayBase is Base, IStablePay {
         require(order.targetAmount > 0, "Target amount > 0.");
         _;
     }
+
     modifier areOrderAmountsValidEther(StablePayCommon.Order memory order) {
         require(order.targetAmount > 0, "Target amount > 0.");
         _;
@@ -86,7 +78,6 @@ contract StablePayBase is Base, IStablePay {
     /**
         @dev Get the current Settings smart contract configured in the platform.
      */
-    // TODO Move to Base.sol
     function getSettings() internal view returns (ISettings) {
         address settingsAddress = _storage.getAddress(
             keccak256(abi.encodePacked(CONTRACT_NAME, SETTINGS_NAME))
@@ -97,7 +88,6 @@ contract StablePayBase is Base, IStablePay {
     /**
         @dev Get the current ProviderRegistry smart contract configured in the platform.
      */
-    // TODO Move to Base.sol
     function getProviderRegistry() internal view returns (IProviderRegistry) {
         address stablePayStorageAddress = _storage.getAddress(
             keccak256(abi.encodePacked(CONTRACT_NAME, STABLE_PAY_STORAGE_NAME))
@@ -354,6 +344,7 @@ contract StablePayBase is Base, IStablePay {
 
         StablePayCommon.PostActionData memory postActionData = createPostActionData(
             order,
+            currentToAmount,
             feeAmount
         );
 
@@ -365,12 +356,14 @@ contract StablePayBase is Base, IStablePay {
 
     function createPostActionData(
         StablePayCommon.Order memory order,
+        uint256 toAmount,
         uint256 feeAmount
     ) internal pure returns (StablePayCommon.PostActionData memory) {
         return
             StablePayCommon.PostActionData({
                 sourceAmount: order.sourceAmount,
                 targetAmount: order.targetAmount,
+                toAmount: toAmount,
                 minRate: order.minRate,
                 maxRate: order.maxRate,
                 feeAmount: feeAmount,

@@ -255,4 +255,45 @@ module.exports = {
             };
         }
     },
+    registration: {
+        newContractRegistered: tx => {
+            const name = 'NewContractRegistered';
+            return {
+                name: name,
+                emitted: (thisContract, contractAddress, contractName) => emitted(tx, name, ev => {
+                    assert.equal(ev.thisContract, thisContract);
+                    assert.equal(ev.contractAddress, contractAddress);
+                    assert.equal(ev.contractName.toString(), contractName.toString());
+                }),
+                notEmitted: (assertFunction = () => {} ) => notEmitted(tx, name, assertFunction)
+            };
+        },
+    },
+    compoundSettings: {
+        erc20ToCEr20MappingCreated: tx => {
+            const name = 'Erc20ToCEr20MappingCreated';
+            return {
+                name: name,
+                emitted: (thisContract, erc20Address, cErc20Address) => emitted(tx, name, ev => {
+                    assert.equal(ev.thisContract, thisContract);
+                    assert.equal(ev.erc20Address, erc20Address);
+                    assert.equal(ev.cErc20Address, cErc20Address);
+                }),
+                notEmitted: (assertFunction = () => {} ) => notEmitted(tx, name, assertFunction)
+            };
+        },
+        erc20ToCEr20MappingUpdated: tx => {
+            const name = 'Erc20ToCEr20MappingUpdated';
+            return {
+                name: name,
+                emitted: (thisContract, oldCerc20Address, erc20Address, cErc20Address) => emitted(tx, name, ev => {
+                    assert.equal(ev.thisContract, thisContract);
+                    assert.equal(ev.oldCerc20Address, oldCerc20Address);
+                    assert.equal(ev.erc20Address, erc20Address);
+                    assert.equal(ev.cErc20Address, cErc20Address);
+                }),
+                notEmitted: (assertFunction = () => {} ) => notEmitted(tx, name, assertFunction)
+            };
+        },
+    },
 }
