@@ -42,31 +42,36 @@ module.exports = async (callback) => {
         const tokens = [];
         let index = 1;
         while( index <= parseInt(tokensCount)) {
-            const tokenAddress = await factory.getTokenWithId(index);
-            const tokenExchangeAddress = await factory.getExchange(tokenAddress);
-            if(tokenAddress === NULL_ADDRESS) {
-                index++;
-                continue;
+            let decimals, name, symbol;
+            try {
+                const tokenAddress = await factory.getTokenWithId(index);
+                const tokenExchangeAddress = await factory.getExchange(tokenAddress);
+                if(tokenAddress === NULL_ADDRESS) {
+                    index++;
+                    continue;
+                }
+                const tokenInstance = await ERC20.at(tokenAddress);
+
+                const decimalsPromise = tokenInstance.decimals();
+                const namePromise = tokenInstance.name();
+                const symbolPromise = tokenInstance.symbol();
+
+                [decimals, name, symbol] = await Promise.all([decimalsPromise, namePromise, symbolPromise]);
+
+                console.log(`Token: ${symbol} (${name}) - Decimals: ${decimals} - Address: ${tokenAddress} - Exchange: ${tokenExchangeAddress}.`);
+
+                tokens.push({
+                    token: {
+                        address: tokenAddress,
+                        symbol,
+                        name,
+                        decimals: parseInt(decimals.toString()),
+                    },
+                    exchange: tokenExchangeAddress,
+                });
+            } catch (error) {
+                console.log(`Error on index ${index}: ${symbol} (${name}) - Decimals: ${decimals}`);
             }
-            const tokenInstance = await ERC20.at(tokenAddress);
-
-            const decimalsPromise = tokenInstance.decimals();
-            const namePromise = tokenInstance.name();
-            const symbolPromise = tokenInstance.symbol();
-
-            const [decimals, name, symbol] = await Promise.all([decimalsPromise, namePromise, symbolPromise]);
-
-            console.log(`Token: ${symbol} (${name}) - Decimals: ${decimals} - Address: ${tokenAddress} - Exchange: ${tokenExchangeAddress}.`);
-
-            tokens.push({
-                token: {
-                    address: tokenAddress,
-                    symbol,
-                    name,
-                    decimals,
-                },
-                exchange: tokenExchangeAddress,
-            });
             index++;
         }
 
