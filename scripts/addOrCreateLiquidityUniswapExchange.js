@@ -7,7 +7,6 @@
     truffle exec ./scripts/addOrCreateLiquidityUniswapExchange.js --network infuraRopsten
  */
 // Smart contracts
-const IProviderRegistry = artifacts.require("./interface/IProviderRegistry.sol");
 const ERC20 = artifacts.require("./services/erc20/ERC20.sol");
 const UniswapFactoryInterface = artifacts.require("./services/uniswap/UniswapFactoryInterface.sol");
 const UniswapExchangeInterface = artifacts.require("./services/uniswap/UniswapExchangeInterface.sol");
@@ -41,7 +40,9 @@ const printExchangeInfo = async (title, tokenExchangeInstance, tokenInstance, we
     Script Arguments
  */
 const senderIndex = 0;
+const useName = true;
 const tokenName = 'DAI_COMPOUND';
+const tokenAddressInput = '0xB5E5D0F8C0cbA267CD3D7035d6AdC8eBA7Df7Cdd';
 const addLiquidity = true;
 const tokensLiquidity = 150;
 const etherLiquidity = 1;
@@ -57,7 +58,7 @@ module.exports = async (callback) => {
 
         const uniswapConfContracts = uniswapConf.contracts;
         const tokens = kyberConf.tokens;
-        const tokenAddress = tokens[tokenName];
+        const tokenAddress = useName ? tokens[tokenName] : tokenAddressInput;
         
         assert(tokenAddress, "Source token is undefined.");
         
