@@ -28,6 +28,9 @@ const AddressLib = artifacts.require("./util/AddressLib.sol");
 // Official Smart Contracts
 const PostActionRegistry = artifacts.require("./base/PostActionRegistry.sol");
 const TransferToPostAction = artifacts.require("./base/action/TransferToPostAction.sol");
+const CompoundMintPostAction = artifacts.require("./base/action/CompoundMintPostAction.sol");
+const CompoundSettings = artifacts.require("./base/CompoundSettings.sol");
+const Registration = artifacts.require("./base/Registration.sol");
 const Settings = artifacts.require("./base/Settings.sol");
 const Role = artifacts.require("./base/Role.sol");
 const Vault = artifacts.require("./base/Vault.sol");
@@ -44,7 +47,7 @@ const UniswapSwappingProvider = artifacts.require("./providers/UniswapSwappingPr
 const UniswapFactoryInterface = artifacts.require("./services/uniswap/UniswapFactoryInterface.sol");
 const UniswapTemplateExchangeInterface = artifacts.require("./services/uniswap/UniswapExchangeInterface.sol");
 
-const allowedNetworks = ['ganache ', 'test', 'coverage', 'develop'];
+const allowedNetworks = ['ganache', 'test', 'coverage', 'develop'];
 
 module.exports = function(deployer, network, accounts) {
   console.log(`Deploying smart contracts to '${network}'.`)
@@ -65,6 +68,7 @@ module.exports = function(deployer, network, accounts) {
   }
 
   const stablePayConf = envConf.stablepay;
+  const stablePayProviders = stablePayConf.providers;
   const kyberConf = envConf.kyber;
   const uniswapConf = envConf.uniswap;
 
@@ -72,6 +76,8 @@ module.exports = function(deployer, network, accounts) {
   const kyberTokens = kyberConf.tokens;
 
   const uniswapContracts = uniswapConf.contracts;
+
+  const compoundConf = envConf.compound;
 
 
   const owner = accounts[0];
@@ -132,6 +138,18 @@ module.exports = function(deployer, network, accounts) {
     await deployerApp.deploy(Role, Storage.address, {gas: maxGasForDeploying});
     await deployerApp.deploy(Vault, Storage.address);
 
+    await deployerApp.links(Registration, [
+      AddressLib
+    ]);
+    await deployerApp.deploy(Registration, Storage.address, {gas: maxGasForDeploying});
+
+    await deployerApp.links(CompoundSettings, [
+      AddressLib
+    ]);
+    await deployerApp.deploy(CompoundSettings, Storage.address);
+
+    await deployerApp.deploy(CompoundMintPostAction, Storage.address, CompoundSettings.address);
+
     await deployerApp.deploy(StablePay, Storage.address, {gas: maxGasForDeploying});
 
     await deployerApp.links(StablePayBase, [
@@ -159,8 +177,11 @@ module.exports = function(deployer, network, accounts) {
     ]);
     await deployerApp.deploy(TransferToPostAction, Storage.address, {gas: maxGasForDeploying, from: owner});
 
+    /** Registering post actions. */
+    console.log('Registering post actions.');
     const postActionRegistryInstance = await PostActionRegistry.deployed();
     await postActionRegistryInstance.registerPostAction(TransferToPostAction.address);
+    await postActionRegistryInstance.registerPostAction(CompoundMintPostAction.address);
 
     /** Deploying Kyber swap provider. */
     await deployerApp.links(KyberSwappingProvider, [
@@ -230,9 +251,26 @@ module.exports = function(deployer, network, accounts) {
       } else {
         await settingsInstance.setTokenAvailability(tokenAddress, minAmount, maxAmount, {from: owner});
         deployerApp.addData(`Token_${tokenAvailability.name}_Kyber_${tokenAddress}`, {minAmount: minAmount, maxAmount: maxAmount});
-        console.log(` Token '${tokenAvailability.name}' availability  configured: Address: '${tokenAddress}' - MinAmount: '${minAmount}' - MaxAmount: '${maxAmount}'.`);
+        console.log(`Token '${tokenAvailability.name}' availability  configured: Address: '${tokenAddress}' - MinAmount: '${minAmount}' - MaxAmount: '${maxAmount}'.`);
       }
     }
+
+    /** Configuring Compound.Finance Tokens/CTokens mapping in CompoundSettings contract. */
+    const compoundSettingsInstance = await CompoundSettings.deployed();
+    for (const mapping of compoundConf.mappings) {
+      const tokenAddress = kyberTokens[mapping.token.toUpperCase()];
+      const cTokenAddress = compoundConf.tokens[mapping.cToken.toUpperCase()];
+      if(tokenAddress === undefined || cTokenAddress === undefined) {
+        console.log(`CompoundSettings: Token ${mapping.token} (${tokenAddress}) address or CToken ${mapping.cToken} (${cTokenAddress}) address is undefined.`);
+      } else {
+        await compoundSettingsInstance.mapErc20ToCEr20(tokenAddress, cTokenAddress);
+        deployerApp.addData(`Compound_Token_${mapping.token}_CToken_${mapping.cToken}`, {token: tokenAddress, ctoken: cTokenAddress});
+        console.log(`CompoundSettings - New Mapping: Token ${mapping.token} (${tokenAddress}) => CToken ${mapping.cToken} (${cTokenAddress}).`);
+      }
+    }
+
+    console.log(`Registering TransferToPostAction (${TransferToPostAction.address}) as DEFAULT post action.`);
+    await postActionRegistryInstance.setPostActionAsDefault(TransferToPostAction.address);
 
     /** Writing smart contract data into JSON file. */
     deployerApp.writeJson(`./build/${Date.now()}_${network}.json`);
@@ -241,5 +279,17 @@ module.exports = function(deployer, network, accounts) {
     if(printDeployCostValue === true) {
       deployerApp.prettyPrint(true);
     }
+
+    console.log(`StablePay: '${stablePayInstance.address}',`);
+		console.log(`StablePayStorage: '${stablePayStorageInstance.address}',`);
+		console.log(`Settings: '${settingsInstance.address}',`);
+		console.log(`Vault: '${Vault.address}',`);
+		console.log(`KyberSwappingProvider: '${KyberSwappingProvider.address}',`);
+		console.log(`UniswapSwappingProvider: '${UniswapSwappingProvider.address}',`);
+		console.log(`TransferToPostAction: '${TransferToPostAction.address}',`);
+		console.log(`PostActionRegistry: '${PostActionRegistry.address}',`);
+		console.log(`Storage: '${Storage.address}',`);
+		console.log(`Registration: '${Registration.address}',`);
+		console.log(`CompoundSettings: '${CompoundSettings.address}',`);
   });
 };

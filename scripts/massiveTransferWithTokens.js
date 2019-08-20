@@ -39,7 +39,7 @@ const DAI_NAME = 'DAI';
 const merchantAddressIndex = 1;
 const customerAddressIndex = 0;
 const minAmount = 10;
-const maxAmount = 40;
+const maxAmount = 25;
 
 module.exports = async (callback) => {
     try {

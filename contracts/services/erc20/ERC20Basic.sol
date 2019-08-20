@@ -6,6 +6,9 @@ pragma solidity 0.5.3;
  * @dev see https://github.com/ethereum/EIPs/issues/179
  */
 contract ERC20Basic {
+
+    function name() external view returns (string memory);
+    function symbol() external view returns (string memory);
     function decimals() external view returns (uint256 digits);
     function totalSupply() public view returns (uint256);
     function balanceOf(address who) public view returns (uint256);

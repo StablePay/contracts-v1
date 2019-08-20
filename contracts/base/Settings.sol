@@ -91,25 +91,25 @@ contract Settings is Base, ISettings {
         return _isPlatformPaused();
     }
 
-    function disableTokenAvailability(address _tokenAddress)
+    function disableTokenAvailability(address tokenAddress)
         external
         onlySuperUser
         returns (bool)
     {
         _storage.setBool(
-            keccak256(abi.encodePacked(TOKEN_AVAILABLE, _tokenAddress)),
+            keccak256(abi.encodePacked(TOKEN_AVAILABLE, tokenAddress)),
             false
         );
         uint256 minAmount = _storage.getUint(
-            keccak256(abi.encodePacked(TOKEN_MIN_AMOUNT, _tokenAddress))
+            keccak256(abi.encodePacked(TOKEN_MIN_AMOUNT, tokenAddress))
         );
         uint256 maxAmount = _storage.getUint(
-            keccak256(abi.encodePacked(TOKEN_MAX_AMOUNT, _tokenAddress))
+            keccak256(abi.encodePacked(TOKEN_MAX_AMOUNT, tokenAddress))
         );
 
         emit TokenAvailabilityUpdated(
             address(this),
-            _tokenAddress,
+            tokenAddress,
             minAmount,
             maxAmount,
             false
@@ -117,49 +117,64 @@ contract Settings is Base, ISettings {
         return true;
     }
 
-    function getTokenAvailability(address _tokenAddress)
+    function getTokenAvailability(address tokenAddress)
         external
         view
         returns (bool available, uint256 minAmount, uint256 maxAmount)
     {
+        return getTokenAvailabilityInternal(tokenAddress);
+    }
+
+    function getTokenAvailabilityInternal(address tokenAddress)
+        internal
+        view
+        returns (bool available, uint256 minAmount, uint256 maxAmount)
+    {
         available = _storage.getBool(
-            keccak256(abi.encodePacked(TOKEN_AVAILABLE, _tokenAddress))
+            keccak256(abi.encodePacked(TOKEN_AVAILABLE, tokenAddress))
         );
         minAmount = _storage.getUint(
-            keccak256(abi.encodePacked(TOKEN_MIN_AMOUNT, _tokenAddress))
+            keccak256(abi.encodePacked(TOKEN_MIN_AMOUNT, tokenAddress))
         );
         maxAmount = _storage.getUint(
-            keccak256(abi.encodePacked(TOKEN_MAX_AMOUNT, _tokenAddress))
+            keccak256(abi.encodePacked(TOKEN_MAX_AMOUNT, tokenAddress))
         );
         return (available, minAmount, maxAmount);
     }
 
     function setTokenAvailability(
-        address _tokenAddress,
+        address tokenAddress,
         uint256 _minAmount,
         uint256 _maxAmount
     ) external onlySuperUser returns (bool) {
         require(_minAmount < _maxAmount, "Min amount < max amount.");
         _storage.setBool(
-            keccak256(abi.encodePacked(TOKEN_AVAILABLE, _tokenAddress)),
+            keccak256(abi.encodePacked(TOKEN_AVAILABLE, tokenAddress)),
             true
         );
         _storage.setUint(
-            keccak256(abi.encodePacked(TOKEN_MIN_AMOUNT, _tokenAddress)),
+            keccak256(abi.encodePacked(TOKEN_MIN_AMOUNT, tokenAddress)),
             _minAmount
         );
         _storage.setUint(
-            keccak256(abi.encodePacked(TOKEN_MAX_AMOUNT, _tokenAddress)),
+            keccak256(abi.encodePacked(TOKEN_MAX_AMOUNT, tokenAddress)),
             _maxAmount
         );
 
         emit TokenAvailabilityUpdated(
             address(this),
-            _tokenAddress,
+            tokenAddress,
             _minAmount,
             _maxAmount,
             true
         );
         return true;
+    }
+
+    function isTokenAvailable(address tokenAddress, uint256 amount) external view returns (bool){
+        (bool available, uint256 minAmount, uint256 maxAmount) = getTokenAvailabilityInternal(tokenAddress);
+        return available &&
+            amount >= minAmount &&
+            amount <= maxAmount;
     }
 }

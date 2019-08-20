@@ -18,6 +18,8 @@ module.exports = {
 		UniswapSwappingProvider: '',
 		TransferToPostAction: '',
 		PostActionRegistry: '',
+		Storage: '',
+		Registration: '',
 	},
 	providers: {
 		Kyber: '0x4b796265724e6574776f726b5f76310000000000000000000000000000000000',

@@ -46,6 +46,8 @@ interface IPostActionRegistry {
     /**
         @notice It registers a new post action in the platform.
         @dev The sender must be a super user.
+        @dev Remember to register the post action into the platform to able access to other contracts in the platform.
+        @dev See Registration or Upgrade smart contracts.
         @param newPostAction the post action address to register.
         @return true if the post action is registered. Otherwise it returns false.
      */

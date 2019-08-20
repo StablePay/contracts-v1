@@ -28,28 +28,23 @@ contract TransferToPostAction is PostActionBase {
         isStablePay(msg.sender)
         returns (bool)
     {
-        // Calculate the 'to' amount.
-        uint256 currentToAmount = postActionData.targetAmount.sub(
-            postActionData.feeAmount
-        );
-
         require(
             ERC20(postActionData.targetToken).balanceOf(address(this)) >=
-                currentToAmount,
+                postActionData.toAmount,
             "Balance of ERC20 is not >= amount to transfer."
         );
 
         // Transfer the 'to' amount to the 'to' address.
         bool result = ERC20(postActionData.targetToken).transfer(
             postActionData.toAddress,
-            currentToAmount
+            postActionData.toAmount
         );
         require(result, "Transfer to 'to' address failed.");
 
         emit ActionExecuted(
             address(this),
             postActionData.sourceAmount,
-            postActionData.targetAmount,
+            postActionData.toAmount,
             postActionData.feeAmount,
             postActionData.sourceToken,
             postActionData.targetToken,

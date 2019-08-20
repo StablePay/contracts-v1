@@ -17,6 +17,14 @@ contract StandardToken is ERC20, BasicToken {
         return 18;
     }
 
+    function name() external view returns (string memory) {
+        return "MockToken";
+    }
+
+    function symbol() external view returns (string memory) {
+        return "MTK";
+    }
+
     function addBalance(address _to, uint256 _value) public returns (bool) {
         require(_to != address(0));
 

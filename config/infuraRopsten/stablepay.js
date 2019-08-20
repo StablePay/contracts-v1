@@ -7,17 +7,25 @@ module.exports = {
 			name: 'DAI',
 			minAmount: BigNumber("10").times(DECIMALS).toFixed(),
 			maxAmount: BigNumber("100").times(DECIMALS).toFixed()
+		},
+		{
+			name: 'DAI_COMPOUND', // To test Compound.finance Post Action 
+			minAmount: BigNumber("10").times(DECIMALS).toFixed(),
+			maxAmount: BigNumber("100").times(DECIMALS).toFixed()
 		}
 	],
 	contracts: {
-		StablePay: '0xE2309FbcC7Dffac163E177db6184b14B09f7b0C9',
-		StablePayStorage: '0x091125c1eD0E1C2cAA9AC6c98864bc8bC92C3114',
-		Settings: '0xbE7c5318e7423364CD0A7dDAC069a8163Faf7350',
-		Vault: '0xE448f25F06E00800CBb0E98A468881Dcb8cF729b',
-		KyberSwappingProvider: '0x8902131c1066b9890e39ec32cB76B021CA295D07',
-		UniswapSwappingProvider: '0x9b04778C455ee800367673fC8988788a7706b6fa',
-		TransferToPostAction: '0x9dcef3037E7E8d3E45755D48FD63243Da0023064',
-		PostActionRegistry: '0x468842B9680b891E204F71cB5cB3770320990755',
+		StablePay: '0xd77eaAB8519bB8228bFeC46d14b1AF9f204e0eeD',
+		StablePayStorage: '0x4407Ad4CB5aFf8d1dB53A7061A0B849C5271aa89',
+		Settings: '0xCbeFECc48dB2aadd4f1cBEe27E5c7dD72eB355a9',
+		Vault: '0x4F67c3302E888Dd2e73EB087C743D4E6047E3A69',
+		KyberSwappingProvider: '0xcAA41E385fbB3CBd8DD17C50200b757C1485DF14',
+		UniswapSwappingProvider: '0x7B56C8BB58C0d9a422365F9F25e31344B3c4DF52',
+		TransferToPostAction: '0x5f897dCd0761884C231f1151c7193cd14d6df7ce',
+		PostActionRegistry: '0xe4030E479ceeb958a99DD9B50a82DdF25D10D4FC',
+		Storage: '0x6F3d1A2c6a20D0C39ED77c2686bD3EF6851f139f',
+		Registration: '0xaB24609f0f91983Be396AFc492F48293710a2778',
+		CompoundSettings: '0x0D27048b090cFE0ED82f82e2a92f310c5deebC50',
 	},
 	providers: {
 		Kyber: '0x4b796265724e6574776f726b5f76310000000000000000000000000000000000',
