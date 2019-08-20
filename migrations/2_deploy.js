@@ -141,7 +141,7 @@ module.exports = function(deployer, network, accounts) {
     await deployerApp.links(Registration, [
       AddressLib
     ]);
-    await deployerApp.deploy(Registration, Storage.address);
+    await deployerApp.deploy(Registration, Storage.address, {gas: maxGasForDeploying});
 
     await deployerApp.links(CompoundSettings, [
       AddressLib
