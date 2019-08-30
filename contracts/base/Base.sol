@@ -1,4 +1,4 @@
-pragma solidity 0.5.3;
+pragma solidity 0.5.10;
 
 import "../interface/IStorage.sol";
 import "../interface/IVault.sol";
@@ -68,12 +68,6 @@ contract Base {
     }
 
     /** @notice Modifier to scope access to admins */
-    modifier onlyAdmin() {
-        roleCheck(ADMIN, msg.sender);
-        _;
-    }
-
-    /** @notice Modifier to scope access to admins */
     modifier onlySuperUser() {
         require(
             roleHas(OWNER, msg.sender) == true ||
@@ -107,11 +101,11 @@ contract Base {
     /**
         @notice This fallback function transfer the ether received to a IVault implementation.
         @notice If ether value is zero, it throws an require error. 
-        @dev If the transfer was succesfully, it emits an DepositReceived event.
+        @dev If the transfer was successful, it emits an DepositReceived event.
      */
     function() external payable {
         require(msg.value > 0, "Msg value > 0.");
-        bool depositResult = IVault(getVault()).deposit.value(msg.value)();
+        bool depositResult = IVault(getVault()).depositEthers.value(msg.value)();
         require(depositResult, "The deposit was not successful.");
         emit DepositReceived(address(this), msg.sender, msg.value);
     }

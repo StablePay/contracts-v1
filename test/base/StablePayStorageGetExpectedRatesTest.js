@@ -34,7 +34,7 @@ contract('StablePayStorageGetExpectedRatesTest', accounts => {
         isSupported: true,
         minRate: "2",
         maxRate: "2.2",
-        owner: account1,
+        owner,
         paused: false,
         providerText: 'textToBytes1'
     };
@@ -43,7 +43,7 @@ contract('StablePayStorageGetExpectedRatesTest', accounts => {
         isSupported: true,
         minRate: "1.8",
         maxRate: "2.0",
-        owner: account2,
+        owner,
         paused: false,
         providerText: 'textToBytes2'
     };
@@ -52,7 +52,7 @@ contract('StablePayStorageGetExpectedRatesTest', accounts => {
         isSupported: true,
         minRate: "1.8",
         maxRate: "2.0",
-        owner: account2,
+        owner,
         paused: false,
         providerText: 'textToBytes3'
     };
@@ -61,7 +61,7 @@ contract('StablePayStorageGetExpectedRatesTest', accounts => {
         isSupported: true,
         minRate: "1.8",
         maxRate: "2.0",
-        owner: account2,
+        owner,
         paused: true,
         providerText: 'textToBytes4'
     };

@@ -1,4 +1,4 @@
-pragma solidity 0.5.3;
+pragma solidity 0.5.10;
 
 import "../../base/proxy/DelegateProxy.sol";
 
@@ -20,14 +20,14 @@ contract DelegateProxyMock is DelegateProxy {
     /**
     * @dev ERC897, the address the proxy would delegate calls to
     */
-    function implementation() public view returns (address) {
+    function implementation() external view returns (address) {
         return target;
     }
 
     /**
      * @dev ERC897, whether it is a forwarding (1) or an upgradeable (2) proxy
      */
-    function proxyType() public pure returns (uint256 proxyTypeId) {
+    function proxyType() external pure returns (uint256 proxyTypeId) {
         return UPGRADEABLE;
     }
 

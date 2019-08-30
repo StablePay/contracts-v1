@@ -1,4 +1,4 @@
-pragma solidity 0.5.3;
+pragma solidity 0.5.10;
 
 import "./Base.sol";
 import "../interface/IUpgrade.sol";
@@ -30,16 +30,20 @@ contract Upgrade is Base, IUpgrade {
     /**
         @notice It upgrades a smart contract of the platform associated to a contract name.
         @dev It must be executed by an owner platform only.
-        @param _name smart contract name to be upgraded.
-        @param _upgradedContractAddress the new smart contract address.
+        @param name smart contract name to be upgraded.
+        @param upgradedContractAddress the new smart contract address.
         @return true if the contract is updated. Otherwise it returns false.
      */
     function upgradeContract(
-        string calldata _name,
-        address _upgradedContractAddress
+        string calldata name,
+        address upgradedContractAddress
     ) external onlySuperUser returns (bool) {
+        require(
+            upgradedContractAddress != address(0x0),
+            "Upgraded contract addresses must not be 0x0."
+        );
         address oldContractAddress = _storage.getAddress(
-            keccak256(abi.encodePacked(CONTRACT_NAME, _name))
+            keccak256(abi.encodePacked(CONTRACT_NAME, name))
         );
 
         require(
@@ -47,7 +51,7 @@ contract Upgrade is Base, IUpgrade {
             "Old contract address must not be 0x0."
         );
         require(
-            oldContractAddress != _upgradedContractAddress,
+            oldContractAddress != upgradedContractAddress,
             "Old and new contract addresses must not be equals."
         );
         uint256 oldContractBalance = oldContractAddress.balance;
@@ -56,21 +60,21 @@ contract Upgrade is Base, IUpgrade {
             emit PendingBalance(
                 address(this),
                 oldContractAddress,
-                _upgradedContractAddress,
-                _name,
+                upgradedContractAddress,
+                name,
                 oldContractBalance
             );
         }
 
         _storage.setAddress(
-            keccak256(abi.encodePacked(CONTRACT_NAME, _name)),
-            _upgradedContractAddress
+            keccak256(abi.encodePacked(CONTRACT_NAME, name)),
+            upgradedContractAddress
         );
         _storage.setAddress(
             keccak256(
-                abi.encodePacked(CONTRACT_ADDRESS, _upgradedContractAddress)
+                abi.encodePacked(CONTRACT_ADDRESS, upgradedContractAddress)
             ),
-            _upgradedContractAddress
+            upgradedContractAddress
         );
         _storage.deleteAddress(
             keccak256(abi.encodePacked(CONTRACT_ADDRESS, oldContractAddress))
@@ -79,8 +83,8 @@ contract Upgrade is Base, IUpgrade {
         emit ContractUpgraded(
             address(this),
             oldContractAddress,
-            _upgradedContractAddress,
-            _name
+            upgradedContractAddress,
+            name
         );
         return true;
     }

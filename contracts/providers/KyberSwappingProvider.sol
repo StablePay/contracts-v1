@@ -1,10 +1,9 @@
-pragma solidity 0.5.3;
+pragma solidity 0.5.10;
 pragma experimental ABIEncoderV2;
 
-import "../services/erc20/ERC20.sol";
+import "openzeppelin-solidity/contracts/token/ERC20/ERC20Detailed.sol";
 import "../services/kyber/KyberNetworkProxyInterface.sol";
-import "../util/StablePayCommon.sol";
-import "./ISwappingProvider.sol";
+import "./AbstractSwappingProvider.sol";
 
 /**
     @title Kyber Network Swapping provider
@@ -13,8 +12,8 @@ import "./ISwappingProvider.sol";
     @notice  https://developer.kyber.network/docs/VendorsGuide/#converting-from-erc20
     @notice https://developer.kyber.network/docs/KyberNetworkProxy/#getexpectedrate
  */
-contract KyberSwappingProvider is ISwappingProvider {
-    ERC20 internal constant ETH_TOKEN_ADDRESS = ERC20(
+contract KyberSwappingProvider is AbstractSwappingProvider {
+    IERC20 internal constant ETH_TOKEN_ADDRESS = IERC20(
         0x00eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
     );
     uint256 internal constant ONE = 1;
@@ -34,12 +33,12 @@ contract KyberSwappingProvider is ISwappingProvider {
 
     /** Constructor */
 
-    constructor(address _stablePay, address _proxy, address _feeAddress)
+    constructor(address stablePayAddress, address proxyAddress, address kyberFeeAddress)
         public
-        ISwappingProvider(_stablePay)
+        AbstractSwappingProvider(stablePayAddress)
     {
-        proxy = _proxy;
-        feeAddress = _feeAddress;
+        proxy = proxyAddress;
+        feeAddress = kyberFeeAddress;
     }
 
     /** Methods */
@@ -61,8 +60,8 @@ contract KyberSwappingProvider is ISwappingProvider {
     }
 
     function getInternalExpectedRate(
-        ERC20 _sourceToken,
-        ERC20 _targetToken,
+        IERC20 _sourceToken,
+        IERC20 _targetToken,
         uint256 _sourceAmount
     )
         internal
@@ -77,14 +76,14 @@ contract KyberSwappingProvider is ISwappingProvider {
         isSupported = isSupportedRate(minRate, maxRate);
     }
 
-    function multiplyByDecimals(ERC20 _token, uint256 _amount)
+    function multiplyByDecimals(IERC20 _token, uint256 _amount)
         internal
         view
         returns (uint256)
     {
         uint256 decimals = ETH_DECIMALS; // By default ETH decimals.
         if (address(_token) != address(ETH_TOKEN_ADDRESS)) {
-            decimals = _token.decimals();
+            decimals = ERC20Detailed(address(_token)).decimals();
         }
         return _amount.mul(TEN ** decimals);
     }
@@ -93,8 +92,8 @@ contract KyberSwappingProvider is ISwappingProvider {
         Calculates rates based on a min/max unit rate and a target amount.
     */
     function calculateRates(
-        ERC20 _sourceToken,
-        ERC20 _targetToken,
+        IERC20 _sourceToken,
+        IERC20 _targetToken,
         uint256 _minRate,
         uint256 _maxRate,
         uint256 _targetAmountWithDecimals
@@ -156,35 +155,35 @@ contract KyberSwappingProvider is ISwappingProvider {
         1000 BAT => 10 DAI
      */
     function getExpectedRate(
-        ERC20 _sourceToken,
-        ERC20 _targetToken,
-        uint256 _targetAmount
+        IERC20 sourceToken,
+        IERC20 targetToken,
+        uint256 targetAmount
     )
-        public
+        external
         view
-        isValidAddress(address(_sourceToken))
-        isValidAddress(address(_targetToken))
+        isValidAddress(address(sourceToken))
+        isValidAddress(address(targetToken))
         returns (bool isSupported, uint256 minRate, uint256 maxRate)
     {
-        require(_targetAmount > 0, "Target amount > 0.");
+        require(targetAmount > 0, "Target amount > 0.");
 
         (isSupported, minRate, maxRate) = getInternalExpectedRate(
-            _sourceToken,
-            _targetToken,
-            multiplyByDecimals(_sourceToken, ONE)
+            sourceToken,
+            targetToken,
+            multiplyByDecimals(sourceToken, ONE)
         );
 
         // It is used to avoid loss decimals in the final result when it calculates rate with source amount.
         // That's the reason why it is multiplied by source token decimals.
         uint256 targetAmountWithDecimals = multiplyByDecimals(
-            _sourceToken,
-            _targetAmount
+            sourceToken,
+            targetAmount
         );
 
         if (isSupported) {
             (uint256 minRateValue, uint256 maxRateValue) = calculateRates(
-                _sourceToken,
-                _targetToken,
+                sourceToken,
+                targetToken,
                 minRate,
                 maxRate,
                 targetAmountWithDecimals
@@ -206,8 +205,8 @@ contract KyberSwappingProvider is ISwappingProvider {
         @dev It returns the min/max expected rates of the target token.
      */
     function getExpectedRateIfSupported(
-        ERC20 _sourceToken,
-        ERC20 _targetToken,
+        IERC20 _sourceToken,
+        IERC20 _targetToken,
         uint256 sourceAmount
     ) internal view returns (uint256 minRate, uint256 maxRate) {
         uint256 minRateValue;
@@ -227,8 +226,8 @@ contract KyberSwappingProvider is ISwappingProvider {
         return (minRateValue, maxRateValue);
     }
 
-    function swapToken(StablePayCommon.Order memory _order)
-        public
+    function swapToken(StablePayCommon.Order calldata _order)
+        external
         isStablePay(msg.sender)
         isValidAddress(_order.toAddress)
         returns (bool)
@@ -236,8 +235,8 @@ contract KyberSwappingProvider is ISwappingProvider {
         require(_order.sourceAmount > 0, "Source amount must be > 0");
 
         // Gets the ERC20 source/target token instances.
-        ERC20 sourceToken = ERC20(_order.sourceToken);
-        ERC20 targetToken = ERC20(_order.targetToken);
+        IERC20 sourceToken = IERC20(_order.sourceToken);
+        IERC20 targetToken = IERC20(_order.targetToken);
 
         // Get expected rates if the swapping is supported.
         uint256 minRate;
@@ -271,6 +270,9 @@ contract KyberSwappingProvider is ISwappingProvider {
             feeAddress
         );
 
+        // Resetting the token approval back to zero.
+        approveTokensTo(sourceToken, address(proxy), 0);
+
         // Get source token balance after swapping execution.
         uint256 sourceFinalTokenBalance = getTokenBalanceOf(_order.sourceToken);
 
@@ -287,8 +289,8 @@ contract KyberSwappingProvider is ISwappingProvider {
         return true;
     }
 
-    function swapEther(StablePayCommon.Order memory _order)
-        public
+    function swapEther(StablePayCommon.Order calldata _order)
+        external
         payable
         isStablePay(msg.sender)
         returns (bool)
@@ -299,8 +301,8 @@ contract KyberSwappingProvider is ISwappingProvider {
         require(_order.toAddress != address(0x0), "To address must be != 0x0.");
 
         // Gets the ERC20 source/target token instances.
-        ERC20 sourceToken = ERC20(_order.sourceToken);
-        ERC20 targetToken = ERC20(_order.targetToken);
+        IERC20 sourceToken = IERC20(_order.sourceToken);
+        IERC20 targetToken = IERC20(_order.targetToken);
 
         // Get expected rates if the swapping is supported.
         uint256 minRate;
@@ -318,7 +320,7 @@ contract KyberSwappingProvider is ISwappingProvider {
             "Not enough ether in balance."
         );
 
-        // Execute the swapping from ERC20 token to ETH.
+        // Execute the swapping from ETH to ERC20 token.
         getKyberNetworkProxy().trade.value(msg.value)(
             sourceToken,
             _order.sourceAmount,

@@ -30,7 +30,7 @@ contract('StablePayStoragePauseSwappingProviderTest', accounts => {
     });
 
     withData({
-        _1_pauseByOwner: [account1, account1, true, 'textToBytes1', undefined, false],
+        _1_pauseByOwner: [owner, owner, true, 'textToBytes1', undefined, false],
         _2_pauseByNonOwner: [account1, account2, true, 'textToBytes2', 'Swapping provider owner is not valid', true],
         _3_pauseNonExistingProvider: [account1, account1, false, 'textToBytes3', 'Swapping provider must exist', true]
     }, function(providerOwner, pauseByAccount, exists, providerTextKey, expectedErrorMessage, mustFail) {

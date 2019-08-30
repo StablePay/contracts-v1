@@ -227,8 +227,8 @@ module.exports = {
         },
     },
     vault: {
-        tokensWithdrawn: tx => {
-            const name = 'TokensWithdrawn';
+        tokensTransferred: tx => {
+            const name = 'TokensTransferred';
             return {
                 name: name,
                 emitted: (thisContract, erc20Contract, who, to, amount) => emitted(tx, name, ev => {
@@ -241,14 +241,39 @@ module.exports = {
                 notEmitted: (assertFunction = () => {} ) => notEmitted(tx, name, assertFunction)
             };
         },
-        ethersWithdrawn: tx => {
-            const name = 'EthersWithdrawn';
+        ethersTransferred: tx => {
+            const name = 'EthersTransferred';
             return {
                 name: name,
                 emitted: (thisContract, who, to, amount) => emitted(tx, name, ev => {
                     assert.equal(ev.thisContract, thisContract);
                     assert.equal(ev.who, who);
                     assert.equal(ev.to, to);
+                    assert.equal(ev.amount.toString(), amount.toString());
+                }),
+                notEmitted: (assertFunction = () => {} ) => notEmitted(tx, name, assertFunction)
+            };
+        },
+        ethersDeposited: tx => {
+            const name = 'EthersDeposited';
+            return {
+                name: name,
+                emitted: (thisContract, from, amount) => emitted(tx, name, ev => {
+                    assert.equal(ev.thisContract, thisContract);
+                    assert.equal(ev.from, from);
+                    assert.equal(ev.amount.toString(), amount.toString());
+                }),
+                notEmitted: (assertFunction = () => {} ) => notEmitted(tx, name, assertFunction)
+            };
+        },
+        tokensDeposited: tx => {
+            const name = 'TokensDeposited';
+            return {
+                name: name,
+                emitted: (thisContract, erc20Contract, from, amount) => emitted(tx, name, ev => {
+                    assert.equal(ev.thisContract, thisContract);
+                    assert.equal(ev.erc20Contract, erc20Contract);
+                    assert.equal(ev.from, from);
                     assert.equal(ev.amount.toString(), amount.toString());
                 }),
                 notEmitted: (assertFunction = () => {} ) => notEmitted(tx, name, assertFunction)

@@ -87,33 +87,6 @@ contract('BaseTest', function (accounts) {
     });
 
     withData({
-        _1_account2_asAdmin_mustNotFail: [account2, true, undefined,  false],
-        _2_account2_notAsAdmin_mustFail: [account3, false, 'Invalid role',  true]
-    }, function(address, addAsAdmin, messageExpected, mustFail) {
-        it(t('anUser', '_onlyAdmin', 'Should be able (or not) to execute function for owners/admins.', mustFail), async function() {
-            // Setup
-            if (addAsAdmin) {
-                await role.adminRoleAdd('admin', address, { from: owner});
-            }
-
-            // Invocation
-            try {
-                await base._onlyAdmin({ from: address});
-                // Assertions
-                assert(!mustFail, "It should not have failed.");
-            } catch (error) {
-                // Assertions
-                assert(mustFail, "It should have failed.");
-                assert(error.message.includes(messageExpected));
-            }
-
-            if (addAsAdmin) {
-                await role.adminRoleRemove('admin', address, { from: owner});
-            }
-        });
-    });
-
-    withData({
         _1_1ether: ['1', undefined, false],
         _2_0ether: ['0', 'Msg value > 0.', true]
     }, function(amount, messageExpected, mustFail) {

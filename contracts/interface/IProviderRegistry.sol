@@ -1,7 +1,7 @@
-pragma solidity 0.5.3;
+pragma solidity 0.5.10;
 pragma experimental ABIEncoderV2;
 
-import "../services/erc20/ERC20.sol";
+import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 import "../util/StablePayCommon.sol";
 
 interface IProviderRegistry {
@@ -38,8 +38,8 @@ interface IProviderRegistry {
 
     function getExpectedRate(
         bytes32 providerKey,
-        ERC20 sourceToken,
-        ERC20 targetToken,
+        IERC20 sourceToken,
+        IERC20 targetToken,
         uint256 targetAmount
     )
         external
@@ -47,14 +47,14 @@ interface IProviderRegistry {
         returns (bool isSupported, uint256 minRate, uint256 maxRate);
 
     function getExpectedRates(
-        ERC20 sourceToken,
-        ERC20 targetToken,
+        IERC20 sourceToken,
+        IERC20 targetToken,
         uint256 targetAmount
     ) external view returns (StablePayCommon.ExpectedRate[] memory);
 
     function getExpectedRateRange(
-        ERC20 sourceToken,
-        ERC20 targetToken,
+        IERC20 sourceToken,
+        IERC20 targetToken,
         uint256 targetAmount
     ) external view returns (uint256 minRate, uint256 maxRate);
 

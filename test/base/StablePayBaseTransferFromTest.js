@@ -4,7 +4,7 @@ const {
 const withData = require('leche').withData;
 
 // Mock Smart Contracts
-const StandardTokenMock = artifacts.require("./mock/StandardTokenMock.sol");
+const SimpleToken = artifacts.require("./mock/token/SimpleToken.sol");
 const StablePayBaseMock = artifacts.require("./mock/StablePayBaseMock.sol");
 
 // Smart Contracts
@@ -29,16 +29,15 @@ contract('StablePayBaseTransferFromTest', accounts => {
     });
 
     withData({
-        _1_approve1000_amount1000: [account1, account2, account3, "1000", "1000", false],
-        _2_approve10_amount100: [account1, account2, account3, "10", "100", true]
-    }, function(tokenOwner, from, to, approveAmount, amount, mustFail) {
+        _1_approve1000_amount1000: [account1, account2, account3, "1000", "1000", undefined, false],
+        _2_approve10_amount100: [account1, account2, account3, "10", "100", 'ERC20: transfer amount exceeds balance', true]
+    }, function(tokenOwner, from, to, approveAmount, amount, expectedMessage, mustFail) {
         it(t('anUser', 'transferFrom', 'Should be able (or not) to transfer from token.', mustFail), async function() {
             //Setup
-            const supply = web3.utils.toWei('100000000000', 'ether');
             const approveAmountWei = web3.utils.toWei(approveAmount, 'ether');
             const amountWei = web3.utils.toWei(amount, 'ether');
             
-            const token = await StandardTokenMock.new(tokenOwner, supply);
+            const token = await SimpleToken.new({from: tokenOwner});
             await token.transfer(from, approveAmountWei, { from: tokenOwner});
             await token.approve(stablePay.address, approveAmountWei, { from: from});
 
@@ -56,7 +55,7 @@ contract('StablePayBaseTransferFromTest', accounts => {
                 // Assertions
                 assert(mustFail);
                 assert(error);
-                assert.equal(error.reason, "Value <= balance[from]");
+                assert.equal(error.reason, expectedMessage);
             }
         });
     });

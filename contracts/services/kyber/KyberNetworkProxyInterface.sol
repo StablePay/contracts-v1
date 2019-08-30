@@ -1,25 +1,25 @@
-pragma solidity 0.5.3;
+pragma solidity 0.5.10;
 
-import "../erc20/ERC20.sol";
+import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 
 /// @title Kyber Network interface
 interface KyberNetworkProxyInterface {
     function maxGasPrice() external view returns (uint256);
     function getUserCapInWei(address user) external view returns (uint256);
-    function getUserCapInTokenWei(address user, ERC20 token)
+    function getUserCapInTokenWei(address user, IERC20 token)
         external
         view
         returns (uint256);
     function enabled() external view returns (bool);
     function info(bytes32 id) external view returns (uint256);
-    function getExpectedRate(ERC20 src, ERC20 dest, uint256 srcQty)
+    function getExpectedRate(IERC20 src, IERC20 dest, uint256 srcQty)
         external
         view
         returns (uint256 expectedRate, uint256 slippageRate);
     function tradeWithHint(
-        ERC20 src,
+        IERC20 src,
         uint256 srcAmount,
-        ERC20 dest,
+        IERC20 dest,
         address destAddress,
         uint256 maxDestAmount,
         uint256 minConversionRate,
@@ -27,9 +27,9 @@ interface KyberNetworkProxyInterface {
         bytes calldata hint
     ) external payable returns (uint256);
     function trade(
-        ERC20 src,
+        IERC20 src,
         uint256 srcAmount,
-        ERC20 dest,
+        IERC20 dest,
         address destAddress,
         uint256 maxDestAmount,
         uint256 minConversionRate,

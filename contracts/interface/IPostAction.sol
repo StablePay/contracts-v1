@@ -1,8 +1,8 @@
-pragma solidity 0.5.3;
+pragma solidity 0.5.10;
 pragma experimental ABIEncoderV2;
 
+import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "../util/StablePayCommon.sol";
-import "../util/SafeMath.sol";
 
 /**
     @title This is an abstraction to take actions after swapping the tokens.

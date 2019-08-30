@@ -1,10 +1,9 @@
-pragma solidity 0.5.3;
+pragma solidity 0.5.10;
 pragma experimental ABIEncoderV2;
 
-import "../../services/erc20/ERC20.sol";
-import "../../providers/ISwappingProvider.sol";
+import "../../providers/AbstractSwappingProvider.sol";
 
-contract SwappingProviderMock is ISwappingProvider {
+contract SwappingProviderMock is AbstractSwappingProvider {
     /** Fields */
     bool public isSupported;
     uint256 public minRate;
@@ -18,7 +17,7 @@ contract SwappingProviderMock is ISwappingProvider {
 
     /** Constructor */
 
-    constructor(address stablePay) public ISwappingProvider(stablePay) {}
+    constructor(address stablePay) public AbstractSwappingProvider(stablePay) {}
 
     /** Functions */
 
@@ -50,11 +49,11 @@ contract SwappingProviderMock is ISwappingProvider {
         return true;
     }
 
-    function swapToken(StablePayCommon.Order memory _order)
-        public
+    function swapToken(StablePayCommon.Order calldata _order)
+        external
         returns (bool)
     {
-        bool targetTransferResult = ERC20(_order.targetToken).transfer(
+        bool targetTransferResult = IERC20(_order.targetToken).transfer(
             msg.sender,
             _order.targetAmount
         );
@@ -63,8 +62,8 @@ contract SwappingProviderMock is ISwappingProvider {
         return true;
     }
 
-    function swapEther(StablePayCommon.Order memory order)
-        public
+    function swapEther(StablePayCommon.Order calldata order)
+        external
         payable
         returns (bool)
     {
@@ -72,8 +71,8 @@ contract SwappingProviderMock is ISwappingProvider {
         return true;
     }
 
-    function getExpectedRate(ERC20 src, ERC20 dest, uint256 srcQty)
-        public
+    function getExpectedRate(IERC20 src, IERC20 dest, uint256 srcQty)
+        external
         view
         returns (bool _isSupported, uint256 _minRate, uint256 _maxRate)
     {

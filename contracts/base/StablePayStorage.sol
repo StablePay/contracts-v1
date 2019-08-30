@@ -1,12 +1,12 @@
-pragma solidity 0.5.3;
+pragma solidity 0.5.10;
 pragma experimental ABIEncoderV2;
 
-import "../services/erc20/ERC20.sol";
+import "openzeppelin-solidity/contracts/math/SafeMath.sol";
+import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 import "../base/Base.sol";
-import "../util/SafeMath.sol";
 import "../util/Bytes32ArrayLib.sol";
 import "../util/StablePayCommon.sol";
-import "../providers/ISwappingProvider.sol";
+import "../interface/ISwappingProvider.sol";
 import "../interface/IProviderRegistry.sol";
 
 contract StablePayStorage is Base, IProviderRegistry {
@@ -98,8 +98,8 @@ contract StablePayStorage is Base, IProviderRegistry {
 
     function getExpectedRate(
         bytes32 providerKey,
-        ERC20 sourceToken,
-        ERC20 targetToken,
+        IERC20 sourceToken,
+        IERC20 targetToken,
         uint256 targetAmount
     ) public view returns (bool isSupported, uint256 minRate, uint256 maxRate) {
         require(
@@ -119,8 +119,8 @@ contract StablePayStorage is Base, IProviderRegistry {
     }
 
     function getSupportedExpectedRatesCount(
-        ERC20 sourceToken,
-        ERC20 targetToken,
+        IERC20 sourceToken,
+        IERC20 targetToken,
         uint256 targetAmount
     ) internal view returns (uint256) {
         uint256 count = 0;
@@ -149,8 +149,8 @@ contract StablePayStorage is Base, IProviderRegistry {
     }
 
     function getExpectedRates(
-        ERC20 sourceToken,
-        ERC20 targetToken,
+        IERC20 sourceToken,
+        IERC20 targetToken,
         uint256 targetAmount
     )
         public
@@ -196,8 +196,8 @@ contract StablePayStorage is Base, IProviderRegistry {
     }
 
     function getExpectedRateRange(
-        ERC20 sourceToken,
-        ERC20 targetToken,
+        IERC20 sourceToken,
+        IERC20 targetToken,
         uint256 targetAmount
     ) public view returns (uint256 minRate, uint256 maxRate) {
         uint256 minRateResult = 0;
@@ -313,6 +313,7 @@ contract StablePayStorage is Base, IProviderRegistry {
         swappingProviderExists(_providerKey)
         isSwappingProviderOwner(_providerKey, msg.sender)
         isSwappingProviderNotPausedByAdmin(_providerKey)
+        onlySuperUser()
         returns (bool)
     {
         providers[_providerKey].pausedByOwner = true;
@@ -330,6 +331,7 @@ contract StablePayStorage is Base, IProviderRegistry {
         isSwappingProviderOwner(_providerKey, msg.sender)
         isSwappingProviderPausedByOwner(_providerKey)
         isSwappingProviderNotPausedByAdmin(_providerKey)
+        onlySuperUser()
         returns (bool)
     {
         providers[_providerKey].pausedByOwner = false;
@@ -347,6 +349,7 @@ contract StablePayStorage is Base, IProviderRegistry {
     )
         public
         isSwappingProviderNewOrUpdate(_providerKey, msg.sender)
+        onlySuperUser()
         returns (bool)
     {
         require(
