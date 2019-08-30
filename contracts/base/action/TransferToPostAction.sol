@@ -1,4 +1,4 @@
-pragma solidity 0.5.3;
+pragma solidity 0.5.10;
 pragma experimental ABIEncoderV2;
 
 import "./PostActionBase.sol";
@@ -34,13 +34,13 @@ contract TransferToPostAction is PostActionBase {
         );
 
         require(
-            ERC20(postActionData.targetToken).balanceOf(address(this)) >=
+            IERC20(postActionData.targetToken).balanceOf(address(this)) >=
                 currentToAmount,
             "Balance of ERC20 is not >= amount to transfer."
         );
 
         // Transfer the 'to' amount to the 'to' address.
-        bool result = ERC20(postActionData.targetToken).transfer(
+        bool result = IERC20(postActionData.targetToken).transfer(
             postActionData.toAddress,
             currentToAmount
         );

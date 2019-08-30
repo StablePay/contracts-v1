@@ -5,8 +5,7 @@ const CustomUniswapExchangeMock = artifacts.require("./mock/CustomUniswapExchang
 const CustomUniswapFactoryMock = artifacts.require("./mock/CustomUniswapFactoryMock.sol");
 const UniswapSwappingProvider = artifacts.require("./UniswapSwappingProvider.sol");
 const StablePay = artifacts.require("./StablePay.sol");
-const Token1 = artifacts.require("./services/erc20/EIP20.sol");
-const Token2 = artifacts.require("./services/erc20/EIP20.sol");
+const SimpleToken = artifacts.require("./mock/token/SimpleToken.sol");
 
 // Utils
 const {
@@ -20,17 +19,13 @@ contract('UniswapSwappingProviderGetExpectedRateTest', accounts => {
     let account2 = accounts[2];
     let tokenAddress =  accounts[2];
 
-
-
     beforeEach('beforeEach', async () => {
         stablePay = await StablePay.deployed();
         assert(stablePay);
         assert(stablePay.address);
 
-        const token1 = await Token1.new(supply, "a", 18, "A");
+        const token1 = await SimpleToken.new();
         tokenAddress = token1.address;
-
-
     });
 /*
     withData({

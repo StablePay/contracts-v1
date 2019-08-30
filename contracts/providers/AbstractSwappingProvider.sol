@@ -1,11 +1,10 @@
-pragma solidity 0.5.3;
+pragma solidity 0.5.10;
 pragma experimental ABIEncoderV2;
 
-import "../util/SafeMath.sol";
-import "../util/StablePayCommon.sol";
-import "../services/erc20/ERC20.sol";
+import "openzeppelin-solidity/contracts/math/SafeMath.sol";
+import "../interface/ISwappingProvider.sol";
 
-contract ISwappingProvider {
+contract AbstractSwappingProvider is ISwappingProvider {
     using SafeMath for uint256;
 
     /** Events */
@@ -35,15 +34,15 @@ contract ISwappingProvider {
 
     /** Modifiers */
 
-    modifier isStablePay(address _anAddress) {
-        require(stablePay == _anAddress, "Address must be StablePay");
+    modifier isStablePay(address anAddress) {
+        require(stablePay == anAddress, "Address must be StablePay");
         _;
     }
 
     /** Constructor */
 
-    constructor(address _stablePay) public {
-        stablePay = _stablePay;
+    constructor(address stablePayAddress) public ISwappingProvider() {
+        stablePay = stablePayAddress;
     }
 
     /** Fallback Method */
@@ -61,7 +60,7 @@ contract ISwappingProvider {
         @dev It returns the balance. 
      */
     function getTokenBalanceOf(address token) internal view returns (uint256) {
-        return ERC20(token).balanceOf(address(this));
+        return IERC20(token).balanceOf(address(this));
     }
 
     /**
@@ -105,7 +104,7 @@ contract ISwappingProvider {
             finalBalance
         );
         if (tokensDiff > 0) {
-            bool transferResult = ERC20(token).transfer(to, tokensDiff);
+            bool transferResult = IERC20(token).transfer(to, tokensDiff);
             require(transferResult, "Transfer tokens back failed.");
         }
         return true;
@@ -141,7 +140,7 @@ contract ISwappingProvider {
         @dev It mitigates a front-running attach approving a zero amount of tokens before the specific amount.
         @dev If any approve invocation returns false, it throws a require error.
      */
-    function approveTokensTo(ERC20 token, address to, uint256 amount)
+    function approveTokensTo(IERC20 token, address to, uint256 amount)
         internal
         returns (bool)
     {
@@ -151,33 +150,4 @@ contract ISwappingProvider {
         require(token.approve(to, amount), "Error approving tokens for proxy.");
         return true;
     }
-
-    /**
-        @dev Perform the swapping between tokens.
-        @dev The function must transfer the target tokens to the StablePay smart contract.
-        @dev After the transfer, the StablePay contract will check the transfer result.
-        @param order info to perform the swapping.
-     */
-    function swapToken(StablePayCommon.Order memory order)
-        public
-        returns (bool);
-
-    /**
-        @dev Perform the swapping between ether and a token.
-        @dev Before finishing this function must transfer the target tokens to the StablePay smart contract in order to continue with the swapping process.
-        @param order info to perform the swapping. 
-     */
-    function swapEther(StablePayCommon.Order memory order)
-        public
-        payable
-        returns (bool);
-
-    /**
-        @dev Calculate the expected values (min and max) to perform the swapping.
-        @dev Return whether the swapping those tokens is supported or not, and the rates. 
-     */
-    function getExpectedRate(ERC20 src, ERC20 dest, uint256 srcQty)
-        public
-        view
-        returns (bool isSupported, uint256 minRate, uint256 maxRate);
 }

@@ -168,6 +168,15 @@ The project uses the [prettier solidity plugin](https://github.com/prettier-soli
 
 ---
 
+## External Smart Contracts
+
+We copied some external contracts into this repository due to they were in a NPM dependency:
+
+* SimpleToken.sol. See [hash commit version](https://github.com/OpenZeppelin/openzeppelin-contracts/commit/d1158ea68c597075a5aec4a77a9c16f061beffd3).
+
+- 
+
+---
 ## Contact Us
 
 If you have any question or feedback, contact us at hi@stablepay.io.

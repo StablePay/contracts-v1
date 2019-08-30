@@ -22,7 +22,7 @@ const ProxyTargetMock = artifacts.require("./mock/proxy/ProxyTargetMock.sol");
 
 // Libraries
 const Bytes32ArrayLib = artifacts.require("./util/Bytes32ArrayLib.sol");
-const SafeMath = artifacts.require("./util/SafeMath.sol");
+const SafeMath = artifacts.require("openzeppelin-solidity/contracts/math/SafeMath.sol");
 const AddressLib = artifacts.require("./util/AddressLib.sol");
 
 // Official Smart Contracts

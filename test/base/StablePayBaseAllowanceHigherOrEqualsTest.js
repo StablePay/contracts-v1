@@ -4,8 +4,8 @@ const {
 const withData = require('leche').withData;
 
 // Mock Smart Contracts
-const StandardTokenMock = artifacts.require("./mock/StandardTokenMock.sol");
-const StablePayBaseMock = artifacts.require("./mock/StablePayBaseMock.sol");
+const SimpleToken = artifacts.require("./mock/token/SimpleToken.sol");
+const StablePayBaseMock = artifacts.require("./mock/base/StablePayBaseMock.sol");
 
 // Smart Contracts
 const Storage = artifacts.require("./base/Storage.sol");
@@ -34,11 +34,10 @@ contract('StablePayBaseAllowanceHigherOrEqualsTest', accounts => {
     }, function(tokenOwner, from, to, approveAmount, amount, mustFail) {
         it(t('anUser', 'allowanceHigherOrEquals', 'Should be able to check allowance.', mustFail), async function() {
             //Setup
-            const supply = web3.utils.toWei('100000000000', 'ether');
             const approveAmountWei = web3.utils.toWei(approveAmount, 'ether');
             const amountWei = web3.utils.toWei(amount, 'ether');
             
-            const token = await StandardTokenMock.new(tokenOwner, supply);
+            const token = await SimpleToken.new({from: tokenOwner});
             await token.approve(stablePay.address, approveAmountWei, { from: from});
 
             try {

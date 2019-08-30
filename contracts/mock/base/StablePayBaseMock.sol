@@ -1,4 +1,4 @@
-pragma solidity 0.5.3;
+pragma solidity 0.5.10;
 pragma experimental ABIEncoderV2;
 
 import "../../base/StablePayBase.sol";
@@ -37,7 +37,8 @@ contract StablePayBaseMock is StablePayBase {
         address spender,
         uint256 amount
     ) public view returns (bool) {
-        return super.allowanceHigherOrEquals(token, owner, spender, amount);
+        super.allowanceHigherOrEquals(token, owner, spender, amount);
+        return true;
     }
 
     function _transferFrom(
@@ -46,7 +47,8 @@ contract StablePayBaseMock is StablePayBase {
         address to,
         uint256 amount
     ) public returns (bool) {
-        return super.transferFrom(token, from, to, amount);
+        super.transferFrom(token, from, to, amount);
+        return true;
     }
 
     function _transferDiffEtherBalanceIfApplicable(
@@ -84,10 +86,10 @@ contract StablePayBaseMock is StablePayBase {
         return super.calculateAndTransferFee(order);
     }
 
-    function _calculateAndTransferToAmount(
+    function _calculateAndTransferAmountToPostActionAddress(
         StablePayCommon.Order memory order,
         uint256 feeAmount
     ) public returns (bool success, uint256 toAmount) {
-        return super.calculateAndTransferToAmount(order, feeAmount);
+        return super.calculateAndTransferAmountToPostActionAddress(order, feeAmount);
     }
 }

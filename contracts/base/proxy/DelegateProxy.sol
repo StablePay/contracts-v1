@@ -1,13 +1,13 @@
-pragma solidity 0.5.3;
+pragma solidity 0.5.10;
 
 import "./IsContract.sol";
-import "../../interface/IERCProxy.sol";
+import "./ERCAbstractProxy.sol";
 
 /**
     @title It delegates a call function to a destination address.
     @dev Borrowed from the Awesome AragonOS project.
  */
-contract DelegateProxy is IERCProxy, IsContract {
+contract DelegateProxy is ERCAbstractProxy, IsContract {
     uint256 internal constant FWD_GAS_LIMIT = 10000;
 
     /**

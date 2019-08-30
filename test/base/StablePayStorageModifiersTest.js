@@ -29,8 +29,8 @@ contract('StablePayStorageModifiersTest', accounts => {
     });
 
     withData({
-        _1_withValidProviderKey: [account1, account1, 'textToBytes1', false],
-        _2_withInvalidProviderKey: [account1, account2, 'textToBytes2', true]
+        _1_withValidProviderKey: [owner, owner, 'textToBytes1', false],
+        _2_withInvalidProviderKey: [owner, account2, 'textToBytes2', true]
     }, function(providerOwner, accountToTest, providerTextKey, mustFail) {
         it(t('anUser', '_isSwappingProviderOwner', 'Should be able to test if an address is the owner.', mustFail), async function() {
             //Setup

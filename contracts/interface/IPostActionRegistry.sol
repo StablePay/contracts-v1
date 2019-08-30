@@ -1,4 +1,4 @@
-pragma solidity 0.5.3;
+pragma solidity 0.5.10;
 
 /**
     @title This manages the post action smart contracts for the platform.
