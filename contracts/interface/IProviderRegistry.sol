@@ -19,6 +19,17 @@ interface IProviderRegistry {
     );
 
     /**
+        @notice This event is emitted when a swapping provider is unregistered.
+     */
+    event SwappingProviderUnRegistered(
+        address indexed thisContract,
+        bytes32 providerKey,
+        address swappingProvider,
+        address who,
+        uint256 removedAt
+    );
+
+    /**
         @dev This event is emitted when a specific swapping provider is paused.
      */
     event SwappingProviderPaused(
@@ -93,4 +104,12 @@ interface IProviderRegistry {
         address payable providerAddress,
         bytes32 providerKey
     ) external returns (bool);
+
+    /**
+        @notice It unregisters a swapping provider from the registry.
+        @dev This action only can be executed by a owner.
+        @param providerKey associated to the swapping provider.
+        @return true if the swapping provider is unregistered. Otherwise it returns false.
+     */
+    function unregisterSwappingProvider(bytes32 providerKey) external returns (bool);
 }

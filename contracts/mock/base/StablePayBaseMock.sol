@@ -71,12 +71,12 @@ contract StablePayBaseMock is StablePayBase {
         uint256 initialBalance,
         uint256 finalBalance
     ) public pure returns (bool) {
-        return
-            super.checkCurrentTargetBalance(
-                targetAmount,
-                initialBalance,
-                finalBalance
-            );
+        super.checkCurrentTargetBalance(
+            targetAmount,
+            initialBalance,
+            finalBalance
+        );
+        return true;
     }
 
     function _calculateAndTransferFee(StablePayCommon.Order memory order)

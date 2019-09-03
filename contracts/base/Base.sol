@@ -46,6 +46,20 @@ contract Base {
         uint256 amount
     );
 
+    /**
+        @notice This event is emitted when a specific amount of ether is transferred from the contract.
+        @param thisContract This smart contract address.
+        @param who transferred the tokens.
+        @param to who received the tokens.
+        @param amount total amount transferred.
+     */
+    event EthersTransferred(
+        address indexed thisContract,
+        address who,
+        address to,
+        uint256 amount
+    );
+
     /** Modifiers */
 
     /**
@@ -104,9 +118,7 @@ contract Base {
         @dev If the transfer was successful, it emits an DepositReceived event.
      */
     function() external payable {
-        require(msg.value > 0, "Msg value > 0.");
-        bool depositResult = IVault(getVault()).depositEthers.value(msg.value)();
-        require(depositResult, "The deposit was not successful.");
+        require(msg.value > 0, "Msg value must be > 0.");
         emit DepositReceived(address(this), msg.sender, msg.value);
     }
 
@@ -168,5 +180,25 @@ contract Base {
      */
     function roleCheck(string memory aRole, address anAddress) internal view {
         require(roleHas(aRole, anAddress) == true, "Invalid role");
+    }
+
+    function transferEthersToVault()
+        external
+        onlySuperUser
+    {
+        uint256 currentBalance = address(this).balance;
+        require(currentBalance > 0, "Balance must be > 0.");
+
+        address to = getVault();
+        bool depositResult = IVault(to).depositEthers.value(currentBalance)();
+        require(depositResult, "The transfer was not successful.");
+        
+        emit EthersTransferred(
+            address(this),
+            msg.sender,
+            to,
+            currentBalance
+        );
+
     }
 }

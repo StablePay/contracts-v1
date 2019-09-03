@@ -46,7 +46,7 @@ contract Role is Base, IRole {
         @param newOwner The address to transfer ownership to.
      */
     function transferOwnership(address newOwner)
-        public
+        external
         onlyLatestRole
         onlyOwner
     {

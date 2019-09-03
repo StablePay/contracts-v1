@@ -29,7 +29,6 @@ contract('PostActionBaseTest', function (accounts) {
             try {
                 // Invocation
                 const result = await postActionInstance._isStablePay(address);
-                console.log(result);
 
                 // Assertions
                 assert(!mustFail, 'It should have failed because data is invalid.');
@@ -53,7 +52,7 @@ contract('PostActionBaseTest', function (accounts) {
 
             // Invocation
             const result = await postActionInstance._getStablePayAddress();
-            console.log(result);
+
             // Assertions
             assert(result);
             assert.equal(result.toString(), address.toString());

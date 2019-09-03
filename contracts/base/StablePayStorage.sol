@@ -101,9 +101,9 @@ contract StablePayStorage is Base, IProviderRegistry {
         IERC20 sourceToken,
         IERC20 targetToken,
         uint256 targetAmount
-    ) public view returns (bool isSupported, uint256 minRate, uint256 maxRate) {
+    ) external view returns (bool isSupported, uint256 minRate, uint256 maxRate) {
         require(
-            isSwappingProviderValid(providerKey),
+            isSwappingProviderValidInternal(providerKey),
             "Provider must exist and be enabled."
         );
         StablePayCommon.SwappingProvider memory swappingProvider = providers[providerKey];
@@ -130,7 +130,7 @@ contract StablePayStorage is Base, IProviderRegistry {
             index = index.add(1)
         ) {
             bytes32 _providerKey = providersRegistry[index];
-            if (isSwappingProviderValid(_providerKey)) {
+            if (isSwappingProviderValidInternal(_providerKey)) {
                 ISwappingProvider iSwappingProvider = ISwappingProvider(
                     providers[_providerKey].providerAddress
                 );
@@ -153,7 +153,7 @@ contract StablePayStorage is Base, IProviderRegistry {
         IERC20 targetToken,
         uint256 targetAmount
     )
-        public
+        external
         view
         returns (StablePayCommon.ExpectedRate[] memory expectedRates)
     {
@@ -171,7 +171,7 @@ contract StablePayStorage is Base, IProviderRegistry {
             index = index.add(1)
         ) {
             bytes32 _providerKey = providersRegistry[index];
-            if (isSwappingProviderValid(_providerKey)) {
+            if (isSwappingProviderValidInternal(_providerKey)) {
                 StablePayCommon.SwappingProvider storage swappingProvider = providers[_providerKey];
                 ISwappingProvider iSwappingProvider = ISwappingProvider(
                     swappingProvider.providerAddress
@@ -199,7 +199,7 @@ contract StablePayStorage is Base, IProviderRegistry {
         IERC20 sourceToken,
         IERC20 targetToken,
         uint256 targetAmount
-    ) public view returns (uint256 minRate, uint256 maxRate) {
+    ) external view returns (uint256 minRate, uint256 maxRate) {
         uint256 minRateResult = 0;
         uint256 maxRateResult = 0;
 
@@ -209,7 +209,7 @@ contract StablePayStorage is Base, IProviderRegistry {
             index = index.add(1)
         ) {
             bytes32 _providerKey = providersRegistry[index];
-            if (isSwappingProviderValid(_providerKey)) {
+            if (isSwappingProviderValidInternal(_providerKey)) {
                 StablePayCommon.SwappingProvider storage swappingProvider = providers[_providerKey];
                 ISwappingProvider iSwappingProvider = ISwappingProvider(
                     swappingProvider.providerAddress
@@ -241,7 +241,7 @@ contract StablePayStorage is Base, IProviderRegistry {
     }
 
     function getSwappingProvider(bytes32 providerKey)
-        public
+        external
         view
         returns (StablePayCommon.SwappingProvider memory)
     {
@@ -249,7 +249,7 @@ contract StablePayStorage is Base, IProviderRegistry {
     }
 
     function isSwappingProviderPaused(bytes32 providerKey)
-        public
+        external
         view
         returns (bool)
     {
@@ -261,8 +261,8 @@ contract StablePayStorage is Base, IProviderRegistry {
                 );
     }
 
-    function isSwappingProviderValid(bytes32 providerKey)
-        public
+    function isSwappingProviderValidInternal(bytes32 providerKey)
+        internal
         view
         returns (bool)
     {
@@ -272,12 +272,20 @@ contract StablePayStorage is Base, IProviderRegistry {
                 !providers[providerKey].pausedByAdmin;
     }
 
-    function getProvidersRegistryCount() public view returns (uint256) {
+    function isSwappingProviderValid(bytes32 providerKey)
+        external
+        view
+        returns (bool)
+    {
+        return isSwappingProviderValidInternal(providerKey);
+    }
+
+    function getProvidersRegistryCount() external view returns (uint256) {
         return providersRegistry.length;
     }
 
     function pauseByAdminSwappingProvider(bytes32 _providerKey)
-        public
+        external
         swappingProviderExists(_providerKey)
         isSwappingProviderNotPausedByAdmin(_providerKey)
         onlySuperUser()
@@ -293,7 +301,7 @@ contract StablePayStorage is Base, IProviderRegistry {
     }
 
     function unpauseByAdminSwappingProvider(bytes32 _providerKey)
-        public
+        external
         swappingProviderExists(_providerKey)
         isSwappingProviderPausedByAdmin(_providerKey)
         onlySuperUser()
@@ -309,7 +317,7 @@ contract StablePayStorage is Base, IProviderRegistry {
     }
 
     function pauseSwappingProvider(bytes32 _providerKey)
-        public
+        external
         swappingProviderExists(_providerKey)
         isSwappingProviderOwner(_providerKey, msg.sender)
         isSwappingProviderNotPausedByAdmin(_providerKey)
@@ -326,7 +334,7 @@ contract StablePayStorage is Base, IProviderRegistry {
     }
 
     function unpauseSwappingProvider(bytes32 _providerKey)
-        public
+        external
         swappingProviderExists(_providerKey)
         isSwappingProviderOwner(_providerKey, msg.sender)
         isSwappingProviderPausedByOwner(_providerKey)
@@ -347,11 +355,15 @@ contract StablePayStorage is Base, IProviderRegistry {
         address payable _providerAddress,
         bytes32 _providerKey
     )
-        public
+        external
         isSwappingProviderNewOrUpdate(_providerKey, msg.sender)
         onlySuperUser()
         returns (bool)
     {
+        require(
+            _providerKey != bytes32(0x0),
+            "Provider key must not be 0x0."
+        );
         require(
             _providerAddress != address(0x0),
             "Provider address must not be 0x0."
@@ -373,6 +385,33 @@ contract StablePayStorage is Base, IProviderRegistry {
             providers[_providerKey].providerAddress,
             providers[_providerKey].ownerAddress,
             providers[_providerKey].createdAt
+        );
+
+        return true;
+    }
+
+    function unregisterSwappingProvider(bytes32 providerKey)
+        external
+        swappingProviderExists(providerKey)
+        onlySuperUser()
+        returns (bool)
+    {
+        require(
+            providerKey != bytes32(0x0),
+            "Provider key must not be 0x0."
+        );
+
+        address providerAddress = providers[providerKey].providerAddress;
+
+        delete providers[providerKey];
+        providersRegistry.remove(providerKey);
+
+        emit SwappingProviderUnRegistered(
+            address(this),
+            providerKey,
+            providerAddress,
+            msg.sender,
+            now
         );
 
         return true;

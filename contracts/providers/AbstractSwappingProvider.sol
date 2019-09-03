@@ -47,11 +47,14 @@ contract AbstractSwappingProvider is ISwappingProvider {
 
     /** Fallback Method */
 
+    /**
+        @notice This fallback function is executed when the liquidity providers (like KyberNetwork, Uniswap) transferred to SwappingProvider implementations the Ether left.
+        @dev The ether left (msg.value) must be greater than zero. Otherwise it will throw a require error.
+     */
     function() external payable {
         require(msg.value > 0, "Value must be > 0");
         // @dev https://ethereum.stackexchange.com/questions/19341/address-send-vs-address-transfer-best-practice-usage/38642#38642
         // @dev https://ropsten.etherscan.io/tx/0xbb7bd5c4ba0d5a4d4141b5f1b759f75253dacb58b85a71e7848ef9295872046f#internal transferWithEthers
-        // TODO Check stablePay.call.value(msg.value)();
         emit DepositReceived(address(this), msg.sender, msg.value);
     }
 
@@ -78,11 +81,11 @@ contract AbstractSwappingProvider is ISwappingProvider {
     ) internal pure returns (uint256 diffBalance) {
         require(
             initialBalance >= finalBalance,
-            "SwappingProvider: Initial balance >= final balance."
+            "SwappingProvider: Initial balance is not >= final balance."
         );
         uint256 used = initialBalance.sub(finalBalance);
 
-        require(sentAmount >= used, "SwappingProvider: Sent amount >= used.");
+        require(sentAmount >= used, "SwappingProvider: Sent amount is not >= used.");
         uint256 diff = sentAmount.sub(used);
         return diff;
     }

@@ -111,7 +111,20 @@ module.exports = {
                 }),
                 notEmitted: (assertFunction = () => {} ) => notEmitted(tx, name, assertFunction)
             };
-        }
+        },
+        swappingProviderUnRegistered: tx => {
+            const name = 'SwappingProviderUnRegistered';
+            return {
+                name: name,
+                emitted: (thisContract, providerKey, swappingProvider, who, removedAt) => emitted(tx, name, ev => {
+                    assert.equal(ev.thisContract, thisContract);
+                    assert.equal(ev.providerKey.toString(), providerKey.toString());
+                    assert.equal(ev.swappingProvider, swappingProvider);
+                    assert.equal(ev.who, who);
+                }),
+                notEmitted: (assertFunction = () => {} ) => notEmitted(tx, name, assertFunction)
+            };
+        },
     },
     settings: {
         platformFeeUpdated: tx => {

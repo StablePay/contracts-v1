@@ -205,16 +205,16 @@ contract KyberSwappingProvider is AbstractSwappingProvider {
         @dev It returns the min/max expected rates of the target token.
      */
     function getExpectedRateIfSupported(
-        IERC20 _sourceToken,
-        IERC20 _targetToken,
+        IERC20 sourceToken,
+        IERC20 targetToken,
         uint256 sourceAmount
     ) internal view returns (uint256 minRate, uint256 maxRate) {
         uint256 minRateValue;
         uint256 maxRateValue;
         // Get expected rates for the swapping source/target tokens.
         (minRateValue, maxRateValue) = getKyberNetworkProxy().getExpectedRate(
-            _sourceToken,
-            _targetToken,
+            sourceToken,
+            targetToken,
             sourceAmount
         );
 
@@ -256,15 +256,17 @@ contract KyberSwappingProvider is AbstractSwappingProvider {
             "Not enough tokens in balance."
         );
 
-        // Set the spender's token allowance to tokenQty
+        // Set the spender's token allowance to order source amount.
         approveTokensTo(sourceToken, address(proxy), _order.sourceAmount);
 
         // Execute swap between the ERC20 token to ERC20 token.
+        // The source token left is transferred to this contract (KyberSwappingProvider).
+        // The source token left is transferred back to StablePay in the next step. See 'transferDiffTokensIfApplicable' function.
         getKyberNetworkProxy().trade(
             sourceToken,
             _order.sourceAmount,
             targetToken,
-            msg.sender, // Kyber will call sender fallback function to transfer back the ether left.
+            msg.sender, // The target amount is transferred to the sender (StablePay --see modifier isStablePay) directly.
             _order.targetAmount,
             maxRate,
             feeAddress
@@ -280,7 +282,7 @@ contract KyberSwappingProvider is AbstractSwappingProvider {
         // The initial balance is higher (or equals) than final source token balance.
         transferDiffTokensIfApplicable(
             _order.sourceToken,
-            msg.sender,
+            msg.sender, // The sender address (StablePay) will receive the source tokens left.
             _order.sourceAmount,
             sourceInitialTokenBalance,
             sourceFinalTokenBalance
@@ -321,11 +323,14 @@ contract KyberSwappingProvider is AbstractSwappingProvider {
         );
 
         // Execute the swapping from ETH to ERC20 token.
+        // The Ether left is transferred to this (KyberSwappingProvider) contract.
+        // So, the fallback function in the AbstractSwappingProvider contract is executed.
+        // Then this contract transfers the Ether left in the next step calling the 'transferDiffEtherBalanceIfApplicable' function.
         getKyberNetworkProxy().trade.value(msg.value)(
             sourceToken,
             _order.sourceAmount,
             targetToken,
-            msg.sender,
+            msg.sender, // The target amount is transferred to this address (StablePay) directly.
             _order.targetAmount,
             maxRate,
             feeAddress
