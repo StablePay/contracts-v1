@@ -101,7 +101,7 @@ contract UniswapSwappingProvider is AbstractSwappingProvider {
         // The initial balance is higher (or equals) than final source token balance.
         transferDiffTokensIfApplicable(
             _order.sourceToken,
-            _order.fromAddress,
+            msg.sender, // The address (StablePay) which will receive the source tokens left.
             _order.sourceAmount,
             sourceInitialTokenBalance,
             sourceFinalTokenBalance
