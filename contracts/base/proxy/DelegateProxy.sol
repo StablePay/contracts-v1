@@ -8,7 +8,6 @@ import "./ERCAbstractProxy.sol";
     @dev Borrowed from the Awesome AragonOS project.
  */
 contract DelegateProxy is ERCAbstractProxy, IsContract {
-    //uint256 internal constant FWD_GAS_LIMIT = 10000;
 
     /**
     * @dev Performs a delegatecall and returns whatever the delegatecall returned (entire context execution will return!)
@@ -20,7 +19,6 @@ contract DelegateProxy is ERCAbstractProxy, IsContract {
             isContract(destination),
             "Destination address is not a contract."
         );
-        //uint256 fwdGasLimit = FWD_GAS_LIMIT;
 
         assembly {
             let result := delegatecall(
@@ -46,25 +44,4 @@ contract DelegateProxy is ERCAbstractProxy, IsContract {
                 }
         }
     }
-
-    /**
-  * @dev Fallback function allowing to perform a delegatecall to the given implementation.
-  * This function will return whatever the implementation call returns
-  * /
-  function () payable public {
-    address _impl = implementation();
-    require(_impl != address(0));
-
-    assembly {
-      let ptr := mload(0x40)
-      calldatacopy(ptr, 0, calldatasize)
-      let result := delegatecall(gas, _impl, ptr, calldatasize, 0, 0)
-      let size := returndatasize
-      returndatacopy(ptr, 0, size)
-
-      switch result
-      case 0 { revert(ptr, size) }
-      default { return(ptr, size) }
-    }
-  }*/
 }
