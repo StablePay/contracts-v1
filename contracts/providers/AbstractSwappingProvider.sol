@@ -149,8 +149,11 @@ contract AbstractSwappingProvider is ISwappingProvider {
     {
         // Mitigate ERC20 Approve front-running attack, by initially setting allowance to 0
         require(token.approve(to, 0), "Error mitigating front-running attack.");
-        // Set the spender's token allowance to tokenQty
-        require(token.approve(to, amount), "Error approving tokens for proxy.");
+
+        if(amount > 0) {
+            // Set the spender's token allowance to tokenQty
+            require(token.approve(to, amount), "Error approving tokens for proxy.");
+        }
         return true;
     }
 }

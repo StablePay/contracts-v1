@@ -43,6 +43,7 @@ contract Role is Base, IRole {
 
     /**
         @notice It transfers the ownership of the platform to another address.
+        @dev After transfering ownership, if the execution was as expected, it needs to call 'deleteOwner' function.
         @param newOwner The address to transfer ownership to.
      */
     function transferOwnership(address newOwner)
@@ -51,13 +52,11 @@ contract Role is Base, IRole {
         onlyOwner
     {
         // Legit address?
-        require(newOwner != address(0x0), "Address != 0x0.");
+        require(newOwner != address(0x0), "New owner must be != 0x0.");
+
         // Check the role exists
         roleCheck("owner", msg.sender);
-        // Remove current role
-        _storage.deleteBool(
-            keccak256(abi.encodePacked("access.role", "owner", msg.sender))
-        );
+
         // Add new owner
         _storage.setBool(
             keccak256(abi.encodePacked("access.role", "owner", newOwner)),
@@ -65,6 +64,30 @@ contract Role is Base, IRole {
         );
 
         emit OwnershipTransferred(msg.sender, newOwner);
+    }
+
+    /**
+        @notice It removes the owner from the platform.
+        @dev It needs to be executed after transfering the ownership to a new address.
+     */
+    function deleteOwner()
+        external
+        onlyLatestRole
+        onlyOwner
+        returns (bool)
+    {
+        roleCheck("owner", msg.sender);
+
+        _storage.deleteBool(
+            keccak256(abi.encodePacked("access.role", "owner", msg.sender))
+        );
+
+        emit OwnerRemoved(
+            address(this),
+            msg.sender,
+            now
+        );
+        return true;
     }
 
     /** Admin Role Methods */

@@ -68,19 +68,8 @@ contract UniswapSwappingProvider is AbstractSwappingProvider {
             "Source amount not enough for the swapping."
         );
 
-        // Mitigate ERC20 Approve front-running attack, by initially setting allowance to 0
-        require(
-            IERC20(_order.sourceToken).approve(address(sourceExchange), 0),
-            "Error mitigating front-running attack."
-        );
-        // Set the spender's token allowance to tokenQty
-        require(
-            IERC20(_order.sourceToken).approve(
-                address(sourceExchange),
-                sourceTokensToSell
-            ),
-            "Error approving tokens for exchange."
-        ); // Set max amount.
+        // Set the spender's token allowance to order source amount.
+        approveTokensTo(IERC20(_order.sourceToken), address(sourceExchange), sourceTokensToSell);
 
         sourceExchange.tokenToTokenSwapOutput(
             _order.targetAmount,
@@ -89,6 +78,9 @@ contract UniswapSwappingProvider is AbstractSwappingProvider {
             (block.timestamp) + 300,
             _order.targetToken
         );
+
+        // Resetting the token approval back to zero.
+        approveTokensTo(IERC20(_order.sourceToken), address(sourceExchange), 0);
 
         require(
             IERC20(_order.targetToken).transfer(msg.sender, _order.targetAmount),
