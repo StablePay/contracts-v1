@@ -30,7 +30,7 @@ contract('StablePayBaseTransferFromTest', accounts => {
 
     withData({
         _1_approve1000_amount1000: [account1, account2, account3, "1000", "1000", undefined, false],
-        _2_approve10_amount100: [account1, account2, account3, "10", "100", 'ERC20: transfer amount exceeds balance', true]
+        _2_approve10_amount100: [account1, account2, account3, "10", "100", 'SafeMath: subtraction overflow', true]
     }, function(tokenOwner, from, to, approveAmount, amount, expectedMessage, mustFail) {
         it(t('anUser', 'transferFrom', 'Should be able (or not) to transfer from token.', mustFail), async function() {
             //Setup

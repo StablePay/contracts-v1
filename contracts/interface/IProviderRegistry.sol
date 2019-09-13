@@ -1,7 +1,7 @@
 pragma solidity 0.5.10;
 pragma experimental ABIEncoderV2;
 
-import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "../util/StablePayCommon.sol";
 
 interface IProviderRegistry {

@@ -173,6 +173,7 @@ The project uses the [prettier solidity plugin](https://github.com/prettier-soli
 We copied some external contracts into this repository due to they were in a NPM dependency:
 
 * SimpleToken.sol. See [hash commit version](https://github.com/OpenZeppelin/openzeppelin-contracts/commit/d1158ea68c597075a5aec4a77a9c16f061beffd3).
+    This contract is used only for testing purposes. We had to modify it (remove a GSN contract due to OpenZeppelin haven't published the new version yet).
 
 - 
 

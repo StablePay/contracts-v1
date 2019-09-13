@@ -4,7 +4,7 @@ const KyberSwappingProvider = artifacts.require("./providers/KyberSwappingProvid
 const IStablePay = artifacts.require("./interface/IStablePay.sol");
 const Settings = artifacts.require("./base/Settings.sol");
 const Vault = artifacts.require("./base/Vault.sol");
-const ERC20 = artifacts.require("openzeppelin-solidity/contracts/token/ERC20/ERC20Detailed.sol");
+const ERC20 = artifacts.require("@openzeppelin/contracts/token/ERC20/ERC20Detailed.sol");
 
 const leche = require('leche');
 const withData = leche.withData;

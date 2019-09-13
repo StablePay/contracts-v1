@@ -1,7 +1,7 @@
 pragma solidity 0.5.10;
 pragma experimental ABIEncoderV2;
 
-import "openzeppelin-solidity/contracts/math/SafeMath.sol";
+import "@openzeppelin/contracts/math/SafeMath.sol";
 import "../interface/ISwappingProvider.sol";
 
 contract AbstractSwappingProvider is ISwappingProvider {

@@ -9,7 +9,7 @@
 // Smart contracts
 const appConfig = require('../src/config');
 const IStablePay = artifacts.require("./interface/IStablePay.sol");
-const ERC20 = artifacts.require("openzeppelin-solidity/contracts/token/ERC20/ERC20Detailed.sol");
+const ERC20 = artifacts.require("@openzeppelin/contracts/token/ERC20/ERC20Detailed.sol");
 
 // Util classes
 const { ETH_ADDRESS } = require('../test/util/consts');
