@@ -3,7 +3,7 @@ const IStablePay = artifacts.require("./interface/IStablePay.sol");
 const Settings = artifacts.require("./base/Settings.sol");
 const Vault = artifacts.require("./base/Vault.sol");
 const KyberNetworkProxyInterface = artifacts.require("./services/kyber/KyberNetworkProxyInterface.sol");
-const ERC20 = artifacts.require("openzeppelin-solidity/contracts/token/ERC20/IERC20.sol");
+const ERC20 = artifacts.require("@openzeppelin/contracts/token/ERC20/IERC20.sol");
 
 const appConfig = require('../src/config');
 

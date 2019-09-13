@@ -1,6 +1,6 @@
 pragma solidity 0.5.10;
 
-import "openzeppelin-solidity/contracts/math/SafeMath.sol";
+import "@openzeppelin/contracts/math/SafeMath.sol";
 import "../base/Base.sol";
 import "../interface/IPostActionRegistry.sol";
 

@@ -1,7 +1,7 @@
 pragma solidity 0.5.10;
 pragma experimental ABIEncoderV2;
 
-import "openzeppelin-solidity/contracts/token/ERC20/ERC20Detailed.sol";
+import "@openzeppelin/contracts/token/ERC20/ERC20Detailed.sol";
 import "../services/kyber/KyberNetworkProxyInterface.sol";
 import "./AbstractSwappingProvider.sol";
 
@@ -239,9 +239,8 @@ contract KyberSwappingProvider is AbstractSwappingProvider {
         IERC20 targetToken = IERC20(_order.targetToken);
 
         // Get expected rates if the swapping is supported.
-        uint256 minRate;
         uint256 maxRate;
-        (minRate, maxRate) = getExpectedRateIfSupported(
+        (, maxRate) = getExpectedRateIfSupported(
             sourceToken,
             targetToken,
             _order.sourceAmount
