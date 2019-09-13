@@ -46,6 +46,7 @@ contract TransferToPostAction is PostActionBase {
             postActionData.sourceAmount,
             postActionData.toAmount,
             postActionData.feeAmount,
+            0,
             postActionData.sourceToken,
             postActionData.targetToken,
             postActionData.toAddress,

@@ -57,9 +57,9 @@ contract CompoundMintPostAction is PostActionBase {
 
             uint postActionFinalBalance = cTargetToken.balanceOf(address(this));
 
-            calculateAndTransferCErc20To(postActionData, cTargetToken, postActionInitialBalance, postActionFinalBalance);
+            uint cAssetTransferredBalance = calculateAndTransferCErc20To(postActionData, cTargetToken, postActionInitialBalance, postActionFinalBalance);
 
-            emitActionExecutedEvent(postActionData, cTargetTokenAddress);
+            emitActionExecutedEvent(postActionData, cTargetTokenAddress, cAssetTransferredBalance);
         } else {
             require(false, "Target token is not supported in Compound.finance.");
         }
@@ -73,17 +73,17 @@ contract CompoundMintPostAction is PostActionBase {
         uint postActionFinalBalance
     )
         internal
-        returns (bool)
+        returns (uint)
     {
         uint postActionCAssetBalance = postActionFinalBalance.sub(postActionInitialBalance);
         require(
             cTargetToken.transfer(postActionData.toAddress, postActionCAssetBalance),
             "Transfer to 'to' address failed."
         );
-        return true;
+        return postActionCAssetBalance;
     }
 
-    function emitActionExecutedEvent(StablePayCommon.PostActionData memory postActionData, address cTargetTokenAddress)
+    function emitActionExecutedEvent(StablePayCommon.PostActionData memory postActionData, address cTargetTokenAddress, uint cAssetTransferredBalance)
         internal
         returns (bool)
     {
@@ -92,6 +92,7 @@ contract CompoundMintPostAction is PostActionBase {
             postActionData.sourceAmount,
             postActionData.toAmount,
             postActionData.feeAmount,
+            cAssetTransferredBalance,
             postActionData.sourceToken,
             postActionData.targetToken,
             postActionData.toAddress,

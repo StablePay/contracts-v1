@@ -24,6 +24,7 @@ interface IPostAction {
         uint256 sourceAmount,
         uint256 targetAmount,
         uint256 feeAmount,
+        uint256 externalAmount,
         address sourceToken,
         address targetToken,
         address toAddress,
