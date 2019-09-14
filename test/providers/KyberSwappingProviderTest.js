@@ -4,17 +4,18 @@ const {
 } = require('../util/consts');
 const withData = require('leche').withData;
 
-// Mock Smart Contracts
+// Mock Smart Contracts 
 const Mock = artifacts.require("./mock/Mock.sol");
 const KyberSwappingProviderMock = artifacts.require("./mock/provider/KyberSwappingProviderMock.sol");
-const StandardTokenMock = artifacts.require("./mock/erc20/StandardTokenMock.sol");
+const SimpleToken = artifacts.require("./mock/token/SimpleToken.sol");
+//const StandardTokenMock = artifacts.require("./mock/erc20/StandardTokenMock.sol");
 
 contract('KyberSwappingProviderTest', accounts => {
     const owner = accounts[0];
 
     let token;
     beforeEach('Setup', async () => {
-        token = await StandardTokenMock.new(owner, 1000 * 100000*18);
+        token = await SimpleToken.new({from: owner});
     });
 
     withData({

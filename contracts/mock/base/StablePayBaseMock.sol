@@ -89,7 +89,7 @@ contract StablePayBaseMock is StablePayBase {
     function _calculateAndTransferAmountToPostActionAddress(
         StablePayCommon.Order memory order,
         uint256 feeAmount
-    ) public returns (bool success, uint256 toAmount) {
+    ) public returns (uint256 toAmount) {
         return super.calculateAndTransferAmountToPostActionAddress(order, feeAmount);
     }
 }

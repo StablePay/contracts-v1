@@ -1,4 +1,4 @@
-pragma solidity 0.5.3;
+pragma solidity 0.5.10;
 pragma experimental ABIEncoderV2;
 
 import "./PostActionBase.sol";
@@ -8,6 +8,9 @@ import "../../interface/ICompoundSettings.sol";
 contract CompoundMintPostAction is PostActionBase {
     /** Constants */
 
+    /**
+        @notice It is used as a success result after minting the tokens.
+     */
     uint internal constant SUCCESS_CODE = 0;
     bytes32 internal constant COMPOUND_ACTION_DATA = "CompoundAction";
     address internal constant ADDRESS_EMPTY = address(0x0);
@@ -21,6 +24,12 @@ contract CompoundMintPostAction is PostActionBase {
 
     /** Constructor */
 
+    /**
+        @notice It creates a new CompoundMintPostAction instance associated to an Eternal Storage implementation, and a Compound settings contract instance.
+        @param storageAddress the Eternal Storage implementation.
+        @param aCompoundSettings contract address which contains the platform configuration for the Compound.finance platform.
+        @dev The Eternal Storage implementation must implement the IStorage interface.
+     */
     constructor(address storageAddress, address aCompoundSettings) public PostActionBase(storageAddress) {
         compoundSettings = ICompoundSettings(aCompoundSettings);
     }
@@ -29,17 +38,22 @@ contract CompoundMintPostAction is PostActionBase {
 
     /** Functions */
 
+    /**
+        @notice It mints the target tokens in Compound.finance, and transfer the tokens to the owner.
+        @param postActionData needed data to execute the action.
+        @return true if the action is executed successfully. Otherwise it returns false.
+     */
     function execute(StablePayCommon.PostActionData memory postActionData)
         public
         isStablePay(msg.sender)
         isNotPaused()
         returns (bool)
     {
-        ERC20 targetToken = ERC20(postActionData.targetToken);
+        IERC20 targetToken = IERC20(postActionData.targetToken);
 
         require(
             targetToken.balanceOf(address(this)) >= postActionData.toAmount,
-            "Balance of ERC20 is not >= amount to transfer."
+            "Balance of ERC20 is not gte amount to transfer."
         );
 
         if(compoundSettings.supportErc20(postActionData.targetToken)) {
@@ -61,7 +75,7 @@ contract CompoundMintPostAction is PostActionBase {
 
             emitActionExecutedEvent(postActionData, cTargetTokenAddress, cAssetTransferredBalance);
         } else {
-            require(false, "Target token is not supported in Compound.finance.");
+            revert("Target token is not supported in Compound.finance.");
         }
         return true;
     }
@@ -83,9 +97,14 @@ contract CompoundMintPostAction is PostActionBase {
         return postActionCAssetBalance;
     }
 
+    /**
+        @notice It emits an ActionExecuted event associated to the post action data, token address, and amount.
+        @param postActionData associated to this execution.
+        @param cTargetTokenAddress target token address used in Compound.finance platform.
+        @param cAssetTransferredBalance target amount minted in Compound.finance.
+     */
     function emitActionExecutedEvent(StablePayCommon.PostActionData memory postActionData, address cTargetTokenAddress, uint cAssetTransferredBalance)
         internal
-        returns (bool)
     {
         emit ActionExecuted(
             address(this),
@@ -101,6 +120,5 @@ contract CompoundMintPostAction is PostActionBase {
             COMPOUND_ACTION_DATA,
             postActionData.data
         );
-
     }
 }

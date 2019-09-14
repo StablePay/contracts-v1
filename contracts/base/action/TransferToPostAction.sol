@@ -29,7 +29,7 @@ contract TransferToPostAction is PostActionBase {
         returns (bool)
     {
         require(
-            ERC20(postActionData.targetToken).balanceOf(address(this)) >=
+            IERC20(postActionData.targetToken).balanceOf(address(this)) >=
                 postActionData.toAmount,
             "Balance of ERC20 is not >= amount to transfer."
         );

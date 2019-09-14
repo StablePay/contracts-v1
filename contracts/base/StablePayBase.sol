@@ -335,7 +335,7 @@ contract StablePayBase is Base, IStablePay {
     function calculateAndTransferAmountToPostActionAddress(
         StablePayCommon.Order memory order,
         uint256 feeAmount
-    ) internal returns (bool success, uint256 toAmount) {
+    ) internal returns (uint256 toAmount) {
         address postActionAddress = getPostActionRegistry()
             .getPostActionOrDefault(order.postActionAddress);
 
@@ -357,8 +357,9 @@ contract StablePayBase is Base, IStablePay {
 
         IPostAction postAction = IPostAction(postActionAddress);
         bool postActionExecutionResult = postAction.execute(postActionData);
+        require(postActionExecutionResult, "Post action execution failed.");
 
-        return (postActionExecutionResult, currentToAmount);
+        return currentToAmount;
     }
 
     /**
@@ -519,8 +520,7 @@ contract StablePayBase is Base, IStablePay {
             (, feeAmount) = calculateAndTransferFee(order);
 
             // Calculate and transfer the 'target' amount.
-            uint256 toAmount;
-            (, toAmount) = calculateAndTransferAmountToPostActionAddress(order, feeAmount);
+            uint256 toAmount = calculateAndTransferAmountToPostActionAddress(order, feeAmount);
 
             // Emit PaymentSent event for the from/to order.
             emitPaymentSentEvent(order, toAmount);
@@ -667,8 +667,7 @@ contract StablePayBase is Base, IStablePay {
             (, feeAmount) = calculateAndTransferFee(order);
 
             // Calculate and transfer the 'target' amount.
-            uint256 toAmount;
-            (, toAmount) = calculateAndTransferAmountToPostActionAddress(order, feeAmount);
+            uint256 toAmount = calculateAndTransferAmountToPostActionAddress(order, feeAmount);
 
             // Emit PaymentSent event for the from/to order.
             emitPaymentSentEvent(order, toAmount);

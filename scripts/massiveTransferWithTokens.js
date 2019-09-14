@@ -35,7 +35,7 @@ const unavailableTokens = [
     'SPN',
     'HKN'
 ];
-const DAI_NAME = 'DAI';
+const DAI_NAME = 'DAI'; // DAI or DAI_COMPOUND
 const merchantAddressIndex = 1;
 const customerAddressIndex = 0;
 const minAmount = 10;

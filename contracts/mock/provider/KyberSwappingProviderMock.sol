@@ -1,4 +1,4 @@
-pragma solidity 0.5.3;
+pragma solidity 0.5.10;
 pragma experimental ABIEncoderV2;
 
 import "../../providers/KyberSwappingProvider.sol";
@@ -20,7 +20,7 @@ contract KyberSwappingProviderMock is KyberSwappingProvider {
         return isSupportedRate(minRate, maxRate);
     }
 
-    function _multiplyByDecimals(ERC20 token, uint256 amount)
+    function _multiplyByDecimals(IERC20 token, uint256 amount)
         public
         view
         returns (uint256)
@@ -29,8 +29,8 @@ contract KyberSwappingProviderMock is KyberSwappingProvider {
     }
 
     function _getInternalExpectedRate(
-        ERC20 sourceToken,
-        ERC20 targetToken,
+        IERC20 sourceToken,
+        IERC20 targetToken,
         uint256 sourceAmount
     )
         internal
@@ -40,7 +40,7 @@ contract KyberSwappingProviderMock is KyberSwappingProvider {
         return getInternalExpectedRate(sourceToken, targetToken, sourceAmount);
     }
 
-    function _getExpectedRateIfSupported(ERC20 sourceToken, ERC20 targetToken, uint256 sourceAmount)
+    function _getExpectedRateIfSupported(IERC20 sourceToken, IERC20 targetToken, uint256 sourceAmount)
         public
         view
         returns (uint256 minRate, uint256 maxRate)

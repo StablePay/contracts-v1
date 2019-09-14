@@ -37,7 +37,8 @@ interface IPostAction {
     /** Functions */
 
     /**
-        @notice It executes an action
+        @notice It executes an action after (post-action) swapping the tokens.
+        @dev Depending on the implementation, it may transfer the target tokens to other platform either minting or swapping into a new token.
         @param postActionData needed data to execute the action.
         @return true if the action is executed successfully. Otherwise it returns false.
      */

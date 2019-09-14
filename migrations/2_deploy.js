@@ -279,7 +279,7 @@ module.exports = function(deployer, network, accounts) {
     if(printDeployCostValue === true) {
       deployerApp.prettyPrint(true);
     }
-
+    console.log(`>>>>>>>>>> Configuration starts HERE <<<<<<<<<<`)
     console.log(`StablePay: '${stablePayInstance.address}',`);
 		console.log(`StablePayStorage: '${stablePayStorageInstance.address}',`);
 		console.log(`Settings: '${settingsInstance.address}',`);
@@ -290,6 +290,8 @@ module.exports = function(deployer, network, accounts) {
 		console.log(`PostActionRegistry: '${PostActionRegistry.address}',`);
 		console.log(`Storage: '${Storage.address}',`);
 		console.log(`Registration: '${Registration.address}',`);
-		console.log(`CompoundSettings: '${CompoundSettings.address}',`);
+    console.log(`CompoundSettings: '${CompoundSettings.address}',`);
+    console.log(`CompoundMintPostAction: '${CompoundMintPostAction.address}',`);
+    console.log(`>>>>>>>>>> Configuration ends HERE <<<<<<<<<<`)
   });
 };
