@@ -7,6 +7,11 @@ module.exports = {
 			name: 'DAI',
 			minAmount: BigNumber("0.001").times(DAI_DECIMALS).toFixed(),
 			maxAmount: BigNumber("10").times(DAI_DECIMALS).toFixed()
+		},
+		{
+			name: 'WETH', // Used to send Ether to the receiver in a post action.
+			minAmount: BigNumber("0.0001").times(DECIMALS).toFixed(),
+			maxAmount: BigNumber("1").times(DECIMALS).toFixed()
 		}
     ],
 	contracts: {

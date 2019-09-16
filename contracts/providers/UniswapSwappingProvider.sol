@@ -159,9 +159,9 @@ contract UniswapSwappingProvider is AbstractSwappingProvider {
         IERC20 _targetToken,
         uint256 _targetAmount
     ) external view returns (bool isSupported, uint256 minRate, uint256 maxRate) {
-        require(address(_sourceToken) != address(0x0), "Source token != 0x0.");
-        require(address(_targetToken) != address(0x0), "Target token != 0x0.");
-        require(_targetAmount > 0, "Target amount > 0.");
+        require(address(_sourceToken) != address(0x0), "Source token must not be eq 0x0.");
+        require(address(_targetToken) != address(0x0), "Target token must not be eq 0x0.");
+        require(_targetAmount > 0, "Target amount is not gt 0.");
 
         UniswapFactoryInterface uFactory = UniswapFactoryInterface(
             uniswapFactory

@@ -165,7 +165,7 @@ contract KyberSwappingProvider is AbstractSwappingProvider {
         isValidAddress(address(targetToken))
         returns (bool isSupported, uint256 minRate, uint256 maxRate)
     {
-        require(targetAmount > 0, "Target amount > 0.");
+        require(targetAmount > 0, "Target amount is not gt 0.");
 
         (isSupported, minRate, maxRate) = getInternalExpectedRate(
             sourceToken,
@@ -232,7 +232,7 @@ contract KyberSwappingProvider is AbstractSwappingProvider {
         isValidAddress(_order.toAddress)
         returns (bool)
     {
-        require(_order.sourceAmount > 0, "Source amount must be > 0");
+        require(_order.sourceAmount > 0, "Source amount must be gt 0");
 
         // Gets the ERC20 source/target token instances.
         IERC20 sourceToken = IERC20(_order.sourceToken);
@@ -296,10 +296,10 @@ contract KyberSwappingProvider is AbstractSwappingProvider {
         isStablePay(msg.sender)
         returns (bool)
     {
-        require(msg.value > 0, "Msg value must be > 0");
-        require(_order.sourceAmount > 0, "Amount must be > 0");
-        require(msg.value == _order.sourceAmount, "Msg value == source amount");
-        require(_order.toAddress != address(0x0), "To address must be != 0x0.");
+        require(msg.value > 0, "Msg value must be gt 0");
+        require(_order.sourceAmount > 0, "Amount must be gt 0");
+        require(msg.value == _order.sourceAmount, "Msg value is not eq source amount");
+        require(_order.toAddress != address(0x0), "To address must be not eq 0x0.");
 
         // Gets the ERC20 source/target token instances.
         IERC20 sourceToken = IERC20(_order.sourceToken);

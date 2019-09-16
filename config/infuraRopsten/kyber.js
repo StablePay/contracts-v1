@@ -42,7 +42,8 @@ module.exports = {
         REQ: '0xb43D10BbE7222519Da899B72bF2c7f094b6F79D7',
         SALT: '0xB47f1A9B121BA114d5e98722a8948e274d0F4042',
         SNT: '0xbF5d8683b9BE6C43fcA607eb2a6f2626A18837a6',
-        STORM: '0x8FFf7De21de8ad9c510704407337542073FDC44b'
+        STORM: '0x8FFf7De21de8ad9c510704407337542073FDC44b',
+        WETH: "0xbca556c912754bc8e7d4aad20ad69a1b1444f42d",
     },
     contracts: {
         KyberNetwork: "0x3f9a8e219ab1ad42f96b22c294e564b2b48fe636",

@@ -31,7 +31,7 @@ contract PostActionRegistry is Base, IPostActionRegistry {
         @param postAction address to check.
      */
     modifier isValidAddress(address postAction) {
-        require(postAction != address(0x0), "Post action must be != 0x0.");
+        require(postAction != address(0x0), "Post action must not be eq 0x0.");
         _;
     }
 
@@ -77,7 +77,8 @@ contract PostActionRegistry is Base, IPostActionRegistry {
      */
     function registerPostAction(address newPostAction)
         external
-        onlySuperUser
+        onlySuperUser()
+        nonReentrant()
         isValidAddress(newPostAction)
         postActionNotExists(newPostAction)
         returns (bool)
@@ -102,7 +103,8 @@ contract PostActionRegistry is Base, IPostActionRegistry {
      */
     function unregisterPostAction(address postAction)
         external
-        onlySuperUser
+        onlySuperUser()
+        nonReentrant()
         isValidAddress(postAction)
         postActionExists(postAction)
         returns (bool)
@@ -170,7 +172,8 @@ contract PostActionRegistry is Base, IPostActionRegistry {
      */
     function setPostActionAsDefault(address postAction)
         external
-        onlySuperUser
+        onlySuperUser()
+        nonReentrant()
         isValidAddress(postAction)
         postActionExists(postAction)
         returns (bool)

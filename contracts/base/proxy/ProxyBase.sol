@@ -70,7 +70,7 @@ contract ProxyBase is DelegateProxy, Base {
         returns (bool)
     {
         require(toAddress != address(0x0), "Target address must be != 0x0.");
-        require(amount > 0, "Amount must be > 0.");
+        require(amount > 0, "Amount must be gt 0.");
         require(
             address(this).balance >= amount,
             "Contract has not enough balance."

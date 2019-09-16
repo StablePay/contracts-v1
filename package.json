@@ -8,8 +8,8 @@
     "test": "truffle test",
     "test:coverage": "scripts/coverage.sh",
     "test:ganache": "truffle test --network ganache",
-    "deploy:ganache": "truffle migrate --reset --all --network ganache",
-    "deploy:ropsten": "truffle migrate --reset --all --network infuraRopsten",
+    "deploy:ganache": "truffle migrate --reset --network ganache",
+    "deploy:ropsten": "truffle migrate --reset --network infuraRopsten",
     "start:ganache": "ganache-cli --db ./db --accounts 10 --mnemonic 'gesture rather obey video awake genuine patient base soon parrot upset lounge' --networkId 5777 --debug"
   },
   "repository": {

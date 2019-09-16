@@ -2,9 +2,16 @@ pragma solidity 0.5.10;
 pragma experimental ABIEncoderV2;
 
 import "./PostActionBase.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "../../services/compound/CErc20.sol";
 import "../../interface/ICompoundSettings.sol";
 
+/**
+    @title It is a Post Action implementation to support Compound.finance integration.
+    @notice This post action mints the target token in a specific Compound finance token (cToken) (see details https://compound.finance/developers/ctokens).
+    @notice After minting the target token, this post action transfers the cToken amount to the receiver adress.
+    @author StablePay <hi@stablepay.io>
+ */
 contract CompoundMintPostAction is PostActionBase {
     /** Constants */
 
@@ -45,6 +52,7 @@ contract CompoundMintPostAction is PostActionBase {
      */
     function execute(StablePayCommon.PostActionData memory postActionData)
         public
+        nonReentrant()
         isStablePay(msg.sender)
         isNotPaused()
         returns (bool)
@@ -80,6 +88,14 @@ contract CompoundMintPostAction is PostActionBase {
         return true;
     }
 
+    /**
+        @notice It calculates and transfer the cToken amount based on the initial and final balance.
+        @param postActionData associated to this execution.
+        @param cTargetToken cToken address (Compound token).
+        @param postActionInitialBalance this contract initial cTargetToken balance.
+        @param postActionFinalBalance this contract final cTargetToken balance.
+        @return the current cToken balance for the execution (final balance - initial balance).
+     */
     function calculateAndTransferCErc20To(
         StablePayCommon.PostActionData memory postActionData,
         CErc20 cTargetToken,

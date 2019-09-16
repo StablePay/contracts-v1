@@ -2,7 +2,11 @@ const leche = require('leche');
 const withData = leche.withData;
 
 const Settings = artifacts.require("./base/Settings.sol");
-const t = require('../util/consts').title;
+const Mock = artifacts.require("./mock/Mock.sol");
+const {
+    title: t,
+     NULL_ADDRESS,
+} = require('../util/consts');
 const settings = require('../util/events').settings;
 
 contract('SettingsTest', function (accounts) {
@@ -143,6 +147,75 @@ contract('SettingsTest', function (accounts) {
 
             if (pauseBefore) {
                 await instance.unpausePlatform('Needed to test it II', {from: owner});
+            }
+        });
+    });
+
+    withData({
+        _1_basic: [owner, '100', '1000', undefined, false],
+        _2_emptyTokenAddress: [NULL_ADDRESS, '100', '1000', 'Token address must not be eq 0x0.', true],
+        _3_minValue0: [owner, '0', '1000', 'Min amount is not gt 0.', true],
+        _4_maxValue_lg_minValue: [owner, '100', '0', 'Min amount is not lt max amount.', true],
+    }, function(tokenAddressString, minValue, maxValue, expectedMessage, mustFail) {
+        it(t('anUser', 'setTokenAvailability', 'Should be able (or not) to set token availability.', mustFail), async function() {
+            //Setup
+            let tokenAddress = tokenAddressString;
+            if(tokenAddress !==  NULL_ADDRESS) {
+                const mock = await Mock.new();
+                tokenAddress = mock.address;
+            }
+
+            try {
+                //Invocation
+                const result = await instance.setTokenAvailability(tokenAddress, minValue, maxValue);
+
+                // Assertions
+                assert(!mustFail, 'It should have failed because data is invalid.');
+                assert(result);
+                settings
+                    .tokenAvailabilityUpdated(result)
+                    .emitted(instance.address, tokenAddress, minValue, maxValue, true);
+            } catch (error) {
+                // Assertions
+                assert(mustFail);
+                assert(error);
+                assert.equal(error.reason, expectedMessage);
+            }
+        });
+    });
+
+    withData({
+        _1_basic: [undefined, undefined, false],
+        _2_emtpyToken: [NULL_ADDRESS, 'Token address must not be eq 0x0.', true],
+        _3_emtpyToken: [NULL_ADDRESS, 'Token address must not be eq 0x0.', true],
+    }, function(tokenToDisableAddressString, expectedMessage, mustFail) {
+        it(t('anUser', 'disableTokenAvailability', 'Should be able (or not) to disable token availability.', mustFail), async function() {
+            //Setup
+            const minValue = '1';
+            const maxValue = '10';
+            const token = await Mock.new();
+            await instance.setTokenAvailability(token.address, minValue, maxValue);
+
+            let tokenToDisableAddress = tokenToDisableAddressString;
+            if(tokenToDisableAddressString === undefined) {
+                tokenToDisableAddress = token.address;
+            }
+
+            try {
+                //Invocation
+                const result = await instance.disableTokenAvailability(tokenToDisableAddress);
+
+                // Assertions
+                assert(!mustFail, 'It should have failed because data is invalid.');
+                assert(result);
+                settings
+                    .tokenAvailabilityUpdated(result)
+                    .emitted(instance.address, tokenToDisableAddress, '0', '0', false);
+            } catch (error) {
+                // Assertions
+                assert(mustFail);
+                assert(error);
+                assert.equal(error.reason, expectedMessage);
             }
         });
     });

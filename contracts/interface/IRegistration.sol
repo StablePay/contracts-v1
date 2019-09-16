@@ -19,6 +19,15 @@ contract IRegistration {
         string contractName
     );
 
+    /**
+        @notice This event is emitted when a current smart contract is unregistered.
+     */
+    event ContractUnregistered(
+        address indexed thisContract,
+        address indexed oldContractAddress,
+        string oldContractName
+    );
+
     /** Functions */
 
     /**
@@ -28,8 +37,19 @@ contract IRegistration {
         @param contractAddress the new smart contract address.
         @return true if the contract is registered. Otherwise it returns false.
      */
-     // TODO Does it need to have a unregisterContract to remove storage address/name?
     function registerContract(
+        string calldata contractName,
+        address contractAddress
+    ) external returns (bool);
+
+    /**
+        @notice It unregisters a current smart contract associated to a contract name in the platform.
+        @dev It must be executed by an owner platform only.
+        @param contractName smart contract name to be unregistered.
+        @param contractAddress the current smart contract address.
+        @return true if the contract is unregistered. Otherwise it returns false.
+     */
+    function unregisterContract(
         string calldata contractName,
         address contractAddress
     ) external returns (bool);

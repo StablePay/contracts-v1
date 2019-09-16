@@ -41,7 +41,8 @@ contract CompoundSettings is Base, ICompoundSettings {
      */
     function mapErc20ToCEr20(address erc20Address, address cErc20Address)
         external
-        onlySuperUser
+        onlySuperUser()
+        nonReentrant()
         returns (bool)
     {
         erc20Address.requireNotEmpty("ERC20 address must not be 0x0.");
@@ -72,7 +73,8 @@ contract CompoundSettings is Base, ICompoundSettings {
      */
     function updateMapErc20ToCEr20(address erc20Address, address newCErc20Address)
         external
-        onlySuperUser
+        onlySuperUser()
+        nonReentrant()
         returns (bool)
     {
         erc20Address.requireNotEmpty("ERC20 address must not be 0x0.");

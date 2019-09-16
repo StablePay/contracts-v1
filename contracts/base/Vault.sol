@@ -32,7 +32,7 @@ contract Vault is Base, IVault {
       @dev If the ether is zero, it throws a require error.
      */
     function() external payable {
-        require(msg.value > 0, "Msg value is not > 0.");
+        require(msg.value > 0, "Msg value is not gt 0.");
         emit EthersDeposited(address(this), msg.sender, msg.value);
     }
 
@@ -45,7 +45,7 @@ contract Vault is Base, IVault {
       @return true if it received the ether transferred. Otherwise it returns false.
      */
     function depositEthers() external nonReentrant() payable returns (bool) {
-        require(msg.value > 0, "Msg value is not > 0.");
+        require(msg.value > 0, "Msg value is not gt 0.");
         emit EthersDeposited(address(this), msg.sender, msg.value);
         return true;
     }
@@ -60,12 +60,12 @@ contract Vault is Base, IVault {
         external
         nonReentrant()
         returns (bool) {
-        require(amount > 0, "Amount must be > 0.");
+        require(amount > 0, "Amount must be gt 0.");
         require(tokenAddress != address(0x0), "Token address must be != 0x0.");
 
         IERC20 token = IERC20(tokenAddress);
 
-        require(token.allowance(msg.sender, address(this)) >= amount, "ERC20 allowance is not >= amount.");
+        require(token.allowance(msg.sender, address(this)) >= amount, "ERC20 allowance is not gte amount.");
 
         bool transferFromResult = token.transferFrom(msg.sender, address(this), amount);
         require(transferFromResult, "Transfer from sender to Vault failed.");
@@ -105,9 +105,9 @@ contract Vault is Base, IVault {
         address toAddress,
         uint256 amount
     ) external onlySuperUser() nonReentrant() returns (bool) {
-        require(tokenAddress != address(0x0), "Token address must be != 0x0.");
-        require(toAddress != address(0x0), "Target address must be != 0x0.");
-        require(amount > 0, "Amount must be > 0.");
+        require(tokenAddress != address(0x0), "Token address must not be eq 0x0.");
+        require(toAddress != address(0x0), "Target address must not be eq 0x0.");
+        require(amount > 0, "Amount must be gt 0.");
         require(
             hasBalanceInErc(tokenAddress, address(this), amount),
             "Contract has not enough tokens balance."
@@ -139,8 +139,8 @@ contract Vault is Base, IVault {
         nonReentrant()
         returns (bool)
     {
-        require(toAddress != address(0x0), "Target address must be != 0x0.");
-        require(amount > 0, "Amount must be > 0.");
+        require(toAddress != address(0x0), "Target address must not be eq 0x0.");
+        require(amount > 0, "Amount must be gt 0.");
         require(
             address(this).balance >= amount,
             "Contract has not enough balance."

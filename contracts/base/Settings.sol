@@ -2,6 +2,7 @@ pragma solidity 0.5.10;
 
 import "./Base.sol";
 import "../interface/ISettings.sol";
+import "../util/AddressLib.sol";
 
 /**
     @title This manages the settings for the platform.
@@ -10,6 +11,8 @@ import "../interface/ISettings.sol";
     @notice It allows configure some aspect in the platform once it is deployed.
  */
 contract Settings is Base, ISettings {
+    using AddressLib for address;
+
     /** Constants */
 
     string internal constant TOKEN_AVAILABLE = "token.available";
@@ -34,7 +37,12 @@ contract Settings is Base, ISettings {
         return _storage.getUint16(keccak256(abi.encodePacked(PLATFORM_FEE)));
     }
 
-    function setPlatformFee(uint16 _fee) external onlySuperUser returns (bool) {
+    function setPlatformFee(uint16 _fee)
+        external
+        onlySuperUser()
+        nonReentrant()
+        returns (bool)
+    {
         uint16 oldPlatformFee = _storage.getUint16(
             keccak256(abi.encodePacked(PLATFORM_FEE))
         );
@@ -51,7 +59,8 @@ contract Settings is Base, ISettings {
      */
     function pausePlatform(string calldata reason)
         external
-        onlySuperUser
+        onlySuperUser()
+        nonReentrant()
         returns (bool)
     {
         _storage.setBool(keccak256(abi.encodePacked(STATE_PAUSED)), true);
@@ -67,7 +76,8 @@ contract Settings is Base, ISettings {
      */
     function unpausePlatform(string calldata reason)
         external
-        onlySuperUser
+        onlySuperUser()
+        nonReentrant()
         returns (bool)
     {
         _storage.setBool(keccak256(abi.encodePacked(STATE_PAUSED)), false);
@@ -93,25 +103,26 @@ contract Settings is Base, ISettings {
 
     function disableTokenAvailability(address tokenAddress)
         external
-        onlySuperUser
+        onlySuperUser()
+        nonReentrant()
         returns (bool)
     {
+        tokenAddress.requireNotEmpty("Token address must not be eq 0x0.");
+        (bool available, ,) = getTokenAvailabilityInternal(tokenAddress);
+        require(available, "Token availability is already disabled.");
+
         _storage.setBool(
             keccak256(abi.encodePacked(TOKEN_AVAILABLE, tokenAddress)),
             false
         );
-        uint256 minAmount = _storage.getUint(
-            keccak256(abi.encodePacked(TOKEN_MIN_AMOUNT, tokenAddress))
-        );
-        uint256 maxAmount = _storage.getUint(
-            keccak256(abi.encodePacked(TOKEN_MAX_AMOUNT, tokenAddress))
-        );
+        _storage.setUint(keccak256(abi.encodePacked(TOKEN_MIN_AMOUNT, tokenAddress)), 0);
+        _storage.setUint(keccak256(abi.encodePacked(TOKEN_MAX_AMOUNT, tokenAddress)), 0);
 
         emit TokenAvailabilityUpdated(
             address(this),
             tokenAddress,
-            minAmount,
-            maxAmount,
+            0,
+            0,
             false
         );
         return true;
@@ -144,28 +155,35 @@ contract Settings is Base, ISettings {
 
     function setTokenAvailability(
         address tokenAddress,
-        uint256 _minAmount,
-        uint256 _maxAmount
-    ) external onlySuperUser returns (bool) {
-        require(_minAmount < _maxAmount, "Min amount < max amount.");
+        uint256 minAmount,
+        uint256 maxAmount
+    )
+        external
+        onlySuperUser()
+        nonReentrant()
+        returns (bool)
+    {
+        tokenAddress.requireNotEmpty("Token address must not be eq 0x0.");
+        require(minAmount > 0, "Min amount is not gt 0.");
+        require(minAmount < maxAmount, "Min amount is not lt max amount.");
         _storage.setBool(
             keccak256(abi.encodePacked(TOKEN_AVAILABLE, tokenAddress)),
             true
         );
         _storage.setUint(
             keccak256(abi.encodePacked(TOKEN_MIN_AMOUNT, tokenAddress)),
-            _minAmount
+            minAmount
         );
         _storage.setUint(
             keccak256(abi.encodePacked(TOKEN_MAX_AMOUNT, tokenAddress)),
-            _maxAmount
+            maxAmount
         );
 
         emit TokenAvailabilityUpdated(
             address(this),
             tokenAddress,
-            _minAmount,
-            _maxAmount,
+            minAmount,
+            maxAmount,
             true
         );
         return true;

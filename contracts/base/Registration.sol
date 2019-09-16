@@ -15,6 +15,7 @@ contract Registration is Base, IRegistration {
     using AddressLib for address;
 
     /** Constants */
+    address internal constant EMPTY_ADDRESS = address(0x0);
     string internal constant CONTRACT_ADDRESS = "contract.address";
 
     /** Events */
@@ -59,6 +60,36 @@ contract Registration is Base, IRegistration {
         );
 
         emit NewContractRegistered(
+            address(this),
+            contractAddress,
+            contractName
+        );
+
+        return true;
+    }
+
+    /**
+        @notice It unregisters a current smart contract associated to a contract name in the platform.
+        @dev It must be executed by an owner platform only.
+        @param contractName smart contract name to be unregistered.
+        @param contractAddress the current smart contract address.
+        @return true if the contract is unregistered. Otherwise it returns false.
+     */
+    function unregisterContract(string calldata contractName, address contractAddress)
+        external
+        onlySuperUser()
+        nonReentrant()
+        returns (bool)
+    {
+        contractAddress.requireNotEmpty("Contract address must not be eq 0x0.");
+        address currentContractAddress = getContractAddressInternal(contractName);
+        currentContractAddress.requireNotEmpty("Current contract address must not be eq 0x0.");
+        currentContractAddress.requireEqualTo(contractAddress, "Current contract address is not eq contract address.");
+
+        _storage.setAddress(keccak256(abi.encodePacked(CONTRACT_NAME, contractName)), EMPTY_ADDRESS);
+        _storage.setAddress(keccak256(abi.encodePacked(CONTRACT_ADDRESS, contractAddress)), EMPTY_ADDRESS);
+
+        emit ContractUnregistered(
             address(this),
             contractAddress,
             contractName

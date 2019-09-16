@@ -53,7 +53,6 @@ contract Storage is IStorage {
      */
     constructor() public {
         // Set the main owner upon deployment
-        // TODO implement ownable using access.role to allow admins
         boolStorage[keccak256(
             abi.encodePacked("access.role", "owner", msg.sender)
         )] = true;

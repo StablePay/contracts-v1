@@ -2,7 +2,13 @@ pragma solidity 0.5.10;
 pragma experimental ABIEncoderV2;
 
 import "./PostActionBase.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
+/**
+    @title It is the default Post Action implementation.
+    @notice After the swapping execution, it transfers the target token to the receiver address.
+    @author StablePay <hi@stablepay.io>
+ */
 contract TransferToPostAction is PostActionBase {
     /** Constants */
 
@@ -23,15 +29,22 @@ contract TransferToPostAction is PostActionBase {
 
     /** Functions */
 
+    /**
+        @notice It transfer the target token to the receiver address.
+        @param postActionData needed data to execute the action.
+        @return true if the transfer is executed ok. Otherwise it returns false.
+     */
     function execute(StablePayCommon.PostActionData memory postActionData)
         public
+        nonReentrant()
         isStablePay(msg.sender)
+        isNotPaused()
         returns (bool)
     {
         require(
             IERC20(postActionData.targetToken).balanceOf(address(this)) >=
                 postActionData.toAmount,
-            "Balance of ERC20 is not >= amount to transfer."
+            "Balance of ERC20 is not gte amount to transfer."
         );
 
         // Transfer the 'to' amount to the 'to' address.

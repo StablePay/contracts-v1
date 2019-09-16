@@ -50,7 +50,7 @@ contract StablePayBase is Base, IStablePay {
 
     modifier isTokenAvailable(address tokenAddress, uint256 amount) {
         bool isAvailable = getSettings().isTokenAvailable(tokenAddress, amount);
-        require(isAvailable, "Token amount is not available (> or <).");
+        require(isAvailable, "Token amount is not available (gt or lt).");
         _;
     }
 
@@ -66,16 +66,16 @@ contract StablePayBase is Base, IStablePay {
     }
 
     modifier areOrderAmountsValidToken(StablePayCommon.Order memory order) {
-        require(order.sourceAmount > 0, "Source amount is not > 0.");
-        require(order.targetAmount > 0, "Target amount is not > 0.");
+        require(order.sourceAmount > 0, "Source amount is not gt 0.");
+        require(order.targetAmount > 0, "Target amount is not gt 0.");
         _;
     }
 
     modifier areOrderAmountsValidEther(StablePayCommon.Order memory order) {
-        require(msg.value > 0, "Msg value is not > 0");
-        require(order.sourceAmount > 0, "Source amount is not > 0");
-        require(msg.value == order.sourceAmount, "Msg value is not == source amount");
-        require(order.targetAmount > 0, "Target amount is not > 0.");
+        require(msg.value > 0, "Msg value is not gt 0");
+        require(order.sourceAmount > 0, "Source amount is not gt 0");
+        require(msg.value == order.sourceAmount, "Msg value is not eq source amount");
+        require(order.targetAmount > 0, "Target amount is not gt 0.");
         _;
     }
 
@@ -241,7 +241,7 @@ contract StablePayBase is Base, IStablePay {
     ) internal returns (bool, uint256) {
         require(
             finalBalance >= initialBalance,
-            "StablePayBase Token: Final balance is not >= initial balance."
+            "StablePayBase Token: Final balance is not gte initial balance."
         );
         uint256 tokensDiff = finalBalance.sub(initialBalance);
         if (tokensDiff > 0) {
@@ -258,12 +258,12 @@ contract StablePayBase is Base, IStablePay {
     ) internal pure returns (uint256 diffBalance) {
         require(
             initialBalance >= finalBalance,
-            "SwappingProvider Ether: Initial balance is not >= final balance."
+            "SwappingProvider Ether: Initial balance is not gte final balance."
         );
         uint256 used = initialBalance.sub(finalBalance);
         require(
             sentAmount >= used,
-            "SwappingProvider Ether: Sent amount is not >= used amount."
+            "SwappingProvider Ether: Sent amount is not gte used amount."
         );
         return sentAmount.sub(used);
     }
@@ -302,7 +302,7 @@ contract StablePayBase is Base, IStablePay {
     ) internal pure {
         require(
             finalBalance >= initialBalance,
-            "StablePayBase: Final balance must be >= initial balance."
+            "StablePayBase: Final balance must be gte initial balance."
         );
         uint256 currentBalance = finalBalance.sub(initialBalance);
         require(

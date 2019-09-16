@@ -52,7 +52,7 @@ contract AbstractSwappingProvider is ISwappingProvider {
         @dev The ether left (msg.value) must be greater than zero. Otherwise it will throw a require error.
      */
     function() external payable {
-        require(msg.value > 0, "Value must be > 0");
+        require(msg.value > 0, "Value must be gt 0");
         // @dev https://ethereum.stackexchange.com/questions/19341/address-send-vs-address-transfer-best-practice-usage/38642#38642
         // @dev https://ropsten.etherscan.io/tx/0xbb7bd5c4ba0d5a4d4141b5f1b759f75253dacb58b85a71e7848ef9295872046f#internal transferWithEthers
         emit DepositReceived(address(this), msg.sender, msg.value);
@@ -81,11 +81,11 @@ contract AbstractSwappingProvider is ISwappingProvider {
     ) internal pure returns (uint256 diffBalance) {
         require(
             initialBalance >= finalBalance,
-            "SwappingProvider: Initial balance is not >= final balance."
+            "SwappingProvider: Initial balance is not gte final balance."
         );
         uint256 used = initialBalance.sub(finalBalance);
 
-        require(sentAmount >= used, "SwappingProvider: Sent amount is not >= used.");
+        require(sentAmount >= used, "SwappingProvider: Sent amount is not gte used.");
         uint256 diff = sentAmount.sub(used);
         return diff;
     }

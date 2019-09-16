@@ -4,5 +4,5 @@ module.exports = {
     uniswap: require('./uniswap'),
     stablepay: require('./stablepay'),
     compound: require('./compound'),
-    maxGas: 6500000,
+    maxGas: 7000000,
 };

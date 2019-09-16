@@ -1,5 +1,4 @@
 const BigNumber = require('bignumber.js');
-// TODO Remove it
 
 class Averager {
     constructor(data) {

@@ -6,6 +6,7 @@ const ProviderKeyGenerator = require('../src/utils/ProviderKeyGenerator');
 
 /** Platform configuration keys for smart contracts. */
 const PLATFORM_FEE_KEY = 'config.platform.fee';
+const WETH = 'WETH';
 
 /** Platform configuration values. */
 const printDeployCostValue = appConfig.getPrintDeployCost().get();
@@ -29,6 +30,7 @@ const AddressLib = artifacts.require("./util/AddressLib.sol");
 const PostActionRegistry = artifacts.require("./base/PostActionRegistry.sol");
 const TransferToPostAction = artifacts.require("./base/action/TransferToPostAction.sol");
 const CompoundMintPostAction = artifacts.require("./base/action/CompoundMintPostAction.sol");
+const EtherTransferPostAction = artifacts.require("./base/action/EtherTransferPostAction.sol");
 const CompoundSettings = artifacts.require("./base/CompoundSettings.sol");
 const Registration = artifacts.require("./base/Registration.sol");
 const Settings = artifacts.require("./base/Settings.sol");
@@ -93,7 +95,7 @@ module.exports = function(deployer, network, accounts) {
         data: uniswapConf.factory.bytecode
       }).send({
         from: owner,
-        gas: 1500000, // TODO Not hardcoded values in migrations. It should be configured by network in ./config/{network} file.
+        gas: maxGasForDeploying,
         gasPrice: 90000 * 2
       });
       uniswapFactory = await UniswapFactoryInterface.at(factoryResult.options.address);
@@ -148,6 +150,9 @@ module.exports = function(deployer, network, accounts) {
     ]);
     await deployerApp.deploy(CompoundSettings, Storage.address);
 
+    await deployerApp.links(CompoundMintPostAction, [
+      AddressLib
+    ]);
     await deployerApp.deploy(CompoundMintPostAction, Storage.address, CompoundSettings.address);
 
     await deployerApp.deploy(StablePay, Storage.address, {gas: maxGasForDeploying});
@@ -172,16 +177,27 @@ module.exports = function(deployer, network, accounts) {
 
     await deployerApp.deployMockIf(CustomSwappingProviderMock, stablePayInstance.address);
 
+    await deployerApp.links(EtherTransferPostAction, [
+      AddressLib
+    ]);
+    const wethTokenAddress = kyberTokens[WETH];
+    console.log(`WETH token address configured is '${wethTokenAddress}'.`);
+    await deployerApp.deploy(EtherTransferPostAction, Storage.address, wethTokenAddress);
+
     await deployerApp.links(TransferToPostAction, [
-      SafeMath
+      AddressLib
     ]);
     await deployerApp.deploy(TransferToPostAction, Storage.address, {gas: maxGasForDeploying, from: owner});
 
     /** Registering post actions. */
     console.log('Registering post actions.');
     const postActionRegistryInstance = await PostActionRegistry.deployed();
+    console.log('Registering TransferToPostAction contract.');
     await postActionRegistryInstance.registerPostAction(TransferToPostAction.address);
+    console.log('Registering CompoundMintPostAction contract.');
     await postActionRegistryInstance.registerPostAction(CompoundMintPostAction.address);
+    console.log('Registering EtherTransferPostAction contract.');
+    await postActionRegistryInstance.registerPostAction(EtherTransferPostAction.address);
 
     /** Deploying Kyber swap provider. */
     await deployerApp.links(KyberSwappingProvider, [
@@ -292,6 +308,7 @@ module.exports = function(deployer, network, accounts) {
 		console.log(`Registration: '${Registration.address}',`);
     console.log(`CompoundSettings: '${CompoundSettings.address}',`);
     console.log(`CompoundMintPostAction: '${CompoundMintPostAction.address}',`);
+    console.log(`EtherTransferPostAction: '${EtherTransferPostAction.address}',`);
     console.log(`>>>>>>>>>> Configuration ends HERE <<<<<<<<<<`)
   });
 };

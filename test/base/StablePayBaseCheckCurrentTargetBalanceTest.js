@@ -27,7 +27,7 @@ contract('StablePayBaseCheckCurrentTargetBalanceTest', accounts => {
         _1_target10_10_11: ["1", "10", "11", undefined, false],
         _2_target10_10_11: ["100", "100", "200", undefined, false],
         _3_target0_100_100: ["0", "100", "100", undefined, false],
-        _4_target1_12_11: ["1", "12", "11", "StablePayBase: Final balance must be >= initial balance.", true],
+        _4_target1_12_11: ["1", "12", "11", "StablePayBase: Final balance must be gte initial balance.", true],
         _5_target15_10_30: ["15", "10", "30", "Target final tokens balance is not valid.", true]
     }, function(targetAmount, initialAmount, finalAmount, errorMessageExpected, mustFail) {
         it(t('anUser', 'checkCurrentTargetBalance', 'Should able to check if amounts are valid.', mustFail), async function() {

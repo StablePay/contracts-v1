@@ -91,7 +91,7 @@ contract('BaseTest', function (accounts) {
 
     withData({
         _1_1ether: ['1', undefined, false],
-        _2_0ether: ['0', 'Msg value must be > 0.', true]
+        _2_0ether: ['0', 'Msg value must be gt 0.', true]
     }, function(amount, messageExpected, mustFail) {
         it(t('anUser', 'fallback', 'Should be able to transfer ether.', mustFail), async function() {
             //Setup
@@ -122,7 +122,7 @@ contract('BaseTest', function (accounts) {
 
     withData({
         _1_1ether: ['1', undefined, false],
-        _2_0ether: ['0', 'Balance must be > 0.', true]
+        _2_0ether: ['0', 'Balance must be gt 0.', true]
     }, function(amount, messageExpected, mustFail) {
         it(t('anUser', 'transferEthersToVault', 'Should be able to transfer ether to Vault.', mustFail), async function() {
             //Setup

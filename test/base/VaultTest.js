@@ -48,7 +48,7 @@ contract('VaultTest', function (accounts) {
     });
 
     withData({
-        _1_1ether: ["0", "Msg value is not > 0."]
+        _1_1ether: ["0", "Msg value is not gt 0."]
     }, function(valueWei, messageExpected) {
         it(t('anOwner', 'depositEthers', 'Should not able to deposit ether.', true), async function() {
             // Setup

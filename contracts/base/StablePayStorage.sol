@@ -87,12 +87,6 @@ contract StablePayStorage is Base, IProviderRegistry {
     constructor(address storageAddress) public Base(storageAddress) {}
 
     /** Fallback Method */
-    // TODO Review fallback function.
-
-    function() external payable {
-        require(msg.value > 0, "Msg value > 0");
-        emit DepositReceived(address(this), msg.sender, msg.value);
-    }
 
     /** Functions */
 
@@ -289,6 +283,7 @@ contract StablePayStorage is Base, IProviderRegistry {
         swappingProviderExists(_providerKey)
         isSwappingProviderNotPausedByAdmin(_providerKey)
         onlySuperUser()
+        nonReentrant()
         returns (bool)
     {
         providers[_providerKey].pausedByAdmin = true;
@@ -305,6 +300,7 @@ contract StablePayStorage is Base, IProviderRegistry {
         swappingProviderExists(_providerKey)
         isSwappingProviderPausedByAdmin(_providerKey)
         onlySuperUser()
+        nonReentrant()
         returns (bool)
     {
         providers[_providerKey].pausedByAdmin = false;
@@ -322,6 +318,7 @@ contract StablePayStorage is Base, IProviderRegistry {
         isSwappingProviderOwner(_providerKey, msg.sender)
         isSwappingProviderNotPausedByAdmin(_providerKey)
         onlySuperUser()
+        nonReentrant()
         returns (bool)
     {
         providers[_providerKey].pausedByOwner = true;
@@ -340,6 +337,7 @@ contract StablePayStorage is Base, IProviderRegistry {
         isSwappingProviderPausedByOwner(_providerKey)
         isSwappingProviderNotPausedByAdmin(_providerKey)
         onlySuperUser()
+        nonReentrant()
         returns (bool)
     {
         providers[_providerKey].pausedByOwner = false;
@@ -358,6 +356,7 @@ contract StablePayStorage is Base, IProviderRegistry {
         external
         isSwappingProviderNewOrUpdate(_providerKey, msg.sender)
         onlySuperUser()
+        nonReentrant()
         returns (bool)
     {
         require(
@@ -394,6 +393,7 @@ contract StablePayStorage is Base, IProviderRegistry {
         external
         swappingProviderExists(providerKey)
         onlySuperUser()
+        nonReentrant()
         returns (bool)
     {
         require(

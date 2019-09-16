@@ -118,7 +118,7 @@ contract Base {
         @dev If the transfer was successful, it emits an DepositReceived event.
      */
     function() external payable {
-        require(msg.value > 0, "Msg value must be > 0.");
+        require(msg.value > 0, "Msg value must be gt 0.");
         emit DepositReceived(address(this), msg.sender, msg.value);
     }
 
@@ -182,12 +182,17 @@ contract Base {
         require(roleHas(aRole, anAddress) == true, "Invalid role");
     }
 
+    /**
+        @notice It transfers the Ether left in the contract to the Vault contract.
+        @dev It can be invoked by a super user only.
+     */
     function transferEthersToVault()
         external
-        onlySuperUser
+        onlySuperUser()
+        nonReentrant()
     {
         uint256 currentBalance = address(this).balance;
-        require(currentBalance > 0, "Balance must be > 0.");
+        require(currentBalance > 0, "Balance must be gt 0.");
 
         address to = getVault();
         bool depositResult = IVault(to).depositEthers.value(currentBalance)();

@@ -43,13 +43,14 @@ contract Role is Base, IRole {
 
     /**
         @notice It transfers the ownership of the platform to another address.
-        @dev After transfering ownership, if the execution was as expected, it needs to call 'deleteOwner' function.
+        @dev After transfering ownership, if the execution was as expected, the sender must call the 'deleteOwner' function.
         @param newOwner The address to transfer ownership to.
      */
     function transferOwnership(address newOwner)
         external
-        onlyLatestRole
-        onlyOwner
+        onlyLatestRole()
+        onlyOwner()
+        nonReentrant()
     {
         // Legit address?
         require(newOwner != address(0x0), "New owner must be != 0x0.");
@@ -69,11 +70,13 @@ contract Role is Base, IRole {
     /**
         @notice It removes the owner from the platform.
         @dev It needs to be executed after transfering the ownership to a new address.
+        @return true if the current owner was deleted. Otherwise it returns false.
      */
     function deleteOwner()
         external
-        onlyLatestRole
-        onlyOwner
+        onlyLatestRole()
+        onlyOwner()
+        nonReentrant()
         returns (bool)
     {
         roleCheck("owner", msg.sender);
@@ -102,8 +105,9 @@ contract Role is Base, IRole {
      */
     function adminRoleAdd(string calldata aRole, address anAddress)
         external
-        onlyLatestRole
-        onlySuperUser
+        onlyLatestRole()
+        onlySuperUser()
+        nonReentrant()
         returns (bool)
     {
         roleAdd(aRole, anAddress);
@@ -120,8 +124,9 @@ contract Role is Base, IRole {
      */
     function adminRoleRemove(string calldata aRole, address anAddress)
         external
-        onlyLatestRole
-        onlySuperUser
+        onlyLatestRole()
+        onlySuperUser()
+        nonReentrant()
         returns (bool)
     {
         roleRemove(aRole, anAddress);
