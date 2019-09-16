@@ -5,7 +5,6 @@ import "../util/StablePayCommon.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract ISwappingProvider {
-
     /** Events */
 
     /**
@@ -32,7 +31,11 @@ contract ISwappingProvider {
         @dev Calculate the expected values (min and max) to perform the swapping.
         @dev Return whether the swapping those tokens is supported or not, and the rates. 
      */
-    function getExpectedRate(IERC20 sourceToken, IERC20 targetToken, uint256 targetAmount)
+    function getExpectedRate(
+        IERC20 sourceToken,
+        IERC20 targetToken,
+        uint256 targetAmount
+    )
         external
         view
         returns (bool isSupported, uint256 minRate, uint256 maxRate);

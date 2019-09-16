@@ -80,9 +80,9 @@ interface ISettings {
         uint256 maxAmount
     ) external returns (bool);
 
-    function isTokenAvailable(
-        address tokenAddress,
-        uint256 amount
-    ) external view returns (bool);
+    function isTokenAvailable(address tokenAddress, uint256 amount)
+        external
+        view
+        returns (bool);
 
 }

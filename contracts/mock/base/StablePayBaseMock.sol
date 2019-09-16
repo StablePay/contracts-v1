@@ -90,6 +90,10 @@ contract StablePayBaseMock is StablePayBase {
         StablePayCommon.Order memory order,
         uint256 feeAmount
     ) public returns (uint256 toAmount) {
-        return super.calculateAndTransferAmountToPostActionAddress(order, feeAmount);
+        return
+            super.calculateAndTransferAmountToPostActionAddress(
+                order,
+                feeAmount
+            );
     }
 }

@@ -186,24 +186,15 @@ contract Base {
         @notice It transfers the Ether left in the contract to the Vault contract.
         @dev It can be invoked by a super user only.
      */
-    function transferEthersToVault()
-        external
-        onlySuperUser()
-        nonReentrant()
-    {
+    function transferEthersToVault() external onlySuperUser() nonReentrant() {
         uint256 currentBalance = address(this).balance;
         require(currentBalance > 0, "Balance must be gt 0.");
 
         address to = getVault();
         bool depositResult = IVault(to).depositEthers.value(currentBalance)();
         require(depositResult, "The transfer was not successful.");
-        
-        emit EthersTransferred(
-            address(this),
-            msg.sender,
-            to,
-            currentBalance
-        );
+
+        emit EthersTransferred(address(this), msg.sender, to, currentBalance);
 
     }
 }

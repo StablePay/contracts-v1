@@ -33,10 +33,11 @@ contract KyberSwappingProvider is AbstractSwappingProvider {
 
     /** Constructor */
 
-    constructor(address stablePayAddress, address proxyAddress, address kyberFeeAddress)
-        public
-        AbstractSwappingProvider(stablePayAddress)
-    {
+    constructor(
+        address stablePayAddress,
+        address proxyAddress,
+        address kyberFeeAddress
+    ) public AbstractSwappingProvider(stablePayAddress) {
         proxy = proxyAddress;
         feeAddress = kyberFeeAddress;
     }
@@ -298,8 +299,14 @@ contract KyberSwappingProvider is AbstractSwappingProvider {
     {
         require(msg.value > 0, "Msg value must be gt 0");
         require(_order.sourceAmount > 0, "Amount must be gt 0");
-        require(msg.value == _order.sourceAmount, "Msg value is not eq source amount");
-        require(_order.toAddress != address(0x0), "To address must be not eq 0x0.");
+        require(
+            msg.value == _order.sourceAmount,
+            "Msg value is not eq source amount"
+        );
+        require(
+            _order.toAddress != address(0x0),
+            "To address must be not eq 0x0."
+        );
 
         // Gets the ERC20 source/target token instances.
         IERC20 sourceToken = IERC20(_order.sourceToken);

@@ -18,7 +18,10 @@ interface InterestRateModel {
       * @param reserves The total reserves of the underlying asset in the CToken
       * @return Success or failure and the borrow interest rate per block scaled by 10e18
       */
-    function getBorrowRate(uint cash, uint borrows, uint reserves) external view returns (uint, uint);
+    function getBorrowRate(uint256 cash, uint256 borrows, uint256 reserves)
+        external
+        view
+        returns (uint256, uint256);
 
     /**
       * @notice Marker function used for light validation when updating the interest rate model of a market

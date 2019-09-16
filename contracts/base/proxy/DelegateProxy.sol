@@ -8,7 +8,6 @@ import "./ERCAbstractProxy.sol";
     @dev Borrowed from the Awesome AragonOS project.
  */
 contract DelegateProxy is ERCAbstractProxy, IsContract {
-
     /**
     * @dev Performs a delegatecall and returns whatever the delegatecall returned (entire context execution will return!)
     * @param destination Destination address to perform the delegatecall

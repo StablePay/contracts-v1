@@ -85,7 +85,10 @@ contract AbstractSwappingProvider is ISwappingProvider {
         );
         uint256 used = initialBalance.sub(finalBalance);
 
-        require(sentAmount >= used, "SwappingProvider: Sent amount is not gte used.");
+        require(
+            sentAmount >= used,
+            "SwappingProvider: Sent amount is not gte used."
+        );
         uint256 diff = sentAmount.sub(used);
         return diff;
     }
@@ -150,9 +153,12 @@ contract AbstractSwappingProvider is ISwappingProvider {
         // Mitigate ERC20 Approve front-running attack, by initially setting allowance to 0
         require(token.approve(to, 0), "Error mitigating front-running attack.");
 
-        if(amount > 0) {
+        if (amount > 0) {
             // Set the spender's token allowance to tokenQty
-            require(token.approve(to, amount), "Error approving tokens for proxy.");
+            require(
+                token.approve(to, amount),
+                "Error approving tokens for proxy."
+            );
         }
         return true;
     }

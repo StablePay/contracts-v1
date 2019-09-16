@@ -45,7 +45,11 @@ contract CustomSwappingProviderMock is AbstractSwappingProvider {
         return _swapResult;
     }
 
-    function getExpectedRate(IERC20 sourceToken, IERC20 targetToken, uint256 targetAmount)
+    function getExpectedRate(
+        IERC20 sourceToken,
+        IERC20 targetToken,
+        uint256 targetAmount
+    )
         external
         view
         returns (bool isSupported, uint256 minRate, uint256 maxRate)

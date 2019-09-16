@@ -111,5 +111,7 @@ interface IProviderRegistry {
         @param providerKey associated to the swapping provider.
         @return true if the swapping provider is unregistered. Otherwise it returns false.
      */
-    function unregisterSwappingProvider(bytes32 providerKey) external returns (bool);
+    function unregisterSwappingProvider(bytes32 providerKey)
+        external
+        returns (bool);
 }

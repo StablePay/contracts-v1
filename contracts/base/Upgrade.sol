@@ -37,12 +37,7 @@ contract Upgrade is Base, IUpgrade {
     function upgradeContract(
         string calldata name,
         address upgradedContractAddress
-    )
-        external
-        onlySuperUser()
-        nonReentrant()
-        returns (bool)
-    {
+    ) external onlySuperUser() nonReentrant() returns (bool) {
         require(
             upgradedContractAddress != address(0x0),
             "Upgraded contract addresses must not be 0x0."

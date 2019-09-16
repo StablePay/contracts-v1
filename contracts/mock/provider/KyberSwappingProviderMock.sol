@@ -4,13 +4,10 @@ pragma experimental ABIEncoderV2;
 import "../../providers/KyberSwappingProvider.sol";
 
 contract KyberSwappingProviderMock is KyberSwappingProvider {
-
-    constructor(
-        address stablePay,
-        address proxy,
-        address feeAddress
-    ) public KyberSwappingProvider(stablePay, proxy, feeAddress) {
-    }
+    constructor(address stablePay, address proxy, address feeAddress)
+        public
+        KyberSwappingProvider(stablePay, proxy, feeAddress)
+    {}
 
     function _isSupportedRate(uint256 minRate, uint256 maxRate)
         public
@@ -40,11 +37,12 @@ contract KyberSwappingProviderMock is KyberSwappingProvider {
         return getInternalExpectedRate(sourceToken, targetToken, sourceAmount);
     }
 
-    function _getExpectedRateIfSupported(IERC20 sourceToken, IERC20 targetToken, uint256 sourceAmount)
-        public
-        view
-        returns (uint256 minRate, uint256 maxRate)
-    {
-        return getExpectedRateIfSupported(sourceToken, targetToken, sourceAmount);
+    function _getExpectedRateIfSupported(
+        IERC20 sourceToken,
+        IERC20 targetToken,
+        uint256 sourceAmount
+    ) public view returns (uint256 minRate, uint256 maxRate) {
+        return
+            getExpectedRateIfSupported(sourceToken, targetToken, sourceAmount);
     }
 }

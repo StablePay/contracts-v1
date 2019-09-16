@@ -56,7 +56,7 @@ contract CompoundSettings is Base, ICompoundSettings {
             cErc20Address
         );
 
-        emit Erc20ToCEr20MappingCreated (
+        emit Erc20ToCEr20MappingCreated(
             address(this),
             erc20Address,
             cErc20Address
@@ -71,25 +71,26 @@ contract CompoundSettings is Base, ICompoundSettings {
         @param newCErc20Address new CErc20 implementation address.
         @return true if it was mapped successfully. Otherwise, it returns false.
      */
-    function updateMapErc20ToCEr20(address erc20Address, address newCErc20Address)
-        external
-        onlySuperUser()
-        nonReentrant()
-        returns (bool)
-    {
+    function updateMapErc20ToCEr20(
+        address erc20Address,
+        address newCErc20Address
+    ) external onlySuperUser() nonReentrant() returns (bool) {
         erc20Address.requireNotEmpty("ERC20 address must not be 0x0.");
         newCErc20Address.requireNotEmpty("CERC20 address must not be 0x0.");
 
         address currentCErc20Address = getCEr20Internal(erc20Address);
         currentCErc20Address.requireNotEmpty("Current CErc20 must NOT be 0x0.");
-        currentCErc20Address.requireNotEqualTo(newCErc20Address, "Current CErc20 must NOT be equal to new CErc20.");
+        currentCErc20Address.requireNotEqualTo(
+            newCErc20Address,
+            "Current CErc20 must NOT be equal to new CErc20."
+        );
 
         _storage.setAddress(
             keccak256(abi.encodePacked(PLATFORM_CERC20, erc20Address)),
             newCErc20Address
         );
 
-        emit Erc20ToCEr20MappingUpdated (
+        emit Erc20ToCEr20MappingUpdated(
             address(this),
             currentCErc20Address,
             erc20Address,
@@ -104,11 +105,7 @@ contract CompoundSettings is Base, ICompoundSettings {
         @param erc20Address ERC20 address to get the mapping.
         @return the current CErc20 mapping for a specific ERC20 address.
      */
-    function getCEr20(address erc20Address)
-        external
-        view
-        returns (address)
-    {
+    function getCEr20(address erc20Address) external view returns (address) {
         return getCEr20Internal(erc20Address);
     }
 
@@ -117,7 +114,10 @@ contract CompoundSettings is Base, ICompoundSettings {
         view
         returns (address)
     {
-        return _storage.getAddress(keccak256(abi.encodePacked(PLATFORM_CERC20, erc20Address)));
+        return
+            _storage.getAddress(
+                keccak256(abi.encodePacked(PLATFORM_CERC20, erc20Address))
+            );
     }
 
     /**
@@ -125,11 +125,7 @@ contract CompoundSettings is Base, ICompoundSettings {
         @param erc20Address ERC20 address to test.
         @return true if ERC20 address has a CErc20 mapped. Otherwise, it returns false.
      */
-    function supportErc20(address erc20Address)
-        external
-        view
-        returns (bool)
-    {
+    function supportErc20(address erc20Address) external view returns (bool) {
         return getCEr20Internal(erc20Address) != address(0x0);
     }
 }

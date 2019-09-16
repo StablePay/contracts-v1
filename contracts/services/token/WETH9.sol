@@ -25,13 +25,12 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
     @notice This is an abstraction/interface of the WETH9 token deployed at this address: https://etherscan.io/address/0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2#code
  */
 contract WETH9 is IERC20 {
-
-    event  Deposit(address indexed dst, uint wad);
-    event  Withdrawal(address indexed src, uint wad);
+    event Deposit(address indexed dst, uint256 wad);
+    event Withdrawal(address indexed src, uint256 wad);
 
     function deposit() public payable;
-    
-    function withdraw(uint wad) public;
+
+    function withdraw(uint256 wad) public;
 
 }
 
@@ -712,3 +711,4 @@ Public License instead of this License.  But first, please read
 <http://www.gnu.org/philosophy/why-not-lgpl.html>.
 
 */
+

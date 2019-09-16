@@ -38,24 +38,24 @@ contract Registration is Base, IRegistration {
         @param contractAddress the new smart contract address.
         @return true if the contract is registered. Otherwise it returns false.
      */
-    function registerContract(string calldata contractName, address contractAddress)
-        external
-        onlySuperUser()
-        nonReentrant()
-        returns (bool)
-    {
+    function registerContract(
+        string calldata contractName,
+        address contractAddress
+    ) external onlySuperUser() nonReentrant() returns (bool) {
         contractAddress.requireNotEmpty("Contract address must not be 0x0.");
-        address currentContractAddress = getContractAddressInternal(contractName);
-        currentContractAddress.requireEmpty("Current contract address must be 0x0.");
+        address currentContractAddress = getContractAddressInternal(
+            contractName
+        );
+        currentContractAddress.requireEmpty(
+            "Current contract address must be 0x0."
+        );
 
         _storage.setAddress(
             keccak256(abi.encodePacked(CONTRACT_NAME, contractName)),
             contractAddress
         );
         _storage.setAddress(
-            keccak256(
-                abi.encodePacked(CONTRACT_ADDRESS, contractAddress)
-            ),
+            keccak256(abi.encodePacked(CONTRACT_ADDRESS, contractAddress)),
             contractAddress
         );
 
@@ -75,25 +75,32 @@ contract Registration is Base, IRegistration {
         @param contractAddress the current smart contract address.
         @return true if the contract is unregistered. Otherwise it returns false.
      */
-    function unregisterContract(string calldata contractName, address contractAddress)
-        external
-        onlySuperUser()
-        nonReentrant()
-        returns (bool)
-    {
+    function unregisterContract(
+        string calldata contractName,
+        address contractAddress
+    ) external onlySuperUser() nonReentrant() returns (bool) {
         contractAddress.requireNotEmpty("Contract address must not be eq 0x0.");
-        address currentContractAddress = getContractAddressInternal(contractName);
-        currentContractAddress.requireNotEmpty("Current contract address must not be eq 0x0.");
-        currentContractAddress.requireEqualTo(contractAddress, "Current contract address is not eq contract address.");
-
-        _storage.setAddress(keccak256(abi.encodePacked(CONTRACT_NAME, contractName)), EMPTY_ADDRESS);
-        _storage.setAddress(keccak256(abi.encodePacked(CONTRACT_ADDRESS, contractAddress)), EMPTY_ADDRESS);
-
-        emit ContractUnregistered(
-            address(this),
-            contractAddress,
+        address currentContractAddress = getContractAddressInternal(
             contractName
         );
+        currentContractAddress.requireNotEmpty(
+            "Current contract address must not be eq 0x0."
+        );
+        currentContractAddress.requireEqualTo(
+            contractAddress,
+            "Current contract address is not eq contract address."
+        );
+
+        _storage.setAddress(
+            keccak256(abi.encodePacked(CONTRACT_NAME, contractName)),
+            EMPTY_ADDRESS
+        );
+        _storage.setAddress(
+            keccak256(abi.encodePacked(CONTRACT_ADDRESS, contractAddress)),
+            EMPTY_ADDRESS
+        );
+
+        emit ContractUnregistered(address(this), contractAddress, contractName);
 
         return true;
     }
@@ -103,22 +110,27 @@ contract Registration is Base, IRegistration {
         @param contractName smart contract name to look for its associated address.
         @return the address associated to a contract name.
      */
-    function getContractAddress(
-        string calldata contractName
-    ) external view returns (address)
+    function getContractAddress(string calldata contractName)
+        external
+        view
+        returns (address)
     {
         return getContractAddressInternal(contractName);
     }
 
-     /**
+    /**
         @notice It gets the contract address associated to a specific contract name in the platform.
         @param contractName smart contract name to look for its associated address.
         @return the address associated to a contract name.
      */
-    function getContractAddressInternal(
-        string memory contractName
-    ) internal view returns (address)
+    function getContractAddressInternal(string memory contractName)
+        internal
+        view
+        returns (address)
     {
-        return _storage.getAddress(keccak256(abi.encodePacked(CONTRACT_NAME, contractName)));
+        return
+            _storage.getAddress(
+                keccak256(abi.encodePacked(CONTRACT_NAME, contractName))
+            );
     }
 }

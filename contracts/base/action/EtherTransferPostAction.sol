@@ -10,7 +10,6 @@ import "../../services/token/WETH9.sol";
     @author StablePay <hi@stablepay.io>
  */
 contract EtherTransferPostAction is PostActionBase {
-
     /** Constants */
 
     address internal constant ADDRESS_EMPTY = address(0x0);
@@ -55,9 +54,13 @@ contract EtherTransferPostAction is PostActionBase {
         returns (bool)
     {
         // Verifies WETH token address.
-        wethTokenAddress.requireEqualTo(postActionData.targetToken, "WETH token address is not eq target token adress.");
+        wethTokenAddress.requireEqualTo(
+            postActionData.targetToken,
+            "WETH token address is not eq target token adress."
+        );
         require(
-            WETH9(postActionData.targetToken).balanceOf(address(this)) >= postActionData.toAmount,
+            WETH9(postActionData.targetToken).balanceOf(address(this)) >=
+                postActionData.toAmount,
             "Balance of WETH9 is not gte amount to transfer."
         );
 
@@ -88,9 +91,10 @@ contract EtherTransferPostAction is PostActionBase {
         @param postActionData associated to this execution.
         @param etherAmountTransferred ether amount transferred to the receiver address.
      */
-    function emitActionExecutedEvent(StablePayCommon.PostActionData memory postActionData, uint etherAmountTransferred)
-        internal
-    {
+    function emitActionExecutedEvent(
+        StablePayCommon.PostActionData memory postActionData,
+        uint256 etherAmountTransferred
+    ) internal {
         emit ActionExecuted(
             address(this),
             postActionData.sourceAmount,
@@ -100,7 +104,7 @@ contract EtherTransferPostAction is PostActionBase {
             postActionData.sourceToken,
             postActionData.targetToken,
             postActionData.toAddress,
-            wethTokenAddress,       // External address
+            wethTokenAddress, // External address
             postActionData.fromAddress,
             ETHER_TRANSFER_ACTION_DATA,
             postActionData.data
@@ -117,16 +121,20 @@ contract EtherTransferPostAction is PostActionBase {
         StablePayCommon.PostActionData memory postActionData,
         uint256 initialPostActionEtherBalance,
         uint256 finalPostActionEtherBalance
-    )
-        internal
-        returns (uint256)
-    {
-        uint256 etherAmountToTransfer = finalPostActionEtherBalance.sub(initialPostActionEtherBalance);
+    ) internal returns (uint256) {
+        uint256 etherAmountToTransfer = finalPostActionEtherBalance.sub(
+            initialPostActionEtherBalance
+        );
         require(etherAmountToTransfer > 0, "Ether amount must be gt 0.");
-        require(postActionData.toAmount == etherAmountToTransfer, "To amount is not eq ether amount received.");
+        require(
+            postActionData.toAmount == etherAmountToTransfer,
+            "To amount is not eq ether amount received."
+        );
 
         // Transfer Ether to the received address. See https://diligence.consensys.net/posts/2019/09/stop-using-soliditys-transfer-now/
-        (bool success, ) = postActionData.toAddress.call.value(etherAmountToTransfer)("");
+        (bool success, ) = postActionData.toAddress.call.value(
+            etherAmountToTransfer
+        )("");
         require(success, "Ether transfer to receiver failed.");
 
         return etherAmountToTransfer;

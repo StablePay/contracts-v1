@@ -70,7 +70,9 @@ contract IVault {
         @param tokenAddress address which represents the ERC20 token.
         @param amount to transfer to this contract.
      */
-    function depositTokens(address tokenAddress, uint256 amount) external returns (bool);
+    function depositTokens(address tokenAddress, uint256 amount)
+        external
+        returns (bool);
 
     /**
       @notice It transfers a specific amount of tokens to an address.

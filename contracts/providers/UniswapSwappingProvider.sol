@@ -69,7 +69,11 @@ contract UniswapSwappingProvider is AbstractSwappingProvider {
         );
 
         // Set the spender's token allowance to order source amount.
-        approveTokensTo(IERC20(_order.sourceToken), address(sourceExchange), sourceTokensToSell);
+        approveTokensTo(
+            IERC20(_order.sourceToken),
+            address(sourceExchange),
+            sourceTokensToSell
+        );
 
         sourceExchange.tokenToTokenSwapOutput(
             _order.targetAmount,
@@ -83,7 +87,10 @@ contract UniswapSwappingProvider is AbstractSwappingProvider {
         approveTokensTo(IERC20(_order.sourceToken), address(sourceExchange), 0);
 
         require(
-            IERC20(_order.targetToken).transfer(msg.sender, _order.targetAmount),
+            IERC20(_order.targetToken).transfer(
+                msg.sender,
+                _order.targetAmount
+            ),
             "Source transfer invocation was not successful."
         );
 
@@ -136,7 +143,10 @@ contract UniswapSwappingProvider is AbstractSwappingProvider {
         );
 
         require(
-            IERC20(_order.targetToken).transfer(msg.sender, _order.targetAmount),
+            IERC20(_order.targetToken).transfer(
+                msg.sender,
+                _order.targetAmount
+            ),
             "Source transfer invocation was not successful."
         );
 
@@ -158,9 +168,19 @@ contract UniswapSwappingProvider is AbstractSwappingProvider {
         IERC20 _sourceToken,
         IERC20 _targetToken,
         uint256 _targetAmount
-    ) external view returns (bool isSupported, uint256 minRate, uint256 maxRate) {
-        require(address(_sourceToken) != address(0x0), "Source token must not be eq 0x0.");
-        require(address(_targetToken) != address(0x0), "Target token must not be eq 0x0.");
+    )
+        external
+        view
+        returns (bool isSupported, uint256 minRate, uint256 maxRate)
+    {
+        require(
+            address(_sourceToken) != address(0x0),
+            "Source token must not be eq 0x0."
+        );
+        require(
+            address(_targetToken) != address(0x0),
+            "Target token must not be eq 0x0."
+        );
         require(_targetAmount > 0, "Target amount is not gt 0.");
 
         UniswapFactoryInterface uFactory = UniswapFactoryInterface(

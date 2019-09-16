@@ -44,7 +44,10 @@ contract StablePayBase is Base, IStablePay {
     /** Modifiers */
 
     modifier isSender(address target) {
-        require(msg.sender == target, "Sender is not equals to 'target' address.");
+        require(
+            msg.sender == target,
+            "Sender is not equals to 'target' address."
+        );
         _;
     }
 
@@ -74,7 +77,10 @@ contract StablePayBase is Base, IStablePay {
     modifier areOrderAmountsValidEther(StablePayCommon.Order memory order) {
         require(msg.value > 0, "Msg value is not gt 0");
         require(order.sourceAmount > 0, "Source amount is not gt 0");
-        require(msg.value == order.sourceAmount, "Msg value is not eq source amount");
+        require(
+            msg.value == order.sourceAmount,
+            "Msg value is not eq source amount"
+        );
         require(order.targetAmount > 0, "Target amount is not gt 0.");
         _;
     }
@@ -102,7 +108,12 @@ contract StablePayBase is Base, IStablePay {
      */
     function getProviderRegistry() internal view returns (IProviderRegistry) {
         address stablePayStorageAddress = _storage.getAddress(
-            keccak256(abi.encodePacked(CONTRACT_NAME, STABLE_PAY_PROVIDER_REGISTRY_NAME))
+            keccak256(
+                abi.encodePacked(
+                    CONTRACT_NAME,
+                    STABLE_PAY_PROVIDER_REGISTRY_NAME
+                )
+            )
         );
         return IProviderRegistry(stablePayStorageAddress);
     }
@@ -147,10 +158,10 @@ contract StablePayBase is Base, IStablePay {
 
         // Calculating the fee amount using the formula:
         //      target amount * platform fee / (100 -fee value basis- * 100 -Percentage-)
-        uint256 feeAmountAvoidDecimals = order.targetAmount
+        uint256 feeAmountAvoidDecimals = order
+            .targetAmount
             .mul(platformFee)
             .div(FEE_VALUE_BASIS_PERCENTAGE);
-
 
         return feeAmountAvoidDecimals;
     }
@@ -165,7 +176,10 @@ contract StablePayBase is Base, IStablePay {
         returns (bool)
     {
         if (_feeAmount > 0) {
-            bool result = IERC20(_tokenAddress).transfer(getVault(), _feeAmount);
+            bool result = IERC20(_tokenAddress).transfer(
+                getVault(),
+                _feeAmount
+            );
             require(result, "Tokens transfer to vault was invalid.");
         }
         return true;
@@ -347,7 +361,10 @@ contract StablePayBase is Base, IStablePay {
             postActionAddress,
             currentToAmount
         );
-        require(transferToPostActionResult, "Transfer to 'target' address failed.");
+        require(
+            transferToPostActionResult,
+            "Transfer to 'target' address failed."
+        );
 
         StablePayCommon.PostActionData memory postActionData = createPostActionData(
             order,
@@ -390,7 +407,7 @@ contract StablePayBase is Base, IStablePay {
             });
     }
 
-     /**
+    /**
         @notice Transfer tokens to the 'target' address if source and target tokens are equal.
         @param order order instance which defines the data needed to make the swap (ether to token) and transfer.
         @return true if source and target token addresses are equal. Otherwise it returns false.
@@ -439,7 +456,7 @@ contract StablePayBase is Base, IStablePay {
         return _isTransferTokens;
     }
 
-     /**
+    /**
         @notice It does the transfer/swap between tokens using a swapping provider.
         @dev After swapping, it checks whether the target amount is equal to the current balance (of this contract). If it is not equals, it throws a require error. See 'checkCurrentTargetBalance' function.
 
@@ -520,7 +537,10 @@ contract StablePayBase is Base, IStablePay {
             (, feeAmount) = calculateAndTransferFee(order);
 
             // Calculate and transfer the 'target' amount.
-            uint256 toAmount = calculateAndTransferAmountToPostActionAddress(order, feeAmount);
+            uint256 toAmount = calculateAndTransferAmountToPostActionAddress(
+                order,
+                feeAmount
+            );
 
             // Emit PaymentSent event for the from/to order.
             emitPaymentSentEvent(order, toAmount);
@@ -558,12 +578,12 @@ contract StablePayBase is Base, IStablePay {
         bytes32[] memory providerKeys
     )
         internal
+        view
         isNotPaused()
         isPostActionValid(order.postActionAddress)
         isTokenAvailable(order.targetToken, order.targetAmount)
         areOrderAmountsValidToken(order)
         isSender(order.fromAddress)
-        view
         returns (bool)
     {
         providerKeys;
@@ -582,9 +602,7 @@ contract StablePayBase is Base, IStablePay {
     function transferWithTokens(
         StablePayCommon.Order memory order,
         bytes32[] memory providerKeys
-    ) 
-        public
-        nonReentrant() {
+    ) public nonReentrant() {
         requireTransferWithTokens(order, providerKeys);
 
         // Transfer tokens if source / target tokens are equal.
@@ -667,7 +685,10 @@ contract StablePayBase is Base, IStablePay {
             (, feeAmount) = calculateAndTransferFee(order);
 
             // Calculate and transfer the 'target' amount.
-            uint256 toAmount = calculateAndTransferAmountToPostActionAddress(order, feeAmount);
+            uint256 toAmount = calculateAndTransferAmountToPostActionAddress(
+                order,
+                feeAmount
+            );
 
             // Emit PaymentSent event for the from/to order.
             emitPaymentSentEvent(order, toAmount);
@@ -683,7 +704,7 @@ contract StablePayBase is Base, IStablePay {
 
             return true;
         }
-        
+
         // Emit ExecutionTransferFailed event for StablePay.
         emitExecutionTransferFailedEvent(
             order,

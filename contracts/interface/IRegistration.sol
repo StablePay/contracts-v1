@@ -59,7 +59,8 @@ contract IRegistration {
         @param contractName smart contract name to look for its associated address.
         @return the address associated to a contract name.
      */
-    function getContractAddress(
-        string calldata contractName
-    ) external view returns (address);
+    function getContractAddress(string calldata contractName)
+        external
+        view
+        returns (address);
 }

@@ -108,23 +108,23 @@ contract Settings is Base, ISettings {
         returns (bool)
     {
         tokenAddress.requireNotEmpty("Token address must not be eq 0x0.");
-        (bool available, ,) = getTokenAvailabilityInternal(tokenAddress);
+        (bool available, , ) = getTokenAvailabilityInternal(tokenAddress);
         require(available, "Token availability is already disabled.");
 
         _storage.setBool(
             keccak256(abi.encodePacked(TOKEN_AVAILABLE, tokenAddress)),
             false
         );
-        _storage.setUint(keccak256(abi.encodePacked(TOKEN_MIN_AMOUNT, tokenAddress)), 0);
-        _storage.setUint(keccak256(abi.encodePacked(TOKEN_MAX_AMOUNT, tokenAddress)), 0);
-
-        emit TokenAvailabilityUpdated(
-            address(this),
-            tokenAddress,
-            0,
-            0,
-            false
+        _storage.setUint(
+            keccak256(abi.encodePacked(TOKEN_MIN_AMOUNT, tokenAddress)),
+            0
         );
+        _storage.setUint(
+            keccak256(abi.encodePacked(TOKEN_MAX_AMOUNT, tokenAddress)),
+            0
+        );
+
+        emit TokenAvailabilityUpdated(address(this), tokenAddress, 0, 0, false);
         return true;
     }
 
@@ -157,12 +157,7 @@ contract Settings is Base, ISettings {
         address tokenAddress,
         uint256 minAmount,
         uint256 maxAmount
-    )
-        external
-        onlySuperUser()
-        nonReentrant()
-        returns (bool)
-    {
+    ) external onlySuperUser() nonReentrant() returns (bool) {
         tokenAddress.requireNotEmpty("Token address must not be eq 0x0.");
         require(minAmount > 0, "Min amount is not gt 0.");
         require(minAmount < maxAmount, "Min amount is not lt max amount.");
@@ -189,10 +184,14 @@ contract Settings is Base, ISettings {
         return true;
     }
 
-    function isTokenAvailable(address tokenAddress, uint256 amount) external view returns (bool){
-        (bool available, uint256 minAmount, uint256 maxAmount) = getTokenAvailabilityInternal(tokenAddress);
-        return available &&
-            amount >= minAmount &&
-            amount <= maxAmount;
+    function isTokenAvailable(address tokenAddress, uint256 amount)
+        external
+        view
+        returns (bool)
+    {
+        (bool available, uint256 minAmount, uint256 maxAmount) = getTokenAvailabilityInternal(
+            tokenAddress
+        );
+        return available && amount >= minAmount && amount <= maxAmount;
     }
 }

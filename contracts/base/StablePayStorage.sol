@@ -95,7 +95,11 @@ contract StablePayStorage is Base, IProviderRegistry {
         IERC20 sourceToken,
         IERC20 targetToken,
         uint256 targetAmount
-    ) external view returns (bool isSupported, uint256 minRate, uint256 maxRate) {
+    )
+        external
+        view
+        returns (bool isSupported, uint256 minRate, uint256 maxRate)
+    {
         require(
             isSwappingProviderValidInternal(providerKey),
             "Provider must exist and be enabled."
@@ -359,10 +363,7 @@ contract StablePayStorage is Base, IProviderRegistry {
         nonReentrant()
         returns (bool)
     {
-        require(
-            _providerKey != bytes32(0x0),
-            "Provider key must not be 0x0."
-        );
+        require(_providerKey != bytes32(0x0), "Provider key must not be 0x0.");
         require(
             _providerAddress != address(0x0),
             "Provider address must not be 0x0."
@@ -396,10 +397,7 @@ contract StablePayStorage is Base, IProviderRegistry {
         nonReentrant()
         returns (bool)
     {
-        require(
-            providerKey != bytes32(0x0),
-            "Provider key must not be 0x0."
-        );
+        require(providerKey != bytes32(0x0), "Provider key must not be 0x0.");
 
         address providerAddress = providers[providerKey].providerAddress;
 

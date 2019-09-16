@@ -32,10 +32,10 @@ library Bytes32ArrayLib {
     {
         if (index >= self.length) return self;
 
-        if(index == self.length - 1) {
-          delete self[self.length - 1];
-          self.length--;
-          return self;
+        if (index == self.length - 1) {
+            delete self[self.length - 1];
+            self.length--;
+            return self;
         }
 
         bytes32 temp = self[self.length - 1];
@@ -51,14 +51,14 @@ library Bytes32ArrayLib {
     function getIndex(bytes32[] storage self, bytes32 item)
         internal
         view
-        returns (bool found, uint indexAt)
+        returns (bool found, uint256 indexAt)
     {
         found = false;
-        for(indexAt = 0; indexAt < self.length; indexAt++) {
-          found = self[indexAt] == item;
-          if(found) {
-            return (found, indexAt);
-          }
+        for (indexAt = 0; indexAt < self.length; indexAt++) {
+            found = self[indexAt] == item;
+            if (found) {
+                return (found, indexAt);
+            }
         }
         return (found, indexAt);
     }
@@ -67,7 +67,7 @@ library Bytes32ArrayLib {
         internal
         returns (bytes32[] memory)
     {
-        (bool found, uint indexAt) = getIndex(self, item);
+        (bool found, uint256 indexAt) = getIndex(self, item);
         if (!found) return self;
 
         return removeAt(self, indexAt);

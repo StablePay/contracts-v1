@@ -8,7 +8,6 @@ import "./CToken.sol";
  * @author Compound
  */
 contract CEther is CToken {
-
     /*** User Interface ***/
 
     /**
@@ -23,7 +22,7 @@ contract CEther is CToken {
      * @param redeemTokens The number of cTokens to redeem into underlying
      * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
      */
-    function redeem(uint redeemTokens) external returns (uint);
+    function redeem(uint256 redeemTokens) external returns (uint256);
 
     /**
      * @notice Sender redeems cTokens in exchange for a specified amount of underlying asset
@@ -31,14 +30,14 @@ contract CEther is CToken {
      * @param redeemAmount The amount of underlying to redeem
      * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
      */
-    function redeemUnderlying(uint redeemAmount) external returns (uint);
+    function redeemUnderlying(uint256 redeemAmount) external returns (uint256);
 
     /**
       * @notice Sender borrows assets from the protocol to their own address
       * @param borrowAmount The amount of the underlying asset to borrow
       * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
       */
-    function borrow(uint borrowAmount) external returns (uint);
+    function borrow(uint256 borrowAmount) external returns (uint256);
 
     /**
      * @notice Sender repays their own borrow
@@ -60,5 +59,7 @@ contract CEther is CToken {
      * @param borrower The borrower of this cToken to be liquidated
      * @param cTokenCollateral The market in which to seize collateral from the borrower
      */
-    function liquidateBorrow(address borrower, CToken cTokenCollateral) external payable;
+    function liquidateBorrow(address borrower, CToken cTokenCollateral)
+        external
+        payable;
 }

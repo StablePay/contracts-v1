@@ -85,11 +85,7 @@ contract Role is Base, IRole {
             keccak256(abi.encodePacked("access.role", "owner", msg.sender))
         );
 
-        emit OwnerRemoved(
-            address(this),
-            msg.sender,
-            now
-        );
+        emit OwnerRemoved(address(this), msg.sender, now);
         return true;
     }
 

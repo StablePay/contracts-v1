@@ -80,7 +80,5 @@ contract IRole is IOwnable {
         @notice It removes the owner from the platform.
         @dev It needs to be executed after transfering the ownership to a new address.
      */
-    function deleteOwner()
-        external
-        returns (bool);
+    function deleteOwner() external returns (bool);
 }

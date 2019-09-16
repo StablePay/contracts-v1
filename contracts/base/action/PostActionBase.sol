@@ -29,7 +29,10 @@ contract PostActionBase is Base, IPostAction {
         @param anAddress address to be checked.
      */
     modifier isStablePay(address anAddress) {
-        getStablePayAddress().requireEqualTo(anAddress, "Address must be StablePay");
+        getStablePayAddress().requireEqualTo(
+            anAddress,
+            "Address must be StablePay"
+        );
         _;
     }
 
