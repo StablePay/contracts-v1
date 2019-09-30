@@ -11,7 +11,7 @@ const {
 } = require('../util/consts');
 const registerProvider  = require('../util/events').registryProvider;
 
-contract('StablePayStorageUnpauseSwappingProviderTest', accounts => {
+contract('StablePayStorageUnpauseByAdminSwappingProviderTest', accounts => {
     const owner = accounts[0];
     const account1 = accounts[1];
     const account2 = accounts[2];
@@ -30,12 +30,12 @@ contract('StablePayStorageUnpauseSwappingProviderTest', accounts => {
     });
 
     withData({
-        _1_unpauseByOwner: [account1, account1, true, true, '_5textToBytes1', 'Swapping provider must not be paused by admin.', true],
-        _2_unpauseByNonOwner: [account1, account2, true, true, '_5textToBytes2', 'Swapping provider owner is not valid', true],
+        _1_unpauseByOwner: [account1, owner, true, true, '_5textToBytes1', undefined, false],
+        _2_unpauseByNonOwner: [account1, account2, true, true, '_5textToBytes2', 'Msg sender does not have permission.', true],
         _3_unpauseNonExistingProvider: [account1, account1, true, false, '_5textToBytes3', 'Swapping provider must exist', true],
-        _4_unpauseNonPausedProvider: [account1, account1, false, true, '_5textToBytes4', 'Swapping provider must be paused.', true]
+        _4_unpauseNonPausedProvider: [account1, owner, false, true, '_5textToBytes4', 'Swapping provider must be paused.', true]
     }, function(providerOwner, pauseByAccount, paused, exists, providerTextKey, expectedErrorMessage, mustFail) {
-        it(t('anUser', 'unpauseSwappingProvider', 'Should be able (or not) to pause a provider.', mustFail), async function() {
+        it(t('anUser', 'unpauseByAdminSwappingProvider', 'Should be able (or not) to pause a provider.', mustFail), async function() {
             //Setup
             const providerKey = toBytes32(providerTextKey);
             await stablePayStorage._registerSwappingProvider(
@@ -43,13 +43,12 @@ contract('StablePayStorageUnpauseSwappingProviderTest', accounts => {
                 providerKey,
                 providerOwner,
                 paused,
-                paused,
                 exists
             );
 
             //Invocation
             try {
-                const result = await stablePayStorage.unpauseSwappingProvider(providerKey, {from: pauseByAccount});
+                const result = await stablePayStorage.unpauseByAdminSwappingProvider(providerKey, {from: pauseByAccount});
 
                 // Assertions
                 registerProvider
@@ -57,6 +56,7 @@ contract('StablePayStorageUnpauseSwappingProviderTest', accounts => {
                     .emitted(stablePayStorage.address, genericSmartContract);
 
                 const isPaused = await stablePayStorage.isSwappingProviderPaused(providerKey);
+                console.log(isPaused);
 
                 assert(!isPaused);
                 assert(!mustFail, 'It should have failed because data is invalid.');

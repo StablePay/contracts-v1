@@ -39,7 +39,7 @@ interface ISettings {
 
     /** Functions */
 
-    function setPlatformFee(uint16 fee) external returns (bool);
+    function setPlatformFee(uint16 fee) external;
 
     function getPlatformFee() external view returns (uint16);
 
@@ -49,7 +49,7 @@ interface ISettings {
 
         @param reason the reason why the platform is being paused.
      */
-    function pausePlatform(string calldata reason) external returns (bool);
+    function pausePlatform(string calldata reason) external;
 
     /**
         @notice It unpauses the platform in when an emergency issue was fixed.
@@ -57,7 +57,7 @@ interface ISettings {
 
         @param reason the reason why the platform is being unpaused.
      */
-    function unpausePlatform(string calldata reason) external returns (bool);
+    function unpausePlatform(string calldata reason) external;
 
     /**
         @notice It gets whether the platform is paused or not.
@@ -66,8 +66,7 @@ interface ISettings {
     function isPlatformPaused() external view returns (bool);
 
     function disableTokenAvailability(address tokenAddress)
-        external
-        returns (bool);
+        external;
 
     function getTokenAvailability(address tokenAddress)
         external
@@ -78,7 +77,7 @@ interface ISettings {
         address tokenAddress,
         uint256 minAmount,
         uint256 maxAmount
-    ) external returns (bool);
+    ) external;
 
     function isTokenAvailable(address tokenAddress, uint256 amount)
         external

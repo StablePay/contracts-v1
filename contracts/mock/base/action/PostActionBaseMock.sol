@@ -46,9 +46,7 @@ contract PostActionBaseMock is PostActionBase {
     }
 
     function execute(StablePayCommon.PostActionData memory postActionData)
-    public
-    returns (bool){
+    public {
         postActionData;
-        return true;
     }
 }

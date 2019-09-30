@@ -58,7 +58,6 @@ contract('StablePayStorageRegisterSwappingProviderTest', accounts => {
 
                 assert.equal(providerDataResult.providerAddress, providerAddress);
                 assert.equal(providerDataResult.ownerAddress, providerOwner);
-                assert.equal(providerDataResult.pausedByOwner, false);
                 assert.equal(providerDataResult.pausedByAdmin, true);
                 assert.equal(providerDataResult.exists, true);
                 assert.equal(providersCountResult, 1);

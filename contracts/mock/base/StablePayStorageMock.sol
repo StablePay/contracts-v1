@@ -44,14 +44,12 @@ contract StablePayStorageMock is StablePayStorage {
         address payable _providerAddress,
         bytes32 _providerKey,
         address _owner,
-        bool _pausedByOwner,
         bool _pausedByAdmin,
         bool _exists
     ) public returns (bool) {
         providers[_providerKey] = StablePayCommon.SwappingProvider({
             providerAddress: _providerAddress,
             ownerAddress: _owner,
-            pausedByOwner: _pausedByOwner,
             pausedByAdmin: _pausedByAdmin,
             exists: _exists,
             createdAt: now

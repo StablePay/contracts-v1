@@ -72,7 +72,6 @@ contract('StablePayStorageModifiersTest', accounts => {
                 providerKey,
                 providerOwner,
                 false,
-                false,
                 exists
             );
 

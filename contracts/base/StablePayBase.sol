@@ -372,9 +372,9 @@ contract StablePayBase is Base, IStablePay {
             feeAmount
         );
 
+        // Execute the post-action.
         IPostAction postAction = IPostAction(postActionAddress);
-        bool postActionExecutionResult = postAction.execute(postActionData);
-        require(postActionExecutionResult, "Post action execution failed.");
+        postAction.execute(postActionData);
 
         return currentToAmount;
     }
@@ -481,7 +481,7 @@ contract StablePayBase is Base, IStablePay {
             providerKey
         );
 
-        // Transfer tokens from the owner (msg.sender) to swapping provider.
+        // Transfer tokens from the msg.sender (token owner) to swapping provider.
         // The owner already allowed to StablePay (this contract) transfer the tokens.
         transferFrom(
             order.sourceToken,
@@ -571,11 +571,9 @@ contract StablePayBase is Base, IStablePay {
         @dev If a value is not valid, it throws a require error.
 
         @param order order instance which defines the data needed to make the transfer and swap if needed.
-        @param providerKeys list of provider keys (sorted) to used as liquidity providers in the swapping process.
      */
     function requireTransferWithTokens(
-        StablePayCommon.Order memory order,
-        bytes32[] memory providerKeys
+        StablePayCommon.Order memory order
     )
         internal
         view
@@ -584,10 +582,7 @@ contract StablePayBase is Base, IStablePay {
         isTokenAvailable(order.targetToken, order.targetAmount)
         areOrderAmountsValidToken(order)
         isSender(order.fromAddress)
-        returns (bool)
     {
-        providerKeys;
-        return true;
     }
 
     /**
@@ -597,34 +592,26 @@ contract StablePayBase is Base, IStablePay {
         @dev The provider keys list must be not empty in order to swap the tokens.
 
         @param order order instance which defines the data needed to make the transfer and swap if needed.
-        @param providerKeys list of provider keys (sorted) to used as liquidity providers in the swapping process.
+        @param providerKey provider key to be used as liquidity providers in the swapping process.
      */
     function transferWithTokens(
         StablePayCommon.Order memory order,
-        bytes32[] memory providerKeys
-    ) public nonReentrant() {
-        requireTransferWithTokens(order, providerKeys);
+        bytes32 providerKey
+    ) public {
+        requireTransferWithTokens(order);
 
         // Transfer tokens if source / target tokens are equal.
         if (transferTokensIfTokensAreEquals(order)) {
             return;
         }
-        require(providerKeys.length > 0, "Provider keys must not be empty.");
 
-        for (
-            uint256 index = 0;
-            index < providerKeys.length;
-            index = index.add(1)
-        ) {
-            bytes32 providerKey = providerKeys[index];
-
-            // Verify if the swapping provider is valid.
-            if (getProviderRegistry().isSwappingProviderValid(providerKey)) {
-                if (doTransferWithTokens(order, providerKey)) {
-                    return; // The swapping was ok.
-                }
+        // Verify if the swapping provider is valid.
+        if (getProviderRegistry().isSwappingProviderValid(providerKey)) {
+            if (doTransferWithTokens(order, providerKey)) {
+                return; // The swapping was ok.
             }
         }
+
         revert("Swapping token could not be processed.");
     }
 
@@ -719,11 +706,9 @@ contract StablePayBase is Base, IStablePay {
         @dev If a value is not valid, it throws a require error.
 
         @param order order instance which defines the data needed to make the transfer and swap if needed.
-        @param providerKeys list of provider keys (sorted) to used as liquidity providers in the swapping process.
      */
     function requireTransferWithEthers(
-        StablePayCommon.Order memory order,
-        bytes32[] memory providerKeys
+        StablePayCommon.Order memory order
     )
         internal
         view
@@ -732,10 +717,7 @@ contract StablePayBase is Base, IStablePay {
         isTokenAvailable(order.targetToken, order.targetAmount)
         areOrderAmountsValidEther(order)
         isSender(order.fromAddress)
-        returns (bool)
     {
-        providerKeys;
-        return true;
     }
 
     /**
@@ -744,28 +726,18 @@ contract StablePayBase is Base, IStablePay {
         @dev The provider keys list must be not empty in order to swap the tokens.
 
         @param order order instance which defines the data needed to make the swap (ether to token) and transfer.
-        @param providerKeys list of provider keys (sorted) to used as liquidity providers in the swapping process.
+        @param providerKey provider key to be used as liquidity providers in the swapping process.
      */
     function transferWithEthers(
         StablePayCommon.Order memory order,
-        bytes32[] memory providerKeys
-    ) public payable nonReentrant() {
-        requireTransferWithEthers(order, providerKeys);
+        bytes32 providerKey
+    ) public payable {
+        requireTransferWithEthers(order);
 
-        require(providerKeys.length > 0, "Provider keys must not be empty.");
-
-        for (
-            uint256 index = 0;
-            index < providerKeys.length;
-            index = index.add(1)
-        ) {
-            bytes32 providerKey = providerKeys[index];
-
-            // Verify if the swapping provider is valid.
-            if (getProviderRegistry().isSwappingProviderValid(providerKey)) {
-                if (doTransferWithEthers(order, providerKey)) {
-                    return; // The swapping was ok.
-                }
+        // Verify if the swapping provider is valid.
+        if (getProviderRegistry().isSwappingProviderValid(providerKey)) {
+            if (doTransferWithEthers(order, providerKey)) {
+                return; // The swapping was ok.
             }
         }
         revert("Swap with ether could not be performed.");

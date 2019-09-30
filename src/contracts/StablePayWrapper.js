@@ -46,8 +46,9 @@ StablePayWrapper.prototype.transferWithTokens = async function(data, ...params) 
         logIf(this.verbose, `Target Token:          ${order[11]}.`);
         logIf(this.verbose, `Merchant Address:      ${order[12]}.`);
         //logIf(this.verbose, `Customer Address:      ${params}.`);
+        const providerKey = providers[0];
 
-        const result = await this.stablePay.transferWithTokens(order, providers, ...params);
+        const result = await this.stablePay.transferWithTokens(order, providerKey, ...params);
         // Assertions
         assert(result);
 
@@ -103,8 +104,9 @@ StablePayWrapper.prototype.transferWithEthers = async function(data, ...params) 
         logIf(this.verbose, `Target Token:          ${order[11]}.`);
         logIf(this.verbose, `Merchant Address:      ${order[12]}.`);
         logIf(this.verbose, `Params:                ${JSON.stringify(params)}.`);
+        const providerKey = providers[0];
 
-        const result = await this.stablePay.transferWithEthers(order, providers, {
+        const result = await this.stablePay.transferWithEthers(order, providerKey, {
             from: params[0].from,
             gas: params[0].gas,
             value: calculatedSourceAmount

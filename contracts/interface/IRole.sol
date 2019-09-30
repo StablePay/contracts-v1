@@ -58,11 +58,9 @@ contract IRole is IOwnable {
 
         @param role the role name to give to the address.
         @param anAddress the address which will receive the role.
-        @return true if the role is added. Otherwise it returns false.
      */
     function adminRoleAdd(string calldata role, address anAddress)
-        external
-        returns (bool);
+        external;
 
     /**
         @notice It removes a role to a specific address.
@@ -70,15 +68,13 @@ contract IRole is IOwnable {
 
         @param role the role name to remove from the address.
         @param anAddress the address which will be removed from the role.
-        @return true if the role is removed. Otherwise it returns false.
      */
     function adminRoleRemove(string calldata role, address anAddress)
-        external
-        returns (bool);
+        external;
 
     /**
         @notice It removes the owner from the platform.
         @dev It needs to be executed after transfering the ownership to a new address.
      */
-    function deleteOwner() external returns (bool);
+    function deleteOwner() external;
 }

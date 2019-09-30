@@ -41,27 +41,23 @@ contract Settings is Base, ISettings {
         external
         onlySuperUser()
         nonReentrant()
-        returns (bool)
     {
         uint16 oldPlatformFee = _storage.getUint16(
             keccak256(abi.encodePacked(PLATFORM_FEE))
         );
         _storage.setUint16(keccak256(abi.encodePacked(PLATFORM_FEE)), _fee);
         emit PlatformFeeUpdated(address(this), oldPlatformFee, _fee);
-        return true;
     }
 
     /**
         @notice It pauses the platform in emergency cases.
         @dev The sender must be a super user (owner or admin) only.
-
         @param reason the reason why the platform is being paused.
      */
     function pausePlatform(string calldata reason)
         external
         onlySuperUser()
         nonReentrant()
-        returns (bool)
     {
         _storage.setBool(keccak256(abi.encodePacked(STATE_PAUSED)), true);
 
@@ -78,7 +74,6 @@ contract Settings is Base, ISettings {
         external
         onlySuperUser()
         nonReentrant()
-        returns (bool)
     {
         _storage.setBool(keccak256(abi.encodePacked(STATE_PAUSED)), false);
 
@@ -105,7 +100,6 @@ contract Settings is Base, ISettings {
         external
         onlySuperUser()
         nonReentrant()
-        returns (bool)
     {
         tokenAddress.requireNotEmpty("Token address must not be eq 0x0.");
         (bool available, , ) = getTokenAvailabilityInternal(tokenAddress);
@@ -125,7 +119,6 @@ contract Settings is Base, ISettings {
         );
 
         emit TokenAvailabilityUpdated(address(this), tokenAddress, 0, 0, false);
-        return true;
     }
 
     function getTokenAvailability(address tokenAddress)
@@ -157,7 +150,7 @@ contract Settings is Base, ISettings {
         address tokenAddress,
         uint256 minAmount,
         uint256 maxAmount
-    ) external onlySuperUser() nonReentrant() returns (bool) {
+    ) external onlySuperUser() nonReentrant() {
         tokenAddress.requireNotEmpty("Token address must not be eq 0x0.");
         require(minAmount > 0, "Min amount is not gt 0.");
         require(minAmount < maxAmount, "Min amount is not lt max amount.");
@@ -181,7 +174,6 @@ contract Settings is Base, ISettings {
             maxAmount,
             true
         );
-        return true;
     }
 
     function isTokenAvailable(address tokenAddress, uint256 amount)

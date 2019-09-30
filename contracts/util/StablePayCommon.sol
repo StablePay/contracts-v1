@@ -5,7 +5,6 @@ contract StablePayCommon {
         address payable providerAddress;
         address ownerAddress;
         uint256 createdAt;
-        bool pausedByOwner;
         bool pausedByAdmin;
         bool exists;
     }

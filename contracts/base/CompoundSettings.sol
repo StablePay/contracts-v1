@@ -37,13 +37,11 @@ contract CompoundSettings is Base, ICompoundSettings {
         @notice It maps a ERC20 token to a CErc20 token (Compound.finance platform implementation).
         @param erc20Address ERC20 implementation address.
         @param cErc20Address CErc20 implementation address
-        @return true if it was mapped successfully. Otherwise, it returns false.
      */
     function mapErc20ToCEr20(address erc20Address, address cErc20Address)
         external
         onlySuperUser()
         nonReentrant()
-        returns (bool)
     {
         erc20Address.requireNotEmpty("ERC20 address must not be 0x0.");
         cErc20Address.requireNotEmpty("CERC20 address must not be 0x0.");
@@ -61,20 +59,17 @@ contract CompoundSettings is Base, ICompoundSettings {
             erc20Address,
             cErc20Address
         );
-
-        return true;
     }
 
     /**
         @notice It updates the current CErc20 mapping for a ERC20.
         @param erc20Address ERC20 implementation address.
         @param newCErc20Address new CErc20 implementation address.
-        @return true if it was mapped successfully. Otherwise, it returns false.
      */
     function updateMapErc20ToCEr20(
         address erc20Address,
         address newCErc20Address
-    ) external onlySuperUser() nonReentrant() returns (bool) {
+    ) external onlySuperUser() nonReentrant() {
         erc20Address.requireNotEmpty("ERC20 address must not be 0x0.");
         newCErc20Address.requireNotEmpty("CERC20 address must not be 0x0.");
 
@@ -96,8 +91,6 @@ contract CompoundSettings is Base, ICompoundSettings {
             erc20Address,
             newCErc20Address
         );
-
-        return true;
     }
 
     /**

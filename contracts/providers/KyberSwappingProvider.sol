@@ -297,6 +297,7 @@ contract KyberSwappingProvider is AbstractSwappingProvider {
         isStablePay(msg.sender)
         returns (bool)
     {
+        require(_order.sourceToken == address(ETH_TOKEN_ADDRESS), "Source token must be eq ETH address.");
         require(msg.value > 0, "Msg value must be gt 0");
         require(_order.sourceAmount > 0, "Amount must be gt 0");
         require(
@@ -313,9 +314,8 @@ contract KyberSwappingProvider is AbstractSwappingProvider {
         IERC20 targetToken = IERC20(_order.targetToken);
 
         // Get expected rates if the swapping is supported.
-        uint256 minRate;
         uint256 maxRate;
-        (minRate, maxRate) = getExpectedRateIfSupported(
+        (, maxRate) = getExpectedRateIfSupported(
             sourceToken,
             targetToken,
             _order.sourceAmount

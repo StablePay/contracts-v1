@@ -63,7 +63,6 @@ module.exports = async (callback) => {
         assert(tokensUrl, 'Tokens URL is undefined.');
         const ordersUrl = `${appConfig.getStablePayApiUrl().get()}/orders?network=${networkName}`;
         assert(ordersUrl, 'Orders URL is undefined.');
-        //console.log(tokensUrl);
 
         const result = await axios.get(tokensUrl);
         const tokens = result.data;
@@ -97,7 +96,9 @@ module.exports = async (callback) => {
                 const { order, providers } = createOrderResult.data;
                 const sourceTokenRequiredBalance = BigNumber(order[0].toString()).toFixed();
 
-                console.log(`Swapping process will use ${providerKeyGenerator.fromBytes(providers[0])}`);
+                const providerKey = providers[0];
+
+                console.log(`Swapping process will use ${providerKeyGenerator.fromBytes(providerKey)}`);
 
                 swapMessage = `${sourceTokenRequiredBalance} ${token.symbol} => ${targetAmountWei} ${DAI_NAME}`;
 
@@ -123,15 +124,17 @@ module.exports = async (callback) => {
                 if(ETH_ADDRESS !== token.address) {
                     const approveResult = await sourceTokenInstance.approve(stablePayInstance.address, sourceTokenRequiredBalance, { from: customerAddress });
                     assert(approveResult, 'Approve is undefined.');
-                    transferWithResult = await stablePayInstance.transferWithTokens(order, providers, {from: customerAddress, gas: maxGasForDeploying});
+                    transferWithResult = await stablePayInstance.transferWithTokens(order, providerKey, {from: customerAddress, gas: maxGasForDeploying});
                 } else {
-                    transferWithResult = await stablePayInstance.transferWithEthers(order, providers, {from: customerAddress, value: sourceTokenRequiredBalance, gas: maxGasForDeploying});
+                    transferWithResult = await stablePayInstance.transferWithEthers(order, providerKey, {from: customerAddress, value: sourceTokenRequiredBalance, gas: maxGasForDeploying});
                 }
                 assert(transferWithResult, 'TransferWith result is undefined.');
 
                 const etherscanUrlPrefix = networkName.toLowerCase() === 'ropsten' ? networkName : 'www';
+                console.log(`Customer: ${customerAddress} => Merchant: ${merchantAddress}`);
                 console.log(`Success ${swapMessage}: https://${etherscanUrlPrefix}.etherscan.io/tx/${transferWithResult.tx}`);
             } catch (error) {
+                console.log(error);
                 console.log(`Error ${swapMessage} : ${error.toString()}`);
                 console.log(`Error on ${token.name}=>${DAI_NAME} stablePayStorage.getExpectedRates(${token.address} (${token.symbol}), ${targetTokenInstance.address} (${DAI_NAME}), ${targetAmountWei});`)
             }

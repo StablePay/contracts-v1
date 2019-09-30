@@ -43,14 +43,6 @@ contract StablePayStorage is Base, IProviderRegistry {
         _;
     }
 
-    modifier isSwappingProviderPausedByOwner(bytes32 providerKey) {
-        require(
-            providers[providerKey].pausedByOwner == true,
-            "Swapping provider must be paused."
-        );
-        _;
-    }
-
     modifier isSwappingProviderPausedByAdmin(bytes32 providerKey) {
         require(
             providers[providerKey].pausedByAdmin == true,
@@ -253,10 +245,7 @@ contract StablePayStorage is Base, IProviderRegistry {
     {
         return
             providers[providerKey].exists &&
-                (
-                    providers[providerKey].pausedByOwner ||
-                        providers[providerKey].pausedByAdmin
-                );
+            providers[providerKey].pausedByAdmin;
     }
 
     function isSwappingProviderValidInternal(bytes32 providerKey)
@@ -266,8 +255,7 @@ contract StablePayStorage is Base, IProviderRegistry {
     {
         return
             providers[providerKey].exists &&
-                !providers[providerKey].pausedByOwner &&
-                !providers[providerKey].pausedByAdmin;
+            !providers[providerKey].pausedByAdmin;
     }
 
     function isSwappingProviderValid(bytes32 providerKey)
@@ -288,7 +276,6 @@ contract StablePayStorage is Base, IProviderRegistry {
         isSwappingProviderNotPausedByAdmin(_providerKey)
         onlySuperUser()
         nonReentrant()
-        returns (bool)
     {
         providers[_providerKey].pausedByAdmin = true;
 
@@ -296,7 +283,6 @@ contract StablePayStorage is Base, IProviderRegistry {
             address(this),
             providers[_providerKey].providerAddress
         );
-        return true;
     }
 
     function unpauseByAdminSwappingProvider(bytes32 _providerKey)
@@ -305,7 +291,6 @@ contract StablePayStorage is Base, IProviderRegistry {
         isSwappingProviderPausedByAdmin(_providerKey)
         onlySuperUser()
         nonReentrant()
-        returns (bool)
     {
         providers[_providerKey].pausedByAdmin = false;
 
@@ -313,44 +298,6 @@ contract StablePayStorage is Base, IProviderRegistry {
             address(this),
             providers[_providerKey].providerAddress
         );
-        return true;
-    }
-
-    function pauseSwappingProvider(bytes32 _providerKey)
-        external
-        swappingProviderExists(_providerKey)
-        isSwappingProviderOwner(_providerKey, msg.sender)
-        isSwappingProviderNotPausedByAdmin(_providerKey)
-        onlySuperUser()
-        nonReentrant()
-        returns (bool)
-    {
-        providers[_providerKey].pausedByOwner = true;
-
-        emit SwappingProviderPaused(
-            address(this),
-            providers[_providerKey].providerAddress
-        );
-        return true;
-    }
-
-    function unpauseSwappingProvider(bytes32 _providerKey)
-        external
-        swappingProviderExists(_providerKey)
-        isSwappingProviderOwner(_providerKey, msg.sender)
-        isSwappingProviderPausedByOwner(_providerKey)
-        isSwappingProviderNotPausedByAdmin(_providerKey)
-        onlySuperUser()
-        nonReentrant()
-        returns (bool)
-    {
-        providers[_providerKey].pausedByOwner = false;
-
-        emit SwappingProviderUnpaused(
-            address(this),
-            providers[_providerKey].providerAddress
-        );
-        return true;
     }
 
     function registerSwappingProvider(
@@ -361,7 +308,6 @@ contract StablePayStorage is Base, IProviderRegistry {
         isSwappingProviderNewOrUpdate(_providerKey, msg.sender)
         onlySuperUser()
         nonReentrant()
-        returns (bool)
     {
         require(_providerKey != bytes32(0x0), "Provider key must not be 0x0.");
         require(
@@ -373,7 +319,6 @@ contract StablePayStorage is Base, IProviderRegistry {
             providerAddress: _providerAddress,
             ownerAddress: msg.sender,
             createdAt: now,
-            pausedByOwner: false,
             pausedByAdmin: true,
             exists: true
         });
@@ -386,8 +331,6 @@ contract StablePayStorage is Base, IProviderRegistry {
             providers[_providerKey].ownerAddress,
             providers[_providerKey].createdAt
         );
-
-        return true;
     }
 
     function unregisterSwappingProvider(bytes32 providerKey)
@@ -395,10 +338,7 @@ contract StablePayStorage is Base, IProviderRegistry {
         swappingProviderExists(providerKey)
         onlySuperUser()
         nonReentrant()
-        returns (bool)
     {
-        require(providerKey != bytes32(0x0), "Provider key must not be 0x0.");
-
         address providerAddress = providers[providerKey].providerAddress;
 
         delete providers[providerKey];
@@ -411,7 +351,5 @@ contract StablePayStorage is Base, IProviderRegistry {
             msg.sender,
             now
         );
-
-        return true;
     }
 }

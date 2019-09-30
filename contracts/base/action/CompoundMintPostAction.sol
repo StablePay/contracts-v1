@@ -55,10 +55,8 @@ contract CompoundMintPostAction is PostActionBase {
      */
     function execute(StablePayCommon.PostActionData memory postActionData)
         public
-        nonReentrant()
         isStablePay(msg.sender)
         isNotPaused()
-        returns (bool)
     {
         IERC20 targetToken = IERC20(postActionData.targetToken);
 
@@ -116,7 +114,6 @@ contract CompoundMintPostAction is PostActionBase {
         } else {
             revert("Target token is not supported in Compound.finance.");
         }
-        return true;
     }
 
     /**

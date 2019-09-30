@@ -87,23 +87,15 @@ interface IProviderRegistry {
     function getProvidersRegistryCount() external view returns (uint256);
 
     function pauseByAdminSwappingProvider(bytes32 providerKey)
-        external
-        returns (bool);
+        external;
 
     function unpauseByAdminSwappingProvider(bytes32 providerKey)
-        external
-        returns (bool);
-
-    function pauseSwappingProvider(bytes32 providerKey) external returns (bool);
-
-    function unpauseSwappingProvider(bytes32 providerKey)
-        external
-        returns (bool);
+        external;
 
     function registerSwappingProvider(
         address payable providerAddress,
         bytes32 providerKey
-    ) external returns (bool);
+    ) external;
 
     /**
         @notice It unregisters a swapping provider from the registry.
@@ -112,6 +104,5 @@ interface IProviderRegistry {
         @return true if the swapping provider is unregistered. Otherwise it returns false.
      */
     function unregisterSwappingProvider(bytes32 providerKey)
-        external
-        returns (bool);
+        external;
 }

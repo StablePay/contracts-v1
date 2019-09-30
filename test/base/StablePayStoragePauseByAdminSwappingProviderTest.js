@@ -11,7 +11,7 @@ const {
 } = require('../util/consts');
 const registerProvider  = require('../util/events').registryProvider;
 
-contract('StablePayStoragePauseSwappingProviderTest', accounts => {
+contract('StablePayStoragePauseByAdminSwappingProviderTest', accounts => {
     const owner = accounts[0];
     const account1 = accounts[1];
     const account2 = accounts[2];
@@ -31,10 +31,10 @@ contract('StablePayStoragePauseSwappingProviderTest', accounts => {
 
     withData({
         _1_pauseByOwner: [owner, owner, true, 'textToBytes1', undefined, false],
-        _2_pauseByNonOwner: [account1, account2, true, 'textToBytes2', 'Swapping provider owner is not valid', true],
+        _2_pauseByNonOwner: [account1, account2, true, 'textToBytes2', 'Msg sender does not have permission.', true],
         _3_pauseNonExistingProvider: [account1, account1, false, 'textToBytes3', 'Swapping provider must exist', true]
     }, function(providerOwner, pauseByAccount, exists, providerTextKey, expectedErrorMessage, mustFail) {
-        it(t('anUser', 'pauseSwappingProvider', 'Should be able (or not) to pause a provider.', mustFail), async function() {
+        it(t('anUser', 'pauseByAdminSwappingProvider', 'Should be able (or not) to pause a provider (by admin).', mustFail), async function() {
             //Setup
             const providerKey = toBytes32(providerTextKey);
             await stablePayStorage._registerSwappingProvider(
@@ -42,13 +42,12 @@ contract('StablePayStoragePauseSwappingProviderTest', accounts => {
                 providerKey,
                 providerOwner,
                 false,
-                false,
                 exists
             );
 
             //Invocation
             try {
-                const result = await stablePayStorage.pauseSwappingProvider(providerKey, {from: pauseByAccount});
+                const result = await stablePayStorage.pauseByAdminSwappingProvider(providerKey, {from: pauseByAccount});
 
                 // Assertions
                 registerProvider
