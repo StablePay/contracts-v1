@@ -4,7 +4,7 @@
   "description": "This is the official Github repository for the StablePay smart contracts.",
   "main": "truffle.js",
   "scripts": {
-    "lint:prettier": "prettier --write **/*.sol",
+    "lint:prettier": "prettier --write **/**/**/*.sol",
     "test": "truffle test",
     "test:coverage": "scripts/coverage.sh",
     "test:ganache": "truffle test --network ganache",
