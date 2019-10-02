@@ -21,7 +21,7 @@ const processArgs = new ProcessArgs();
     Script Arguments
  */
 const senderIndex = 0;
-const providerName = 'KyberNetwork'; // Options: 'Uniswap' or 'KyberNetwork'
+const providerName = 'Uniswap'; // Options: 'Uniswap' or 'KyberNetwork'
 const providerVersion = '1';
 
 module.exports = async (callback) => {

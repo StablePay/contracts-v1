@@ -81,8 +81,7 @@ module.exports = async (callback) => {
 
         const newSwappingProvider = await providerStrategy.getSwappingProvider(providerKey.providerKey);
         assert(newSwappingProvider.exists === true, 'Swapping provider must exists.');
-        assert(newSwappingProvider.pausedByAdmin === false, 'Swapping provider must not be paused by admin.');
-        assert(newSwappingProvider.pausedByOwner === false, 'Swapping provider must not be paused by owner.');
+        assert(newSwappingProvider.pausedByAdmin === true, 'Swapping provider must be paused by admin.');
 
         console.log(`New Swapping Provider Address: ${uniswapSwappingProvider.address}`);
         console.log(`Provider Key: ${providerKey.providerKey}`);

@@ -35,14 +35,6 @@ contract StablePayStorage is Base, IProviderRegistry {
         _;
     }
 
-    modifier isSwappingProviderOwner(bytes32 providerKey, address owner) {
-        require(
-            providers[providerKey].ownerAddress == owner,
-            "Swapping provider owner is not valid."
-        );
-        _;
-    }
-
     modifier isSwappingProviderPausedByAdmin(bytes32 providerKey) {
         require(
             providers[providerKey].pausedByAdmin == true,
@@ -136,6 +128,14 @@ contract StablePayStorage is Base, IProviderRegistry {
             }
         }
         return count;
+    }
+
+    function getProviders()
+        external
+        view
+        returns (bytes32[] memory)
+    {
+        return providersRegistry;
     }
 
     function getExpectedRates(

@@ -51,7 +51,6 @@ module.exports = async (callback) => {
         console.log(`Exists:            ${newSwappingProvider.exists}`);
         console.log(`Address:           ${newSwappingProvider.providerAddress}`);
         console.log(`Owner:             ${newSwappingProvider.ownerAddress}`);
-        console.log(`Paused by Owner:   ${newSwappingProvider.pausedByOwner}`);
         console.log(`Paused by Admin:   ${newSwappingProvider.pausedByAdmin}`);
         const createdAt = newSwappingProvider.createdAt * 1000;
         console.log(`Created At:        ${createdAt}`);

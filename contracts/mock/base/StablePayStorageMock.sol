@@ -19,15 +19,6 @@ contract StablePayStorageMock is StablePayStorage {
 
     /** Methods */
 
-    function _isSwappingProviderOwner(bytes32 _providerKey, address _sender)
-        public
-        view
-        isSwappingProviderOwner(_providerKey, _sender)
-        returns (bool)
-    {
-        return true;
-    }
-
     function _isSwappingProviderNewOrUpdate(
         bytes32 _providerKey,
         address _owner
