@@ -61,9 +61,8 @@ contract IVault {
     /**
       @notice It is used to deposit ether to the Vault by default.
       @dev This function is used by the Base smart contract in the fallback function to transfer any ether received.
-      @return true if it received the ether transferred. Otherwise it returns false.
      */
-    function depositEthers() external payable returns (bool);
+    function depositEthers() external payable;
 
     /**
         @notice It is used to deposit ERC20 tokens.
@@ -71,26 +70,22 @@ contract IVault {
         @param amount to transfer to this contract.
      */
     function depositTokens(address tokenAddress, uint256 amount)
-        external
-        returns (bool);
+        external;
 
     /**
       @notice It transfers a specific amount of tokens to an address.
       @dev It checks whether this contract has at least the amount.
-      @return true if it transfers the tokens. Otherwise it returns false.
      */
     function transferTokens(
         address tokenAddress,
         address toAddress,
         uint256 amount
-    ) external returns (bool);
+    ) external;
 
     /**
       @notice It transfers a specific amount of ether to an address.
       @dev It checks if this smart contract has at least the amount of ether.
-      @return true if it transfers the ether. Otherwise it returns false.
      */
     function transferEthers(address payable toAddress, uint256 amount)
-        external
-        returns (bool);
+        external;
 }

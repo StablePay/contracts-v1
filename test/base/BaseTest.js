@@ -91,7 +91,7 @@ contract('BaseTest', function (accounts) {
 
     withData({
         _1_1ether: ['1', undefined, false],
-        _2_0ether: ['0', 'Msg value must be gt 0.', true]
+        _2_0ether: ['0', undefined, false]
     }, function(amount, messageExpected, mustFail) {
         it(t('anUser', 'fallback', 'Should be able to transfer ether.', mustFail), async function() {
             //Setup

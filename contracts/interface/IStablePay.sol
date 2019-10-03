@@ -74,11 +74,11 @@ contract IStablePay {
         @dev The provider keys list must be not empty in order to swap the tokens.
 
         @param order order instance which defines the data needed to make the transfer and swap if needed.
-        @param providerKeys list of provider keys (sorted) to used as liquidity providers in the swapping process.
+        @param providerKey provider key to be used as liquidity providers in the swapping process.
      */
     function transferWithTokens(
         StablePayCommon.Order memory order,
-        bytes32[] memory providerKeys
+        bytes32 providerKey
     ) public;
 
     /**
@@ -87,10 +87,10 @@ contract IStablePay {
         @dev The provider keys list must be not empty in order to swap the tokens.
 
         @param order order instance which defines the data needed to make the swap (ether to token) and transfer.
-        @param providerKeys list of provider keys (sorted) to used as liquidity providers in the swapping process.
+        @param providerKey provider key to be used as liquidity providers in the swapping process.
      */
     function transferWithEthers(
         StablePayCommon.Order memory order,
-        bytes32[] memory providerKeys
+        bytes32 providerKey
     ) public payable;
 }

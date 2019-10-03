@@ -6,9 +6,11 @@ import "../util/AddressLib.sol";
 
 /**
     @title This manages the settings for the platform.
+    @notice This contract is used to pause/unpause the platform for security reasons.
+    @notice Also it is used to configure min/max amount of target tokens in swapping process.
+
     @author StablePay <hi@stablepay.io>
 
-    @notice It allows configure some aspect in the platform once it is deployed.
  */
 contract Settings is Base, ISettings {
     using AddressLib for address;
@@ -41,27 +43,23 @@ contract Settings is Base, ISettings {
         external
         onlySuperUser()
         nonReentrant()
-        returns (bool)
     {
         uint16 oldPlatformFee = _storage.getUint16(
             keccak256(abi.encodePacked(PLATFORM_FEE))
         );
         _storage.setUint16(keccak256(abi.encodePacked(PLATFORM_FEE)), _fee);
         emit PlatformFeeUpdated(address(this), oldPlatformFee, _fee);
-        return true;
     }
 
     /**
         @notice It pauses the platform in emergency cases.
         @dev The sender must be a super user (owner or admin) only.
-
         @param reason the reason why the platform is being paused.
      */
     function pausePlatform(string calldata reason)
         external
         onlySuperUser()
         nonReentrant()
-        returns (bool)
     {
         _storage.setBool(keccak256(abi.encodePacked(STATE_PAUSED)), true);
 
@@ -78,7 +76,6 @@ contract Settings is Base, ISettings {
         external
         onlySuperUser()
         nonReentrant()
-        returns (bool)
     {
         _storage.setBool(keccak256(abi.encodePacked(STATE_PAUSED)), false);
 
@@ -101,11 +98,15 @@ contract Settings is Base, ISettings {
         return _isPlatformPaused();
     }
 
+    /**
+        @notice It disables a token address as a target token in the platform.
+        @dev This function only can be invoke by an owner or admin user.
+        @param tokenAddress ERC20 address to disable. 
+     */
     function disableTokenAvailability(address tokenAddress)
         external
         onlySuperUser()
         nonReentrant()
-        returns (bool)
     {
         tokenAddress.requireNotEmpty("Token address must not be eq 0x0.");
         (bool available, , ) = getTokenAvailabilityInternal(tokenAddress);
@@ -125,9 +126,15 @@ contract Settings is Base, ISettings {
         );
 
         emit TokenAvailabilityUpdated(address(this), tokenAddress, 0, 0, false);
-        return true;
     }
 
+    /**
+        @notice It gets the current tokens amount availability for specific token address.
+        @notice If the token address is not available, it returns false in the available param.
+        @return available true if the token address is available. Otherwise it returns false.
+        @return minAmount minimum amount of tokens available.
+        @return maxAmount maximum amount of tokens available.
+     */
     function getTokenAvailability(address tokenAddress)
         external
         view
@@ -153,11 +160,18 @@ contract Settings is Base, ISettings {
         return (available, minAmount, maxAmount);
     }
 
+    /**
+        @notice It configures the target token amount availability in the platform.
+        @notice It is used for security reason.
+        @param tokenAddress ERC20 token address to configure.
+        @param minAmount minimum amount of tokens available to swap.
+        @param maxAmount maximum amount of tokens available to swap.
+     */
     function setTokenAvailability(
         address tokenAddress,
         uint256 minAmount,
         uint256 maxAmount
-    ) external onlySuperUser() nonReentrant() returns (bool) {
+    ) external onlySuperUser() nonReentrant() {
         tokenAddress.requireNotEmpty("Token address must not be eq 0x0.");
         require(minAmount > 0, "Min amount is not gt 0.");
         require(minAmount < maxAmount, "Min amount is not lt max amount.");
@@ -181,9 +195,14 @@ contract Settings is Base, ISettings {
             maxAmount,
             true
         );
-        return true;
     }
 
+    /**
+        @notice It gets whether a specific token address and amount is available.
+        @param tokenAddress ERC20 token address to test.
+        @param amount amount of tokens to test.
+        @return true if the amount of tokens (tokenAddress) are available to swap. Otherwise it returns false.
+     */
     function isTokenAvailable(address tokenAddress, uint256 amount)
         external
         view

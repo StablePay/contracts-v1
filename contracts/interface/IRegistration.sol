@@ -40,7 +40,7 @@ contract IRegistration {
     function registerContract(
         string calldata contractName,
         address contractAddress
-    ) external returns (bool);
+    ) external;
 
     /**
         @notice It unregisters a current smart contract associated to a contract name in the platform.
@@ -52,7 +52,7 @@ contract IRegistration {
     function unregisterContract(
         string calldata contractName,
         address contractAddress
-    ) external returns (bool);
+    ) external;
 
     /**
         @notice It gets the contract address associated to a specific contract name in the platform.

@@ -32,7 +32,6 @@ contract Vault is Base, IVault {
       @dev If the ether is zero, it throws a require error.
      */
     function() external payable {
-        require(msg.value > 0, "Msg value is not gt 0.");
         emit EthersDeposited(address(this), msg.sender, msg.value);
     }
 
@@ -42,12 +41,10 @@ contract Vault is Base, IVault {
       @notice It is used to deposit ether to the Vault by default.
       @dev It calls the internal depositEthersInternal() function.
       @dev Remember this function is call from Base smart contract.
-      @return true if it received the ether transferred. Otherwise it returns false.
      */
-    function depositEthers() external payable nonReentrant() returns (bool) {
+    function depositEthers() external payable {
         require(msg.value > 0, "Msg value is not gt 0.");
         emit EthersDeposited(address(this), msg.sender, msg.value);
-        return true;
     }
 
     /**
@@ -59,7 +56,6 @@ contract Vault is Base, IVault {
     function depositTokens(address tokenAddress, uint256 amount)
         external
         nonReentrant()
-        returns (bool)
     {
         require(amount > 0, "Amount must be gt 0.");
         require(tokenAddress != address(0x0), "Token address must be != 0x0.");
@@ -79,8 +75,6 @@ contract Vault is Base, IVault {
         require(transferFromResult, "Transfer from sender to Vault failed.");
 
         emit TokensDeposited(address(this), tokenAddress, msg.sender, amount);
-
-        return true;
     }
 
     /**
@@ -101,13 +95,12 @@ contract Vault is Base, IVault {
     /**
       @notice It transfers a specific amount of tokens to an address.
       @dev It checks whether this contract has at least the amount.
-      @return true if it transfers the tokens. Otherwise it returns false.
      */
     function transferTokens(
         address tokenAddress,
         address toAddress,
         uint256 amount
-    ) external onlySuperUser() nonReentrant() returns (bool) {
+    ) external onlySuperUser() nonReentrant(){
         require(
             tokenAddress != address(0x0),
             "Token address must not be eq 0x0."
@@ -131,19 +124,16 @@ contract Vault is Base, IVault {
             toAddress,
             amount
         );
-        return true;
     }
 
     /**
       @notice It transfers a specific amount of ether to an address.
       @dev It checks if this smart contract has at least the amount of ether.
-      @return true if it transfers the ether. Otherwise it returns false.
      */
     function transferEthers(address payable toAddress, uint256 amount)
         external
         onlySuperUser()
         nonReentrant()
-        returns (bool)
     {
         require(
             toAddress != address(0x0),
@@ -158,6 +148,5 @@ contract Vault is Base, IVault {
         toAddress.transfer(amount);
 
         emit EthersTransferred(address(this), msg.sender, toAddress, amount);
-        return true;
     }
 }

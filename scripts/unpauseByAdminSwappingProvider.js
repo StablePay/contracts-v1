@@ -46,7 +46,6 @@ module.exports = async (callback) => {
         const swappingProviderBefore = await providerStrategy.getSwappingProvider(providerKey);
         console.log(swappingProviderBefore);
         assert(swappingProviderBefore.exists === true, 'Swapping provider must exist.');
-        assert(swappingProviderBefore.pausedByOwner === false, 'Swapping provider must not be paused by owner.');
         assert(swappingProviderBefore.pausedByAdmin === true, 'Swapping provider must be paused by admin.');
 
         /******************************************************************
@@ -58,7 +57,6 @@ module.exports = async (callback) => {
         console.log(util.inspect(unpauseSwappingProviderResult, {showHidden: false, depth: null}));
 
         const swappingProviderAfter = await providerStrategy.getSwappingProvider(providerKey);
-        assert(swappingProviderAfter.pausedByOwner === false, 'Swapping provider must not be paused by owner.');
         assert(swappingProviderAfter.pausedByAdmin === false, 'Swapping provider must not be paused by admin.');
         
         console.log('>>>> The script finished successfully. <<<<');

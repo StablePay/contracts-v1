@@ -118,7 +118,6 @@ contract Base {
         @dev If the transfer was successful, it emits an DepositReceived event.
      */
     function() external payable {
-        require(msg.value > 0, "Msg value must be gt 0.");
         emit DepositReceived(address(this), msg.sender, msg.value);
     }
 
@@ -191,8 +190,9 @@ contract Base {
         require(currentBalance > 0, "Balance must be gt 0.");
 
         address to = getVault();
-        bool depositResult = IVault(to).depositEthers.value(currentBalance)();
-        require(depositResult, "The transfer was not successful.");
+        require(to != address(0x0), "Vault address must not be eq 0x0.");
+        
+        IVault(to).depositEthers.value(currentBalance)();
 
         emit EthersTransferred(address(this), msg.sender, to, currentBalance);
 

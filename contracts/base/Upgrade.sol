@@ -32,12 +32,11 @@ contract Upgrade is Base, IUpgrade {
         @dev It must be executed by an owner platform only.
         @param name smart contract name to be upgraded.
         @param upgradedContractAddress the new smart contract address.
-        @return true if the contract is updated. Otherwise it returns false.
      */
     function upgradeContract(
         string calldata name,
         address upgradedContractAddress
-    ) external onlySuperUser() nonReentrant() returns (bool) {
+    ) external onlySuperUser() nonReentrant() {
         require(
             upgradedContractAddress != address(0x0),
             "Upgraded contract addresses must not be 0x0."
@@ -86,6 +85,5 @@ contract Upgrade is Base, IUpgrade {
             upgradedContractAddress,
             name
         );
-        return true;
     }
 }

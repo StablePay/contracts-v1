@@ -8,7 +8,7 @@
  */
 // Smart contracts
 const IProviderRegistry = artifacts.require("./interface/IProviderRegistry.sol");
-const ERC20 = artifacts.require("@openzeppelin/contracts/token/ERC20/IERC20.sol");
+const ERC20 = artifacts.require("@openzeppelin/contracts/token/ERC20/ERC20Detailed.sol");
 
 // Util classes
 const BigNumber = require('bignumber.js');
@@ -20,11 +20,11 @@ const processArgs = new ProcessArgs();
 /**
     Script Arguments
  */
-const providerName = 'Uniswap'; // KyberNetwork or Uniswap
+const providerName = 'KyberNetwork'; // KyberNetwork or Uniswap
 const providerVersion = "1";
-const sourceTokenName = 'SNT';
+const sourceTokenName = 'ETH';
 const targetTokenName = 'DAI';
-const targetAmount = '1';
+const targetAmount = '10';
 
 module.exports = async (callback) => {
     try {

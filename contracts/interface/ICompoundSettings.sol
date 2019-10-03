@@ -32,22 +32,19 @@ interface ICompoundSettings {
         @notice It maps a ERC20 token to a CErc20 token (Compound.finance platform implementation).
         @param erc20Address ERC20 implementation address.
         @param cErc20Address CErc20 implementation address
-        @return true if it was mapped successfully. Otherwise, it returns false.
      */
     function mapErc20ToCEr20(address erc20Address, address cErc20Address)
-        external
-        returns (bool);
+        external;
 
     /**
         @notice It updates the current CErc20 mapping for a ERC20.
         @param erc20Address ERC20 implementation address.
         @param newCErc20Address new CErc20 implementation address.
-        @return true if it was mapped successfully. Otherwise, it returns false.
      */
     function updateMapErc20ToCEr20(
         address erc20Address,
         address newCErc20Address
-    ) external returns (bool);
+    ) external;
 
     /**
         @notice It gets the current CErc20 mapping for a specific ERC20 address.

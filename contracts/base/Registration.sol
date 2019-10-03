@@ -36,12 +36,11 @@ contract Registration is Base, IRegistration {
         @dev It must be executed by an owner platform only.
         @param contractName smart contract name to be registered.
         @param contractAddress the new smart contract address.
-        @return true if the contract is registered. Otherwise it returns false.
      */
     function registerContract(
         string calldata contractName,
         address contractAddress
-    ) external onlySuperUser() nonReentrant() returns (bool) {
+    ) external onlySuperUser() nonReentrant() {
         contractAddress.requireNotEmpty("Contract address must not be 0x0.");
         address currentContractAddress = getContractAddressInternal(
             contractName
@@ -64,8 +63,6 @@ contract Registration is Base, IRegistration {
             contractAddress,
             contractName
         );
-
-        return true;
     }
 
     /**
@@ -73,12 +70,11 @@ contract Registration is Base, IRegistration {
         @dev It must be executed by an owner platform only.
         @param contractName smart contract name to be unregistered.
         @param contractAddress the current smart contract address.
-        @return true if the contract is unregistered. Otherwise it returns false.
      */
     function unregisterContract(
         string calldata contractName,
         address contractAddress
-    ) external onlySuperUser() nonReentrant() returns (bool) {
+    ) external onlySuperUser() nonReentrant() {
         contractAddress.requireNotEmpty("Contract address must not be eq 0x0.");
         address currentContractAddress = getContractAddressInternal(
             contractName
@@ -102,7 +98,6 @@ contract Registration is Base, IRegistration {
 
         emit ContractUnregistered(address(this), contractAddress, contractName);
 
-        return true;
     }
 
     /**

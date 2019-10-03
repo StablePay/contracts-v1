@@ -48,10 +48,8 @@ contract EtherTransferPostAction is PostActionBase {
      */
     function execute(StablePayCommon.PostActionData memory postActionData)
         public
-        nonReentrant()
         isStablePay(msg.sender)
         isNotPaused()
-        returns (bool)
     {
         // Verifies WETH token address.
         wethTokenAddress.requireEqualTo(
@@ -82,8 +80,6 @@ contract EtherTransferPostAction is PostActionBase {
 
         // Emit ActionExecuted event.
         emitActionExecutedEvent(postActionData, etherAmountToTransfer);
-
-        return true;
     }
 
     /**

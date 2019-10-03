@@ -70,14 +70,12 @@ contract Role is Base, IRole {
     /**
         @notice It removes the owner from the platform.
         @dev It needs to be executed after transfering the ownership to a new address.
-        @return true if the current owner was deleted. Otherwise it returns false.
      */
     function deleteOwner()
         external
         onlyLatestRole()
         onlyOwner()
         nonReentrant()
-        returns (bool)
     {
         roleCheck("owner", msg.sender);
 
@@ -86,7 +84,6 @@ contract Role is Base, IRole {
         );
 
         emit OwnerRemoved(address(this), msg.sender, now);
-        return true;
     }
 
     /** Admin Role Methods */
@@ -97,17 +94,14 @@ contract Role is Base, IRole {
 
         @param aRole the role name to give to the address.
         @param anAddress the address which will receive the role.
-        @return true if the role is added. Otherwise it returns false.
      */
     function adminRoleAdd(string calldata aRole, address anAddress)
         external
         onlyLatestRole()
         onlySuperUser()
         nonReentrant()
-        returns (bool)
     {
         roleAdd(aRole, anAddress);
-        return true;
     }
 
     /**
@@ -116,17 +110,14 @@ contract Role is Base, IRole {
 
         @param aRole the role name to remove from the address.
         @param anAddress the address which will be removed from the role.
-        @return true if the role is removed. Otherwise it returns false.
      */
     function adminRoleRemove(string calldata aRole, address anAddress)
         external
         onlyLatestRole()
         onlySuperUser()
         nonReentrant()
-        returns (bool)
     {
         roleRemove(aRole, anAddress);
-        return true;
     }
 
     /** Internal Role Methods */

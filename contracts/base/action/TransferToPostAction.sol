@@ -36,10 +36,8 @@ contract TransferToPostAction is PostActionBase {
      */
     function execute(StablePayCommon.PostActionData memory postActionData)
         public
-        nonReentrant()
         isStablePay(msg.sender)
         isNotPaused()
-        returns (bool)
     {
         require(
             IERC20(postActionData.targetToken).balanceOf(address(this)) >=
@@ -54,6 +52,11 @@ contract TransferToPostAction is PostActionBase {
         );
         require(result, "Transfer to 'to' address failed.");
 
+        /**
+            This post-action doesn't transfer/mint any external token than target token.
+            So, the external parameters are zero or empty addresses.
+            See details in IPostAction interface.
+         */
         emit ActionExecuted(
             address(this),
             postActionData.sourceAmount,
@@ -68,7 +71,5 @@ contract TransferToPostAction is PostActionBase {
             DEFAULT_ACTION_DATA,
             postActionData.data
         );
-
-        return true;
     }
 }
