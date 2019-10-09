@@ -173,7 +173,6 @@ contract StablePayBase is Base, IStablePay {
      */
     function transferFee(address _tokenAddress, uint256 _feeAmount)
         internal
-        returns (bool)
     {
         if (_feeAmount > 0) {
             bool result = IERC20(_tokenAddress).transfer(
@@ -182,7 +181,6 @@ contract StablePayBase is Base, IStablePay {
             );
             require(result, "Tokens transfer to vault was invalid.");
         }
-        return true;
     }
 
     /** 
@@ -331,13 +329,13 @@ contract StablePayBase is Base, IStablePay {
      */
     function calculateAndTransferFee(StablePayCommon.Order memory order)
         internal
-        returns (bool success, uint256 feeAmount)
+        returns (uint256 feeAmount)
     {
         // Calculate the fee amount based on the target amount and the platform fee.
         uint256 currentFeeAmount = getFeeAmount(order);
         // Transfer the fee amount
         transferFee(order.targetToken, currentFeeAmount);
-        return (true, currentFeeAmount);
+        return currentFeeAmount;
     }
 
     /**
@@ -532,9 +530,8 @@ contract StablePayBase is Base, IStablePay {
                 stablePayTargetFinalBalance
             );
 
-            uint256 feeAmount;
             // Calculate and transfer the platform fee amount.
-            (, feeAmount) = calculateAndTransferFee(order);
+            uint256 feeAmount = calculateAndTransferFee(order);
 
             // Calculate and transfer the 'target' amount.
             uint256 toAmount = calculateAndTransferAmountToPostActionAddress(
@@ -667,9 +664,8 @@ contract StablePayBase is Base, IStablePay {
                 stablePayFinalTargetBalance
             );
 
-            uint256 feeAmount;
             // Calculate and transfer the platform fee amount.
-            (, feeAmount) = calculateAndTransferFee(order);
+            uint256 feeAmount = calculateAndTransferFee(order);
 
             // Calculate and transfer the 'target' amount.
             uint256 toAmount = calculateAndTransferAmountToPostActionAddress(

@@ -81,7 +81,7 @@ contract StablePayBaseMock is StablePayBase {
 
     function _calculateAndTransferFee(StablePayCommon.Order memory order)
         public
-        returns (bool success, uint256 feeAmount)
+        returns (uint256 feeAmount)
     {
         return super.calculateAndTransferFee(order);
     }

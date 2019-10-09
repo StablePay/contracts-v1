@@ -67,7 +67,6 @@ contract ProxyBase is DelegateProxy, Base {
         external
         onlySuperUser()
         nonReentrant()
-        returns (bool)
     {
         require(toAddress != address(0x0), "Target address must be != 0x0.");
         require(amount > 0, "Amount must be gt 0.");
@@ -77,7 +76,5 @@ contract ProxyBase is DelegateProxy, Base {
         );
 
         toAddress.transfer(amount);
-
-        return true;
     }
 }
