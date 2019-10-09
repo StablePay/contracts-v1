@@ -7,10 +7,19 @@ import "./AbstractSwappingProvider.sol";
 
 /**
     @title Kyber Network Swapping provider
+
+    @dev When a customer executes the transfer function in our StablePay main contract, our backend calculates the source amount based on different key aspects (between them, the target amount to transfer or donate) and considering the price of several swapping providers.
+    @dev That said, StablePay uses the max rate in the swapTokens and swapEthers functions to optimize the swapping.
+    @dev In this case, the rate is used in the KyberNetworkProxy.trade function.
+    @dev Both swap functions use the KyberNetworkProxy.trade function. That function expects the conversion rate as a parameter.
+    @dev If the current conversion rate is lower than the conversion rate passed as a parameter, the transaction is canceled.
+
+    @dev For more details about the getExpectedRate function, visit https://developer.kyber.network/docs/API_ABI-KyberNetworkProxy/#getexpectedrate
+    @dev For more details about the trade function, visit https://developer.kyber.network/docs/API_ABI-KyberNetworkProxy/#trade
+
     @author StablePay <hi@stablepay.io>
 
-    @notice  https://developer.kyber.network/docs/VendorsGuide/#converting-from-erc20
-    @notice https://developer.kyber.network/docs/KyberNetworkProxy/#getexpectedrate
+    @notice https://developer.kyber.network/docs/VendorsGuide/#converting-from-erc20
  */
 contract KyberSwappingProvider is AbstractSwappingProvider {
     IERC20 internal constant ETH_TOKEN_ADDRESS = IERC20(

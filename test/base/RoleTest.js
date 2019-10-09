@@ -7,8 +7,8 @@ const role = require('../util/events').role;
 
 contract('RoleTest', accounts => {
     const owner = accounts[0];
-    const player1 = accounts[3];
-    const player2 = accounts[4];
+    const player1 = accounts[1];
+    const player2 = accounts[2];
     let instance;
 
     beforeEach('Deploying contract for each test', async () => {
@@ -56,6 +56,41 @@ contract('RoleTest', accounts => {
                 assert(mustFail, "It should have failed.");
                 assert(error);
                 assert.equal(error.reason, messageExpected);
+            }
+        });
+    });
+
+    withData({
+        _1_basic: [[player1, player2], owner, undefined, false],
+        _2_atLeastOneOwner: [[], owner, 'Platform must have at least one owner.', true],
+    }, function(previousOwners, ownerToDelete, messageExpected, mustFail) {
+        it(t('anUser', 'deleteOwner', `Should (or not) able to delete owner.`, mustFail), async function() {
+            // Setup
+            for (const address of previousOwners) {
+                await instance.transferOwnership(address, {from: owner});
+            }
+
+            //Invocation
+            try {
+                const result = await instance.deleteOwner({from: ownerToDelete});
+
+                // Assertions
+                assert.ok(!mustFail, "It should not have failed.");
+                role.ownerRemoved(result).emitted(instance.address, ownerToDelete);
+            } catch(error) {
+                // Assertions
+                assert(mustFail, "It should have failed.");
+                assert(error);
+                assert.equal(error.reason, messageExpected);
+            } finally {
+
+                // It rollbacks the previous changes.
+                if(previousOwners.length > 0) {
+                    await instance.transferOwnership(ownerToDelete, {from: previousOwners[0]});
+                }
+                for (const address of previousOwners) {
+                    await instance.deleteOwner({from: address});   
+                }
             }
         });
     });

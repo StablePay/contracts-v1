@@ -11,6 +11,10 @@ import "../interface/IRole.sol";
 contract Role is Base, IRole {
     /** Constants */
     string internal constant ROLE_NAME = "Role";
+    uint16 internal constant TOTAL_OWNERS_MIN = 1;
+
+    /** Properties */
+    uint16 public ownersCounter = 1;
 
     /** Events */
 
@@ -64,6 +68,8 @@ contract Role is Base, IRole {
             true
         );
 
+        setTotalOwners(getTotalOwners() + 1);
+
         emit OwnershipTransferred(msg.sender, newOwner);
     }
 
@@ -78,12 +84,30 @@ contract Role is Base, IRole {
         nonReentrant()
     {
         roleCheck("owner", msg.sender);
+        uint16 currentTotalOwners = getTotalOwners();
+        require(currentTotalOwners > TOTAL_OWNERS_MIN, "Platform must have at least one owner.");
 
         _storage.deleteBool(
             keccak256(abi.encodePacked("access.role", "owner", msg.sender))
         );
 
+        setTotalOwners(currentTotalOwners - 1);
+
         emit OwnerRemoved(address(this), msg.sender, now);
+    }
+
+    function getTotalOwners()
+        internal
+        view
+        returns (uint16)
+    {
+        return ownersCounter;
+    }
+
+    function setTotalOwners(uint16 newTotalOwners)
+        internal
+    {
+        ownersCounter = newTotalOwners;
     }
 
     /** Admin Role Methods */

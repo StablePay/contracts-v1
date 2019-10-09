@@ -17,6 +17,12 @@ contract Settings is Base, ISettings {
 
     /** Constants */
 
+    /**
+        @notice This is the max value for the fee. 
+        @notice The platform fee is multiplied by 100.
+        @notice This value is 100%: 100 * 100.
+     */
+    uint16 internal constant MAX_FEE_VALUE = 10000;
     string internal constant TOKEN_AVAILABLE = "token.available";
     string internal constant TOKEN_MAX_AMOUNT = "token.maxAmount";
     string internal constant TOKEN_MIN_AMOUNT = "token.minAmount";
@@ -35,15 +41,28 @@ contract Settings is Base, ISettings {
 
     /** Functions */
 
+    /**
+        @notice It gets the current platform fee.
+        @dev The value is multiplied by 100.
+        @return the current platform fee multiplied by 100.
+     */
     function getPlatformFee() external view returns (uint16) {
         return _storage.getUint16(keccak256(abi.encodePacked(PLATFORM_FEE)));
     }
 
+    /**
+        @notice It sets the platform fee.
+        @dev This function only can be invoke by an owner or admin user.
+        @dev The value must be multiplied by 100 before calling this function.
+        @dev Example: Platform fee: 1% => The value to invoke the function must be: 100.
+        @dev Example: Platform fee: 0.5% => The value to invoke the function must be: 50.
+     */
     function setPlatformFee(uint16 _fee)
         external
         onlySuperUser()
         nonReentrant()
     {
+        require(_fee <= MAX_FEE_VALUE, "Fee must be lte 100.");
         uint16 oldPlatformFee = _storage.getUint16(
             keccak256(abi.encodePacked(PLATFORM_FEE))
         );

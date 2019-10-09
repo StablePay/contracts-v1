@@ -209,7 +209,18 @@ module.exports = {
                 }),
                 notEmitted: (assertFunction = () => {} ) => notEmitted(tx, name, assertFunction)
             };
-        }
+        },
+        ownerRemoved: tx => {
+            const name = 'OwnerRemoved';
+            return {
+                name: name,
+                emitted: (thisContract, oldOwner) => emitted(tx, name, ev => {
+                    assert.equal(ev.thisContract, thisContract);
+                    assert.equal(ev.oldOwner, oldOwner);
+                }),
+                notEmitted: (assertFunction = () => {} ) => notEmitted(tx, name, assertFunction)
+            };
+        },
     },
     stablePayBase: {
         executionTransferFailed: tx => {
