@@ -51,7 +51,6 @@ library AddressLib {
     function requireNotEmpty(address self, string memory message)
         internal
         pure
-        returns (bool)
     {
         require(isNotEmpty(self), message);
     }
@@ -59,7 +58,6 @@ library AddressLib {
     function requireEmpty(address self, string memory message)
         internal
         pure
-        returns (bool)
     {
         require(isEmpty(self), message);
     }
@@ -67,7 +65,6 @@ library AddressLib {
     function requireEqualTo(address self, address other, string memory message)
         internal
         pure
-        returns (bool)
     {
         require(equalTo(self, other), message);
     }
@@ -76,7 +73,7 @@ library AddressLib {
         address self,
         address other,
         string memory message
-    ) internal pure returns (bool) {
+    ) internal pure {
         require(notEqualTo(self, other), message);
     }
 }

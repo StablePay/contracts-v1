@@ -31,13 +31,13 @@ ByApiOrderDataBuilder.prototype.build = async function(data) {
         safeMargin: "0.000000000"
     });
     const apiResponse = apiResult.data;
-    const providersKey = apiResponse.providers;
+    const providerKey = apiResponse.provider;
     const order = apiResponse.order;
     const amounts = apiResponse.amounts;
     console.log(amounts);
     return {
         order: order,
-        providers: providersKey,
+        provider: providerKey,
         amounts: amounts
     };
 }

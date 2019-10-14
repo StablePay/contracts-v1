@@ -93,10 +93,10 @@ module.exports = async (callback) => {
                     verbose: true,
                     safeMargin: "0.000000000"
                 });
-                const { order, providers } = createOrderResult.data;
+                const { order, provider } = createOrderResult.data;
                 const sourceTokenRequiredBalance = BigNumber(order[0].toString()).toFixed();
 
-                const providerKey = providers[0];
+                const providerKey = provider;
 
                 console.log(`Swapping process will use ${providerKeyGenerator.fromBytes(providerKey)}`);
 

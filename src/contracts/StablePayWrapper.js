@@ -15,7 +15,7 @@ class StablePayWrapper  {
 }
 
 StablePayWrapper.prototype.transferWithTokens = async function(data, ...params) {
-    const { order, providers, amounts } = await this.orderDataBuilder.build(data);
+    const { order, provider, amounts } = await this.orderDataBuilder.build(data);
     try {
         console.log(`Params:    ${JSON.stringify(params)}`);
         const calculatedSourceAmount = order[0];
@@ -46,7 +46,7 @@ StablePayWrapper.prototype.transferWithTokens = async function(data, ...params) 
         logIf(this.verbose, `Target Token:          ${order[11]}.`);
         logIf(this.verbose, `Merchant Address:      ${order[12]}.`);
         //logIf(this.verbose, `Customer Address:      ${params}.`);
-        const providerKey = providers[0];
+        const providerKey = provider;
 
         const result = await this.stablePay.transferWithTokens(order, providerKey, ...params);
         // Assertions
@@ -69,7 +69,7 @@ StablePayWrapper.prototype.transferWithTokens = async function(data, ...params) 
             error: undefined,
             amounts: amounts,
             order: order,
-            providers: providers
+            provider: provider
         };
     } catch (error) {
         logIf(this.verbose, `Error trading tokens.`);
@@ -82,13 +82,13 @@ StablePayWrapper.prototype.transferWithTokens = async function(data, ...params) 
             error: error,
             amounts: amounts,
             order: order,
-            providers: providers
+            provider: provider
         };
     }
 }
 
 StablePayWrapper.prototype.transferWithEthers = async function(data, ...params) {
-    const { order, providers, amounts } = await this.orderDataBuilder.build(data);
+    const { order, provider, amounts } = await this.orderDataBuilder.build(data);
     try {
         console.log(`Params:    ${JSON.stringify(params)}`);
         const calculatedSourceAmount = order[0];
@@ -104,7 +104,7 @@ StablePayWrapper.prototype.transferWithEthers = async function(data, ...params) 
         logIf(this.verbose, `Target Token:          ${order[11]}.`);
         logIf(this.verbose, `Merchant Address:      ${order[12]}.`);
         logIf(this.verbose, `Params:                ${JSON.stringify(params)}.`);
-        const providerKey = providers[0];
+        const providerKey = provider;
 
         const result = await this.stablePay.transferWithEthers(order, providerKey, {
             from: params[0].from,
@@ -131,7 +131,7 @@ StablePayWrapper.prototype.transferWithEthers = async function(data, ...params) 
             error: undefined,
             amounts: amounts,
             order: order,
-            providers: providers
+            provider: provider
         };
     } catch (error) {
         logIf(this.verbose, `Error trading tokens.`);
@@ -144,7 +144,7 @@ StablePayWrapper.prototype.transferWithEthers = async function(data, ...params) 
             error: error,
             amounts: amounts,
             order: order,
-            providers: providers
+            provider: provider
         };
     }
 }
