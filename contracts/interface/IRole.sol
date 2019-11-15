@@ -1,4 +1,4 @@
-pragma solidity 0.5.3;
+pragma solidity 0.5.10;
 
 import "./IOwnable.sol";
 
@@ -27,6 +27,18 @@ contract IRole is IOwnable {
     event RoleRemoved(address indexed anAddress, string roleName);
 
     /**
+        @notice This event is emitted when an owner is removed.
+        @param thisContract current contract address.
+        @param oldOwner owner address to removed.
+        @param removedAt timestamp when the owner was removed.
+     */
+    event OwnerRemoved(
+        address indexed thisContract,
+        address indexed oldOwner,
+        uint256 removedAt
+    );
+
+    /**
         @notice This event is emitted when the platform owneship is transferred to a new address.
         @param previousOwner address which was the previous owner.
         @param newOwner address which represents the new owner.
@@ -46,11 +58,9 @@ contract IRole is IOwnable {
 
         @param role the role name to give to the address.
         @param anAddress the address which will receive the role.
-        @return true if the role is added. Otherwise it returns false.
      */
     function adminRoleAdd(string calldata role, address anAddress)
-        external
-        returns (bool);
+        external;
 
     /**
         @notice It removes a role to a specific address.
@@ -58,9 +68,13 @@ contract IRole is IOwnable {
 
         @param role the role name to remove from the address.
         @param anAddress the address which will be removed from the role.
-        @return true if the role is removed. Otherwise it returns false.
      */
     function adminRoleRemove(string calldata role, address anAddress)
-        external
-        returns (bool);
+        external;
+
+    /**
+        @notice It removes the owner from the platform.
+        @dev It needs to be executed after transfering the ownership to a new address.
+     */
+    function deleteOwner() external;
 }

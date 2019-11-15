@@ -1,7 +1,9 @@
 module.exports = {
     permissions:{ },
     wallets:{ },
-    tokens: { },
+    tokens: {
+        WETH: '0x0000000000000000000000000000000000000000',
+    },
     contracts: {
         KyberNetworkProxy: "0x0000000000000000000000000000000000000000"
     }

@@ -7,17 +7,32 @@ module.exports = {
 			name: 'DAI',
 			minAmount: BigNumber("10").times(DECIMALS).toFixed(),
 			maxAmount: BigNumber("100").times(DECIMALS).toFixed()
+		},
+		{
+			name: 'DAI_COMPOUND', // To test Compound.finance Post Action 
+			minAmount: BigNumber("10").times(DECIMALS).toFixed(),
+			maxAmount: BigNumber("100").times(DECIMALS).toFixed()
+		},
+		{
+			name: 'WETH', // Used to send Ether to the receiver in a post action.
+			minAmount: BigNumber("0.001").times(DECIMALS).toFixed(),
+			maxAmount: BigNumber("1").times(DECIMALS).toFixed()
 		}
 	],
 	contracts: {
-		StablePay: '0xE2309FbcC7Dffac163E177db6184b14B09f7b0C9',
-		StablePayStorage: '0x091125c1eD0E1C2cAA9AC6c98864bc8bC92C3114',
-		Settings: '0xbE7c5318e7423364CD0A7dDAC069a8163Faf7350',
-		Vault: '0xE448f25F06E00800CBb0E98A468881Dcb8cF729b',
-		KyberSwappingProvider: '0x8902131c1066b9890e39ec32cB76B021CA295D07',
-		UniswapSwappingProvider: '0x9b04778C455ee800367673fC8988788a7706b6fa',
-		TransferToPostAction: '0x9dcef3037E7E8d3E45755D48FD63243Da0023064',
-		PostActionRegistry: '0x468842B9680b891E204F71cB5cB3770320990755',
+		StablePay: '0xBa318A1fbb2f3093DF31134C42730fDaAe753252',
+		StablePayStorage: '0x98D515Db67b3ea758c57bb5d48c51B7c14126256',
+		Settings: '0xac9311f2a326beF5b4ed087EEfAb72279cC39f46',
+		Vault: '0x1152cC566aC53Af2b8Fe9e3c7FA2a66Ca2D9B83D',
+		KyberSwappingProvider: '0x9220e22Bf7e5DDE3DD3a5c1D2E5D2bEBaf6DBb15',
+		UniswapSwappingProvider: '0xFaBc0f81e0b6D74f6A525Cee4329d1aDE178B0bb',
+		TransferToPostAction: '0xcfa4BC41ab1CcE3B0F09EBe8072337f2928E5BBF',
+		PostActionRegistry: '0xe844d377ae2C4EC04464C6491a25875Aa939614A',
+		Storage: '0xdEd6587465E1F19396241Cfda114069E0D38bF1C',
+		Registration: '0x9ab68F8c71BE836C2D34A04Fdd6d79A93CEa0A33',
+		CompoundSettings: '0x9aeC9273EAC87Ee0c7bB98A785dC52Bf5d0EbD78',
+		CompoundMintPostAction: '0x13e04C884744A7CFcbf9981F948cF74d6b4C9124',
+		EtherTransferPostAction: '0x5A6A24CF42961Ec77ff9c5eE10F3b8e40332C341',
 	},
 	providers: {
 		Kyber: '0x4b796265724e6574776f726b5f76310000000000000000000000000000000000',

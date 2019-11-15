@@ -1,11 +1,11 @@
-pragma solidity 0.5.3;
+pragma solidity 0.5.10;
 
 /**
     @notice This represents the proxy to invoke smart contract functions.
     @author StablePay <hi@stablepay.io>
     @dev It delegates the invocation calls to a specific smart contract.
  */
-contract IERCProxy {
+contract ERCAbstractProxy {
     uint256 public constant FORWARDING = 1;
     uint256 public constant UPGRADEABLE = 2;
 

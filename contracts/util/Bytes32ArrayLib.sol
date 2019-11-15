@@ -1,4 +1,4 @@
-pragma solidity 0.5.3;
+pragma solidity 0.5.10;
 
 /**
   @notice This library is used to manager array of bytes32.
@@ -32,6 +32,12 @@ library Bytes32ArrayLib {
     {
         if (index >= self.length) return self;
 
+        if (index == self.length - 1) {
+            delete self[self.length - 1];
+            self.length--;
+            return self;
+        }
+
         bytes32 temp = self[self.length - 1];
         self[self.length - 1] = self[index];
         self[index] = temp;
@@ -40,5 +46,30 @@ library Bytes32ArrayLib {
         self.length--;
 
         return self;
+    }
+
+    function getIndex(bytes32[] storage self, bytes32 item)
+        internal
+        view
+        returns (bool found, uint256 indexAt)
+    {
+        found = false;
+        for (indexAt = 0; indexAt < self.length; indexAt++) {
+            found = self[indexAt] == item;
+            if (found) {
+                return (found, indexAt);
+            }
+        }
+        return (found, indexAt);
+    }
+
+    function remove(bytes32[] storage self, bytes32 item)
+        internal
+        returns (bytes32[] memory)
+    {
+        (bool found, uint256 indexAt) = getIndex(self, item);
+        if (!found) return self;
+
+        return removeAt(self, indexAt);
     }
 }

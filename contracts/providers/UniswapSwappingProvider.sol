@@ -1,30 +1,27 @@
-pragma solidity 0.5.3;
+pragma solidity 0.5.10;
 pragma experimental ABIEncoderV2;
 
-import "./ISwappingProvider.sol";
-import "../services/erc20/ERC20.sol";
+import "./AbstractSwappingProvider.sol";
 import "../services/uniswap/UniswapExchangeInterface.sol";
 import "../services/uniswap/UniswapFactoryInterface.sol";
-import "../util/StablePayCommon.sol";
-import "../util/SafeMath.sol";
 
 /**
     @title  Uniswap  Swapping provider.
     @author StablePay <hi@stablepay.io>
  */
-contract UniswapSwappingProvider is ISwappingProvider {
+contract UniswapSwappingProvider is AbstractSwappingProvider {
     address public uniswapFactory;
     address private ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
 
-    constructor(address _stablePay, address _factory)
+    constructor(address stablePayAddress, address uniswapFactoryAddress)
         public
-        ISwappingProvider(_stablePay)
+        AbstractSwappingProvider(stablePayAddress)
     {
-        uniswapFactory = _factory;
+        uniswapFactory = uniswapFactoryAddress;
     }
 
-    function swapToken(StablePayCommon.Order memory _order)
-        public
+    function swapToken(StablePayCommon.Order calldata _order)
+        external
         isStablePay(msg.sender)
         returns (bool)
     {
@@ -71,19 +68,12 @@ contract UniswapSwappingProvider is ISwappingProvider {
             "Source amount not enough for the swapping."
         );
 
-        // Mitigate ERC20 Approve front-running attack, by initially setting allowance to 0
-        require(
-            ERC20(_order.sourceToken).approve(address(sourceExchange), 0),
-            "Error mitigating front-running attack."
+        // Set the spender's token allowance to order source amount.
+        approveTokensTo(
+            IERC20(_order.sourceToken),
+            address(sourceExchange),
+            sourceTokensToSell
         );
-        // Set the spender's token allowance to tokenQty
-        require(
-            ERC20(_order.sourceToken).approve(
-                address(sourceExchange),
-                sourceTokensToSell
-            ),
-            "Error approving tokens for exchange."
-        ); // Set max amount.
 
         sourceExchange.tokenToTokenSwapOutput(
             _order.targetAmount,
@@ -93,8 +83,14 @@ contract UniswapSwappingProvider is ISwappingProvider {
             _order.targetToken
         );
 
+        // Resetting the token approval back to zero.
+        approveTokensTo(IERC20(_order.sourceToken), address(sourceExchange), 0);
+
         require(
-            ERC20(_order.targetToken).transfer(msg.sender, _order.targetAmount),
+            IERC20(_order.targetToken).transfer(
+                msg.sender,
+                _order.targetAmount
+            ),
             "Source transfer invocation was not successful."
         );
 
@@ -104,7 +100,7 @@ contract UniswapSwappingProvider is ISwappingProvider {
         // The initial balance is higher (or equals) than final source token balance.
         transferDiffTokensIfApplicable(
             _order.sourceToken,
-            _order.fromAddress,
+            msg.sender, // The address (StablePay) which will receive the source tokens left.
             _order.sourceAmount,
             sourceInitialTokenBalance,
             sourceFinalTokenBalance
@@ -113,8 +109,8 @@ contract UniswapSwappingProvider is ISwappingProvider {
         return true;
     }
 
-    function swapEther(StablePayCommon.Order memory _order)
-        public
+    function swapEther(StablePayCommon.Order calldata _order)
+        external
         payable
         isStablePay(msg.sender)
         returns (bool)
@@ -147,7 +143,10 @@ contract UniswapSwappingProvider is ISwappingProvider {
         );
 
         require(
-            ERC20(_order.targetToken).transfer(msg.sender, _order.targetAmount),
+            IERC20(_order.targetToken).transfer(
+                msg.sender,
+                _order.targetAmount
+            ),
             "Source transfer invocation was not successful."
         );
 
@@ -166,13 +165,23 @@ contract UniswapSwappingProvider is ISwappingProvider {
     }
 
     function getExpectedRate(
-        ERC20 _sourceToken,
-        ERC20 _targetToken,
+        IERC20 _sourceToken,
+        IERC20 _targetToken,
         uint256 _targetAmount
-    ) public view returns (bool isSupported, uint256 minRate, uint256 maxRate) {
-        require(address(_sourceToken) != address(0x0), "Source token != 0x0.");
-        require(address(_targetToken) != address(0x0), "Target token != 0x0.");
-        require(_targetAmount > 0, "Target amount > 0.");
+    )
+        external
+        view
+        returns (bool isSupported, uint256 minRate, uint256 maxRate)
+    {
+        require(
+            address(_sourceToken) != address(0x0),
+            "Source token must not be eq 0x0."
+        );
+        require(
+            address(_targetToken) != address(0x0),
+            "Target token must not be eq 0x0."
+        );
+        require(_targetAmount > 0, "Target amount is not gt 0.");
 
         UniswapFactoryInterface uFactory = UniswapFactoryInterface(
             uniswapFactory

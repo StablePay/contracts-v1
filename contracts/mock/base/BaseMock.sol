@@ -1,4 +1,4 @@
-pragma solidity 0.5.3;
+pragma solidity 0.5.10;
 
 import "../../base/Base.sol";
 
@@ -27,11 +27,6 @@ contract BaseMock is Base {
         @notice Mock function to test the modifier onlyOwner.
      */
     function _onlyOwner() public view onlyOwner() {}
-
-    /**
-        @notice Mock function to test the modifier onlyAdmin.
-     */
-    function _onlyAdmin() public view onlyAdmin() {}
 
     /**
         @notice Mock function to test the modifier onlySuperUser.

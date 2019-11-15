@@ -1,4 +1,4 @@
-pragma solidity 0.5.3;
+pragma solidity 0.5.10;
 
 /**
     @title This manages the post action smart contracts for the platform.
@@ -46,18 +46,18 @@ interface IPostActionRegistry {
     /**
         @notice It registers a new post action in the platform.
         @dev The sender must be a super user.
+        @dev Remember to register the post action into the platform to able access to other contracts in the platform.
+        @dev See Registration or Upgrade smart contracts.
         @param newPostAction the post action address to register.
-        @return true if the post action is registered. Otherwise it returns false.
      */
-    function registerPostAction(address newPostAction) external returns (bool);
+    function registerPostAction(address newPostAction) external;
 
     /**
         @notice It unregisters a already registered post action in the platform.
         @dev The sender must be a super user.
         @param postAction the post action to unregister.
-        @return true if the post action is unregistered. Otherwise it returns false.
      */
-    function unregisterPostAction(address postAction) external returns (bool);
+    function unregisterPostAction(address postAction) external;
 
     /**
         @notice It tests whether a post action address is already registered.
@@ -90,5 +90,5 @@ interface IPostActionRegistry {
         @param postAction post action address to set as default in the platform.
         @return true if the post action is set as default. Otherwise it returns false.
      */
-    function setPostActionAsDefault(address postAction) external returns (bool);
+    function setPostActionAsDefault(address postAction) external;
 }

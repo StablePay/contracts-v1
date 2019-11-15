@@ -1,4 +1,4 @@
-pragma solidity 0.5.3;
+pragma solidity 0.5.10;
 pragma experimental ABIEncoderV2;
 
 import "../../base/StablePayStorage.sol";
@@ -19,15 +19,6 @@ contract StablePayStorageMock is StablePayStorage {
 
     /** Methods */
 
-    function _isSwappingProviderOwner(bytes32 _providerKey, address _sender)
-        public
-        view
-        isSwappingProviderOwner(_providerKey, _sender)
-        returns (bool)
-    {
-        return true;
-    }
-
     function _isSwappingProviderNewOrUpdate(
         bytes32 _providerKey,
         address _owner
@@ -44,14 +35,12 @@ contract StablePayStorageMock is StablePayStorage {
         address payable _providerAddress,
         bytes32 _providerKey,
         address _owner,
-        bool _pausedByOwner,
         bool _pausedByAdmin,
         bool _exists
     ) public returns (bool) {
         providers[_providerKey] = StablePayCommon.SwappingProvider({
             providerAddress: _providerAddress,
             ownerAddress: _owner,
-            pausedByOwner: _pausedByOwner,
             pausedByAdmin: _pausedByAdmin,
             exists: _exists,
             createdAt: now

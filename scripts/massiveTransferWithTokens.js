@@ -9,7 +9,7 @@
 // Smart contracts
 const appConfig = require('../src/config');
 const IStablePay = artifacts.require("./interface/IStablePay.sol");
-const ERC20 = artifacts.require("./interface/ERC20.sol");
+const ERC20 = artifacts.require("@openzeppelin/contracts/token/ERC20/ERC20Detailed.sol");
 
 // Util classes
 const { ETH_ADDRESS } = require('../test/util/consts');
@@ -35,11 +35,11 @@ const unavailableTokens = [
     'SPN',
     'HKN'
 ];
-const DAI_NAME = 'DAI';
+const DAI_NAME = 'DAI'; // DAI or DAI_COMPOUND
 const merchantAddressIndex = 1;
 const customerAddressIndex = 0;
 const minAmount = 10;
-const maxAmount = 40;
+const maxAmount = 25;
 
 module.exports = async (callback) => {
     try {
@@ -63,7 +63,6 @@ module.exports = async (callback) => {
         assert(tokensUrl, 'Tokens URL is undefined.');
         const ordersUrl = `${appConfig.getStablePayApiUrl().get()}/orders?network=${networkName}`;
         assert(ordersUrl, 'Orders URL is undefined.');
-        //console.log(tokensUrl);
 
         const result = await axios.get(tokensUrl);
         const tokens = result.data;
@@ -94,10 +93,12 @@ module.exports = async (callback) => {
                     verbose: true,
                     safeMargin: "0.000000000"
                 });
-                const { order, providers } = createOrderResult.data;
+                const { order, provider } = createOrderResult.data;
                 const sourceTokenRequiredBalance = BigNumber(order[0].toString()).toFixed();
 
-                console.log(`Swapping process will use ${providerKeyGenerator.fromBytes(providers[0])}`);
+                const providerKey = provider;
+
+                console.log(`Swapping process will use ${providerKeyGenerator.fromBytes(providerKey)}`);
 
                 swapMessage = `${sourceTokenRequiredBalance} ${token.symbol} => ${targetAmountWei} ${DAI_NAME}`;
 
@@ -123,15 +124,17 @@ module.exports = async (callback) => {
                 if(ETH_ADDRESS !== token.address) {
                     const approveResult = await sourceTokenInstance.approve(stablePayInstance.address, sourceTokenRequiredBalance, { from: customerAddress });
                     assert(approveResult, 'Approve is undefined.');
-                    transferWithResult = await stablePayInstance.transferWithTokens(order, providers, {from: customerAddress, gas: maxGasForDeploying});
+                    transferWithResult = await stablePayInstance.transferWithTokens(order, providerKey, {from: customerAddress, gas: maxGasForDeploying});
                 } else {
-                    transferWithResult = await stablePayInstance.transferWithEthers(order, providers, {from: customerAddress, value: sourceTokenRequiredBalance, gas: maxGasForDeploying});
+                    transferWithResult = await stablePayInstance.transferWithEthers(order, providerKey, {from: customerAddress, value: sourceTokenRequiredBalance, gas: maxGasForDeploying});
                 }
                 assert(transferWithResult, 'TransferWith result is undefined.');
 
                 const etherscanUrlPrefix = networkName.toLowerCase() === 'ropsten' ? networkName : 'www';
+                console.log(`Customer: ${customerAddress} => Merchant: ${merchantAddress}`);
                 console.log(`Success ${swapMessage}: https://${etherscanUrlPrefix}.etherscan.io/tx/${transferWithResult.tx}`);
             } catch (error) {
+                console.log(error);
                 console.log(`Error ${swapMessage} : ${error.toString()}`);
                 console.log(`Error on ${token.name}=>${DAI_NAME} stablePayStorage.getExpectedRates(${token.address} (${token.symbol}), ${targetTokenInstance.address} (${DAI_NAME}), ${targetAmountWei});`)
             }

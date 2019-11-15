@@ -16,7 +16,8 @@ ByApiOrderDataBuilder.prototype.build = async function(data) {
         targetAmount,
         targetAddress,
         merchantAddress,
-        customerAddress
+        customerAddress,
+        postAction = 'Default',
     } = data;
     const apiResult = await axios.post(
         this.url, {
@@ -25,17 +26,18 @@ ByApiOrderDataBuilder.prototype.build = async function(data) {
         targetTokenAddress: targetAddress,
         merchantAddress: merchantAddress,
         customerAddress: customerAddress,
+        postAction: postAction,
         verbose: true,
         safeMargin: "0.000000000"
     });
     const apiResponse = apiResult.data;
-    const providersKey = apiResponse.providers;
+    const providerKey = apiResponse.provider;
     const order = apiResponse.order;
     const amounts = apiResponse.amounts;
     console.log(amounts);
     return {
         order: order,
-        providers: providersKey,
+        provider: providerKey,
         amounts: amounts
     };
 }

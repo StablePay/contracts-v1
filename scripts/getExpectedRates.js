@@ -8,7 +8,7 @@
  */
 // Smart contracts
 const IProviderRegistry = artifacts.require("./interface/IProviderRegistry.sol");
-const ERC20 = artifacts.require("./services/erc20/ERC20.sol");
+const ERC20 = artifacts.require("@openzeppelin/contracts/token/ERC20/ERC20Detailed.sol");
 
 // Util classes
 const BigNumber = require('bignumber.js');
@@ -51,6 +51,10 @@ module.exports = async (callback) => {
         const accounts = await web3.eth.getAccounts();
         assert(accounts, "Accounts must be defined.");
 
+        const getProvidersRegistryCountResult = await providerStrategy.getProvidersRegistryCount();
+        assert(getProvidersRegistryCountResult, 'Get provider registry count result is undefined.');
+        console.log(`Swapping providers registered: ${getProvidersRegistryCountResult.toString()}`);
+
         const getExpectedRatesResult = await providerStrategy.getExpectedRates(
             sourceToken,
             targetTokenInstance.address,
@@ -63,6 +67,9 @@ module.exports = async (callback) => {
         console.log(`Source Token:              ${sourceTokenName}`);
         console.log(`Target Token:              ${targetTokenName}`);
         console.log(`Target Amount:             ${targetAmount} / ${targetAmountWei}`);
+        if(getExpectedRatesResult.length === 0) {
+            console.log(`Not available providers found.`);
+        }
         getExpectedRatesResult.forEach( expectedRate => {
             console.log('-'.repeat(50));
             console.log(`Provider Key:              ${expectedRate.providerKey}`);

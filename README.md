@@ -168,6 +168,15 @@ The project uses the [prettier solidity plugin](https://github.com/prettier-soli
 
 ---
 
+## External Smart Contracts
+
+We copied some external contracts into this repository due to they were in a NPM dependency:
+
+* SimpleToken.sol. See [hash commit version](https://github.com/OpenZeppelin/openzeppelin-contracts/commit/d1158ea68c597075a5aec4a77a9c16f061beffd3).
+    This contract is used only for testing purposes. We had to modify it (remove a GSN contract due to OpenZeppelin haven't published the new version yet).
+* WETH9.sol. We got the source code from the [Etherscan.io website](https://etherscan.io/address/0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2#code). We added to it the IERC20 inheritance.
+
+---
 ## Contact Us
 
 If you have any question or feedback, contact us at hi@stablepay.io.

@@ -4,7 +4,7 @@
 
     How do I execute this script?
 
-    truffle exec ./scripts/pauseByOwnerSwappingProvider.js --network infuraRopsten
+    truffle exec ./scripts/pauseByAdminSwappingProvider.js --network infuraRopsten
  */
 
 // Smart contracts
@@ -21,7 +21,7 @@ const processArgs = new ProcessArgs();
     Script Arguments
  */
 const senderIndex = 0;
-const providerName = 'KyberNetwork'; // Options: 'Uniswap' or 'KyberNetwork'
+const providerName = 'Uniswap'; // Options: 'Uniswap' or 'KyberNetwork'
 const providerVersion = '1';
 
 module.exports = async (callback) => {
@@ -31,7 +31,6 @@ module.exports = async (callback) => {
         const appConf = require('../config')(network);
         const stablepayConf = appConf.stablepay;
         const stablepayContracts = stablepayConf.contracts;
-        const stablepayProviders = stablepayConf.providers;
 
         const providerStrategy = await IProviderRegistry.at(stablepayContracts.StablePayStorage);
         assert(providerStrategy.address, "Provider registry address is undefined.");
@@ -49,19 +48,18 @@ module.exports = async (callback) => {
         
         const swappingProviderBefore = await providerStrategy.getSwappingProvider(providerKey.providerKey);
         assert(swappingProviderBefore.exists === true, 'Swapping provider must exist.');
-        assert(swappingProviderBefore.pausedByOwner === false, 'Swapping provider must not be paused by owner.');
         assert(swappingProviderBefore.pausedByAdmin === false, 'Swapping provider must not be paused by admin.');
 
         /******************************************************************
                                 Function Invocation
         ******************************************************************/
-        const pauseSwappingProviderResult = await providerStrategy.pauseSwappingProvider(providerKey.providerKey, { from: sender });
+        const pauseSwappingProviderResult = await providerStrategy.pauseByAdminSwappingProvider(providerKey.providerKey, { from: sender });
 
         console.log('Transation Result:');
         console.log(util.inspect(pauseSwappingProviderResult, {showHidden: false, depth: null}));
 
         const swappingProviderAfter = await providerStrategy.getSwappingProvider(providerKey.providerKey);
-        assert(swappingProviderAfter.pausedByOwner === true, 'Swapping provider must be paused by owner.');
+        assert(swappingProviderAfter.pausedByAdmin === true, 'Swapping provider must be paused by admin.');
 
         console.log('>>>> The script finished successfully. <<<<');
         callback();

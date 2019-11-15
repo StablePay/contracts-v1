@@ -111,7 +111,20 @@ module.exports = {
                 }),
                 notEmitted: (assertFunction = () => {} ) => notEmitted(tx, name, assertFunction)
             };
-        }
+        },
+        swappingProviderUnRegistered: tx => {
+            const name = 'SwappingProviderUnRegistered';
+            return {
+                name: name,
+                emitted: (thisContract, providerKey, swappingProvider, who, removedAt) => emitted(tx, name, ev => {
+                    assert.equal(ev.thisContract, thisContract);
+                    assert.equal(ev.providerKey.toString(), providerKey.toString());
+                    assert.equal(ev.swappingProvider, swappingProvider);
+                    assert.equal(ev.who, who);
+                }),
+                notEmitted: (assertFunction = () => {} ) => notEmitted(tx, name, assertFunction)
+            };
+        },
     },
     settings: {
         platformFeeUpdated: tx => {
@@ -196,7 +209,18 @@ module.exports = {
                 }),
                 notEmitted: (assertFunction = () => {} ) => notEmitted(tx, name, assertFunction)
             };
-        }
+        },
+        ownerRemoved: tx => {
+            const name = 'OwnerRemoved';
+            return {
+                name: name,
+                emitted: (thisContract, oldOwner) => emitted(tx, name, ev => {
+                    assert.equal(ev.thisContract, thisContract);
+                    assert.equal(ev.oldOwner, oldOwner);
+                }),
+                notEmitted: (assertFunction = () => {} ) => notEmitted(tx, name, assertFunction)
+            };
+        },
     },
     stablePayBase: {
         executionTransferFailed: tx => {
@@ -227,8 +251,8 @@ module.exports = {
         },
     },
     vault: {
-        tokensWithdrawn: tx => {
-            const name = 'TokensWithdrawn';
+        tokensTransferred: tx => {
+            const name = 'TokensTransferred';
             return {
                 name: name,
                 emitted: (thisContract, erc20Contract, who, to, amount) => emitted(tx, name, ev => {
@@ -241,8 +265,8 @@ module.exports = {
                 notEmitted: (assertFunction = () => {} ) => notEmitted(tx, name, assertFunction)
             };
         },
-        ethersWithdrawn: tx => {
-            const name = 'EthersWithdrawn';
+        ethersTransferred: tx => {
+            const name = 'EthersTransferred';
             return {
                 name: name,
                 emitted: (thisContract, who, to, amount) => emitted(tx, name, ev => {
@@ -253,6 +277,72 @@ module.exports = {
                 }),
                 notEmitted: (assertFunction = () => {} ) => notEmitted(tx, name, assertFunction)
             };
+        },
+        ethersDeposited: tx => {
+            const name = 'EthersDeposited';
+            return {
+                name: name,
+                emitted: (thisContract, from, amount) => emitted(tx, name, ev => {
+                    assert.equal(ev.thisContract, thisContract);
+                    assert.equal(ev.from, from);
+                    assert.equal(ev.amount.toString(), amount.toString());
+                }),
+                notEmitted: (assertFunction = () => {} ) => notEmitted(tx, name, assertFunction)
+            };
+        },
+        tokensDeposited: tx => {
+            const name = 'TokensDeposited';
+            return {
+                name: name,
+                emitted: (thisContract, erc20Contract, from, amount) => emitted(tx, name, ev => {
+                    assert.equal(ev.thisContract, thisContract);
+                    assert.equal(ev.erc20Contract, erc20Contract);
+                    assert.equal(ev.from, from);
+                    assert.equal(ev.amount.toString(), amount.toString());
+                }),
+                notEmitted: (assertFunction = () => {} ) => notEmitted(tx, name, assertFunction)
+            };
         }
+    },
+    registration: {
+        newContractRegistered: tx => {
+            const name = 'NewContractRegistered';
+            return {
+                name: name,
+                emitted: (thisContract, contractAddress, contractName) => emitted(tx, name, ev => {
+                    assert.equal(ev.thisContract, thisContract);
+                    assert.equal(ev.contractAddress, contractAddress);
+                    assert.equal(ev.contractName.toString(), contractName.toString());
+                }),
+                notEmitted: (assertFunction = () => {} ) => notEmitted(tx, name, assertFunction)
+            };
+        },
+    },
+    compoundSettings: {
+        erc20ToCEr20MappingCreated: tx => {
+            const name = 'Erc20ToCEr20MappingCreated';
+            return {
+                name: name,
+                emitted: (thisContract, erc20Address, cErc20Address) => emitted(tx, name, ev => {
+                    assert.equal(ev.thisContract, thisContract);
+                    assert.equal(ev.erc20Address, erc20Address);
+                    assert.equal(ev.cErc20Address, cErc20Address);
+                }),
+                notEmitted: (assertFunction = () => {} ) => notEmitted(tx, name, assertFunction)
+            };
+        },
+        erc20ToCEr20MappingUpdated: tx => {
+            const name = 'Erc20ToCEr20MappingUpdated';
+            return {
+                name: name,
+                emitted: (thisContract, oldCerc20Address, erc20Address, cErc20Address) => emitted(tx, name, ev => {
+                    assert.equal(ev.thisContract, thisContract);
+                    assert.equal(ev.oldCerc20Address, oldCerc20Address);
+                    assert.equal(ev.erc20Address, erc20Address);
+                    assert.equal(ev.cErc20Address, cErc20Address);
+                }),
+                notEmitted: (assertFunction = () => {} ) => notEmitted(tx, name, assertFunction)
+            };
+        },
     },
 }

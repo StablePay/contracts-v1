@@ -1,11 +1,10 @@
-pragma solidity 0.5.3;
+pragma solidity 0.5.10;
 
 import "./base/proxy/ProxyBase.sol";
 
 contract StablePay is ProxyBase {
-    
     /** Constants */
-    string constant public STABLE_PAY = "StablePayBase";
+    string public constant STABLE_PAY = "StablePayBase";
 
     /** Variables */
 
@@ -15,9 +14,9 @@ contract StablePay is ProxyBase {
 
     /** Constructor */
     constructor(address storageAddress)
-      ProxyBase(storageAddress, STABLE_PAY)
-      public {
-    }
+        public
+        ProxyBase(storageAddress, STABLE_PAY)
+    {}
 
     /**
     * @dev ERC897, the address the proxy would delegate calls to
