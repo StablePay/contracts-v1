@@ -37,7 +37,6 @@ contract DexAgSwappingProvider is AbstractSwappingProvider {
     /** Modifiers */
 
     modifier isValidToAddress(address _anAddress) {
-
         require(_anAddress != address(0x0), "To Address must not be 0x0.");
 
         _;
@@ -121,7 +120,6 @@ contract DexAgSwappingProvider is AbstractSwappingProvider {
         );
 
         // Set the spender's token allowance to tokenQty
-
         approveTokensTo(sourceToken, getProxy(), _order.sourceAmount);
 
         // Execute swap between the ERC20 token to ERC20 token.
@@ -175,11 +173,6 @@ contract DexAgSwappingProvider is AbstractSwappingProvider {
         require(_order.sourceAmount > 0, "Amount must be > 0");
 
         require(msg.value == _order.sourceAmount, "Msg value == source amount");
-
-        // Gets the ERC20 source/target token instances.
-        // PREGUNTA: ? porque hay un sourceToken si se usa ether?
-        ERC20 sourceToken = ERC20(_order.sourceToken);
-        ERC20 targetToken = ERC20(_order.targetToken);
 
         // Get ether balance before swapping execution, and validate it is higher (or equals) to order source amount.
 
