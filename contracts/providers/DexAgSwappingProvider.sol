@@ -21,12 +21,12 @@ contract DexAgSwappingProvider is ISwappingProvider {
 
     /** Modifiers */
 
-    modifier isValidAddress(address _anAddress) {
+    modifier isValidToAddress(address _anAddress) {
         require(_anAddress != address(0x0), "To Address must not be 0x0.");
         _;
     }
 
-    modifier hasValidCallData(bytes _callData) {
+    modifier hasValidCallData(bytes memory _callData) {
         require(_callData != EMPTY, "CallData is Empty");
         _;
     }
@@ -42,7 +42,14 @@ contract DexAgSwappingProvider is ISwappingProvider {
     }
 
     /** Methods */
-
+    // NOTE: this can be overriden for other dexes
+    function getProxy()
+        internal
+        view
+        returns (address)
+    {
+        return address(proxy);
+    }
 
     function swapToken(StablePayCommon.Order memory _order)
         public
@@ -56,7 +63,6 @@ contract DexAgSwappingProvider is ISwappingProvider {
 
         // Gets the ERC20 source/target token instances.
         ERC20 sourceToken = ERC20(_order.sourceToken);
-        ERC20 targetToken = ERC20(_order.targetToken);
 
         // Check the current source token balance is higher (or equals) to the order source amount.
         uint256 sourceInitialTokenBalance = getTokenBalanceOf(
@@ -68,7 +74,7 @@ contract DexAgSwappingProvider is ISwappingProvider {
         );
 
         // Set the spender's token allowance to tokenQty
-        approveTokensTo(sourceToken, address(proxy), _order.sourceAmount);
+        approveTokensTo(sourceToken, getProxy(), _order.sourceAmount);
 
         // Execute swap between the ERC20 token to ERC20 token.
         proxy.call(_order.data).value(0);
@@ -100,11 +106,6 @@ contract DexAgSwappingProvider is ISwappingProvider {
         require(msg.value > 0, "Msg value must be > 0");
         require(_order.sourceAmount > 0, "Amount must be > 0");
         require(msg.value == _order.sourceAmount, "Msg value == source amount");
-
-        // Gets the ERC20 source/target token instances.
-        // PREGUNTA: ? porque hay un sourceToken si se usa ether?
-        ERC20 sourceToken = ERC20(_order.sourceToken);
-        ERC20 targetToken = ERC20(_order.targetToken);
 
         // Get ether balance before swapping execution, and validate it is higher (or equals) to order source amount.
         uint256 sourceInitialEtherBalance = getEtherBalance();
