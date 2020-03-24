@@ -14,7 +14,7 @@ import "./ISwappingProvider.sol";
  */
 contract DexAgSwappingProvider is ISwappingProvider {
     address public proxy;
-    bytes32 constant EMPTY = "";
+    bytes32 constant EMPTY = keccak256("");
 
 
     /** Events */
@@ -27,14 +27,14 @@ contract DexAgSwappingProvider is ISwappingProvider {
     }
 
     modifier hasValidCallData(bytes memory _callData) {
-        require(_callData != EMPTY, "CallData is Empty");
+        require(keccak256(_callData) != EMPTY, "CallData is Empty");
         _;
     }
 
 
     /** Constructor */
 
-    constructor(address _stablePay, address _proxy)
+    constructor(address _stablePay, address payable _proxy)
         public
         ISwappingProvider(_stablePay)
     {
@@ -48,7 +48,11 @@ contract DexAgSwappingProvider is ISwappingProvider {
         view
         returns (address)
     {
-        return address(proxy);
+        return proxy;
+    }
+
+    function makePayable(address x) internal pure returns (address payable) {
+        return address(uint160(x));
     }
 
     function swapToken(StablePayCommon.Order memory _order)
@@ -77,8 +81,12 @@ contract DexAgSwappingProvider is ISwappingProvider {
         approveTokensTo(sourceToken, getProxy(), _order.sourceAmount);
 
         // Execute swap between the ERC20 token to ERC20 token.
-        proxy.call(_order.data).value(0);
-
+        // Note: from example docs proxy.call(_order.data).value(0);
+        address payable proxyAddr = makePayable(proxy);
+        (bool success,) = proxyAddr.call(_order.data);
+        if (!success) {
+            revert();
+        }
         // Get source token balance after swapping execution.
         uint256 sourceFinalTokenBalance = getTokenBalanceOf(_order.sourceToken);
 
@@ -115,8 +123,12 @@ contract DexAgSwappingProvider is ISwappingProvider {
         );
 
         // Execute the swapping from ERC20 token to ETH.
-        proxy.call(_order.data).value(msg.value);
-
+        // Note: proxy.call(_order.data).value(msg.value);
+        address payable proxyAddr = makePayable(proxy);
+        (bool success,) = proxyAddr.call(_order.data);
+        if (!success) {
+            revert();
+        }
         // Get ether balance after swapping execution.
         uint256 sourceFinalEtherBalance = getEtherBalance();
 
