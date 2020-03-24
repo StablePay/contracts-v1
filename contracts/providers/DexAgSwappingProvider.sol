@@ -83,7 +83,7 @@ contract DexAgSwappingProvider is ISwappingProvider {
         // Execute swap between the ERC20 token to ERC20 token.
         // Note: from example docs proxy.call(_order.data).value(0);
         address payable proxyAddr = makePayable(proxy);
-        (bool success,) = proxyAddr.call(_order.data);
+        (bool success,) = proxyAddr.call.value(0)(_order.data);
         if (!success) {
             revert();
         }
@@ -125,7 +125,7 @@ contract DexAgSwappingProvider is ISwappingProvider {
         // Execute the swapping from ERC20 token to ETH.
         // Note: proxy.call(_order.data).value(msg.value);
         address payable proxyAddr = makePayable(proxy);
-        (bool success,) = proxyAddr.call(_order.data);
+        (bool success,) = proxyAddr.call.value(msg.value)(_order.data);
         if (!success) {
             revert();
         }
