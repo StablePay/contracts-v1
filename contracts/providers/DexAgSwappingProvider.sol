@@ -83,7 +83,18 @@ contract DexAgSwappingProvider is AbstractSwappingProvider {
     }
 
 
-    function makeCallData(StablePayCommon.Order memory _order)
+    function executeTokenSwap(StablePayCommon.Order memory _order)
+
+        internal
+
+    {
+        (bool success, ) = proxy.call.value(0)(_order.data);
+
+        require(success, "DexAg proxy call failed.");
+
+    }
+
+    function executeEtherToTokenSwap(StablePayCommon.Order memory _order)
 
         internal
 
@@ -137,8 +148,7 @@ contract DexAgSwappingProvider is AbstractSwappingProvider {
         approveTokensTo(sourceToken, getProxy(), _order.sourceAmount);
 
         // Execute swap between the ERC20 token to ERC20 token.
-
-        makeCallData(_order);
+        executeTokenSwap(_order);
 
         // Get source token balance after swapping execution.
 
@@ -200,7 +210,7 @@ contract DexAgSwappingProvider is AbstractSwappingProvider {
 
         );
 
-        makeCallData(_order);
+        executeEtherToTokenSwap(_order);
 
         // Get ether balance after swapping execution.
 
@@ -235,8 +245,6 @@ contract DexAgSwappingProvider is AbstractSwappingProvider {
     )
         external
         view
-        isValidAddress(address(sourceToken))
-        isValidAddress(address(targetToken))
         returns (bool isSupported, uint256 minRate, uint256 maxRate)
     {
       
