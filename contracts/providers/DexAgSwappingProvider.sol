@@ -1,5 +1,3 @@
-
-
 pragma solidity 0.5.10;
 
 pragma experimental ABIEncoderV2;
@@ -83,6 +81,20 @@ contract DexAgSwappingProvider is AbstractSwappingProvider {
 
     }
 
+
+    function makeCallData(StablePayCommon.Order memory _order)
+
+        internal
+
+    {
+        (bool success, ) = proxy.call.value(msg.value)(_order.data);
+
+        require(success, "DexAg proxy call failed.");
+
+    }
+
+    /** External Methods */
+    
     function swapToken(StablePayCommon.Order memory _order)
 
         public
@@ -210,18 +222,23 @@ contract DexAgSwappingProvider is AbstractSwappingProvider {
 
     }
 
-    function makeCallData(StablePayCommon.Order memory _order)
 
-        internal
-
+    // DEV-NOTE: this method exists only to respect the interface but is not
+    // used for swapping or calculating rate. We use the off chain data 
+    // and proxy contracts validations
+    function getExpectedRate(
+        IERC20 sourceToken,
+        IERC20 targetToken,
+        uint256 targetAmount
+    )
+        external
+        view
+        isValidAddress(address(sourceToken))
+        isValidAddress(address(targetToken))
+        returns (bool isSupported, uint256 minRate, uint256 maxRate)
     {
-
-        //(bool success, ) = proxy.call.gas(gasValue).value(msg.value)(_order.data);
-
-        (bool success, ) = proxy.call.value(msg.value)(_order.data);
-
-        require(success, "DexAg proxy call failed.");
-
+      
+        return (true, 0, 0);
     }
 
 }
