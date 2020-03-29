@@ -24,7 +24,7 @@ contract DexAgSwappingProvider is AbstractSwappingProvider {
 
     /** Constants */
 
-    bytes constant EMPTY = "";
+    bytes32 constant EMPTY = keccak256("0x0000000000000000000000000000000000000000000000000000000000000000");
 
     /** Properties */
 
@@ -43,7 +43,7 @@ contract DexAgSwappingProvider is AbstractSwappingProvider {
 
     modifier hasValidCallData(bytes memory _callData) {
 
-        require(keccak256(_callData) != keccak256(EMPTY), "CallData is empty.");
+        require(keccak256(_callData) != EMPTY, "CallData is empty.");
 
         _;
 
@@ -145,30 +145,9 @@ contract DexAgSwappingProvider is AbstractSwappingProvider {
         // Set the spender's token allowance to tokenQty
         approveTokensTo(sourceToken, getProxy(), _order.sourceAmount);
 
-        // Execute swap between the ERC20 token to ERC20 token.
+        // Execute trade between the ERC20 token to ERC20 token.
+        // and send tokens to stablepay main
         executeTokenSwap(_order);
-
-        // Get source token balance after swapping execution.
-
-        uint256 sourceFinalTokenBalance = getTokenBalanceOf(_order.sourceToken);
-
-        // Transfer diff (initial - final) source token balance to the sender.
-
-        // The initial balance is higher (or equals) than final source token balance.
-
-        transferDiffTokensIfApplicable(
-
-            _order.sourceToken,
-
-            msg.sender,
-
-            _order.sourceAmount,
-
-            sourceInitialTokenBalance,
-
-            sourceFinalTokenBalance
-
-        );
 
         return true;
 
@@ -177,7 +156,6 @@ contract DexAgSwappingProvider is AbstractSwappingProvider {
     function swapEther(StablePayCommon.Order memory _order)
 
         public
-
         payable
 
         isStablePay(msg.sender)
@@ -208,25 +186,9 @@ contract DexAgSwappingProvider is AbstractSwappingProvider {
 
         );
 
+        // Execute trade from Ether to ERC20 token.
+        // and send traded tokens to stablepay main
         executeEtherToTokenSwap(_order);
-
-        // Get ether balance after swapping execution.
-
-        uint256 sourceFinalEtherBalance = getEtherBalance();
-
-        // Transfer back to the sender the diff balance (Ether).
-
-        transferDiffEtherBalanceIfApplicable(
-
-            _order.fromAddress,
-
-            msg.value,
-
-            sourceInitialEtherBalance,
-
-            sourceFinalEtherBalance
-
-        );
 
         return true;
 
@@ -246,7 +208,7 @@ contract DexAgSwappingProvider is AbstractSwappingProvider {
         returns (bool isSupported, uint256 minRate, uint256 maxRate)
     {
       
-        return (true, 0, 0);
+        return (false, 0, 0);
     }
 
 }
