@@ -3,7 +3,7 @@ const {
     ETH_ADDRESS,
 } = require('../util/consts');
 const withData = require('leche').withData;
-const KyberOrderFactory = require('../factories/KyberOrderFactory');
+const DexAgOrderFactory = require('../factories/DexAgOrderFactory');
 
 // Mock Smart Contracts 
 const Mock = artifacts.require("./mock/Mock.sol");
@@ -40,7 +40,7 @@ contract('DexAgSwappingProviderTest', accounts => {
             token = await SimpleToken.new({from: customerAddress});
             token.transfer(swappingProvider.address, 100, { from: customerAddress });
 
-            const orderArray = new KyberOrderFactory({
+            const orderArray = new DexAgOrderFactory({
                 sourceToken: token.address,
                 targetToken: token.address,
                 sourceAmount: sourceAmount,
@@ -50,6 +50,8 @@ contract('DexAgSwappingProviderTest', accounts => {
                 merchantAddress: merchantAddress,
                 customerAddress: customerAddress
             }).createOrder();
+
+            console.log('orderArray', orderArray);
     
             try {
                 // Invocation
@@ -76,7 +78,7 @@ contract('DexAgSwappingProviderTest', accounts => {
             token = await SimpleToken.new({from: customerAddress});
             token.transfer(swappingProvider.address, 100, { from: customerAddress });
 
-            const orderArray = new KyberOrderFactory({
+            const orderArray = new DexAgOrderFactory({
                 sourceToken: token.address,
                 targetToken: token.address,
                 sourceAmount: sourceAmount,
@@ -86,6 +88,8 @@ contract('DexAgSwappingProviderTest', accounts => {
                 merchantAddress: merchantAddress,
                 customerAddress: customerAddress
             }).createOrder();
+
+            console.log('orderArray', orderArray);
     
             try {
                 // Invocation
