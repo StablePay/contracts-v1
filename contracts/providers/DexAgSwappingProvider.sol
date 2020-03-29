@@ -43,8 +43,7 @@ contract DexAgSwappingProvider is AbstractSwappingProvider {
     }
 
     modifier hasValidCallData(bytes memory _callData) {
-
-        require(keccak256(_callData) != EMPTY, "CallData is empty.");
+        require(_callData.length > 0, "CallData is empty.");
 
         _;
 
