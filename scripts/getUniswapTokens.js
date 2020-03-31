@@ -1,17 +1,17 @@
 /**
     Purpose:
-    It gets the expected rate for a specific swapping provider.
+    It gets all tokens and exchanged registered in Uniswap.
 
     How do I execute this script?
 
-    truffle exec ./scripts/getExpectedRate.js --network infuraRopsten
+    truffle exec ./scripts/getUniswapTokens.js --network infuraRopsten
  */
 // Smart contracts
 const UniswapFactoryInterface = artifacts.require("./services/uniswap/UniswapFactoryInterface.sol");
-const ERC20 = artifacts.require("./services/erc20/ERC20.sol");
+const ERC20 = artifacts.require("@openzeppelin/contracts/token/ERC20/ERC20Detailed.sol");
 
 // Util classes
-const BigNumber = require('bignumber.js');
+const jsonfile = require('jsonfile');
 const assert = require('assert');
 const { NULL_ADDRESS } = require('../test/util/consts');
 const ProcessArgs = require('../src/utils/ProcessArgs');
@@ -20,8 +20,6 @@ const processArgs = new ProcessArgs();
 /**
     Script Arguments
  */
-
-
 module.exports = async (callback) => {
     try {
         const network = processArgs.network();
@@ -50,6 +48,7 @@ module.exports = async (callback) => {
                     index++;
                     continue;
                 }
+                //console.log(`Token address: ${tokenAddress} - Exchange Address: ${tokenExchangeAddress}`);
                 const tokenInstance = await ERC20.at(tokenAddress);
 
                 const decimalsPromise = tokenInstance.decimals();
@@ -58,9 +57,8 @@ module.exports = async (callback) => {
 
                 [decimals, name, symbol] = await Promise.all([decimalsPromise, namePromise, symbolPromise]);
 
-                console.log(`Token: ${symbol} (${name}) - Decimals: ${decimals} - Address: ${tokenAddress} - Exchange: ${tokenExchangeAddress}.`);
-
-                tokens.push({
+                //console.log(`Token: ${symbol} (${name}) - Decimals: ${decimals} - Address: ${tokenAddress} - Exchange: ${tokenExchangeAddress}.`);
+                const tokenData = {
                     token: {
                         address: tokenAddress,
                         symbol,
@@ -68,14 +66,27 @@ module.exports = async (callback) => {
                         decimals: parseInt(decimals.toString()),
                     },
                     exchange: tokenExchangeAddress,
-                });
+                };
+                tokens.push(tokenData);
+                console.log(index, '- ', tokenData);
+                if(index % 20 === 0) {
+                    const outputJson = `${index}_uniswap_${network}_tokens.json`;
+                    jsonfile.writeFile(outputJson, tokens, {spaces: 4, EOL: '\r\n'}, function (err) {
+                        console.log(`Custom JSON file created at '${outputJson}'.`);
+                        if(err) {
+                            console.error("Errors: " + err);
+                        }
+                    });
+                }
             } catch (error) {
-                console.log(`Error on index ${index}: ${symbol} (${name}) - Decimals: ${decimals}`);
+                console.log(`Error on index ${index}: ${symbol} (${name}) - Decimals: ${decimals} - Error: ${error}`);
             }
             index++;
         }
-
-        console.log(tokens);
+        console.log('='.repeat(100))
+        tokens.forEach(tokenData => {
+            console.log(tokenData);
+        });
         console.log('>>>> The script finished successfully. <<<<');
         callback();
     } catch (error) {

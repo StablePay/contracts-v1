@@ -1,15 +1,13 @@
-pragma solidity 0.5.3;
+pragma solidity 0.5.10;
 
 import "./IsContract.sol";
-import "../../interface/IERCProxy.sol";
+import "./ERCAbstractProxy.sol";
 
 /**
     @title It delegates a call function to a destination address.
     @dev Borrowed from the Awesome AragonOS project.
  */
-contract DelegateProxy is IERCProxy, IsContract {
-    uint256 internal constant FWD_GAS_LIMIT = 10000;
-
+contract DelegateProxy is ERCAbstractProxy, IsContract {
     /**
     * @dev Performs a delegatecall and returns whatever the delegatecall returned (entire context execution will return!)
     * @param destination Destination address to perform the delegatecall
@@ -20,11 +18,10 @@ contract DelegateProxy is IERCProxy, IsContract {
             isContract(destination),
             "Destination address is not a contract."
         );
-        uint256 fwdGasLimit = FWD_GAS_LIMIT;
 
         assembly {
             let result := delegatecall(
-                sub(gas, fwdGasLimit),
+                gas,
                 destination,
                 add(callData, 0x20),
                 mload(callData),

@@ -7,7 +7,7 @@ const KyberOrderFactory = require('../factories/KyberOrderFactory');
 
 // Mock Smart Contracts
 const StablePayBaseMock = artifacts.require("./mock/StablePayBaseMock.sol");
-const StandardTokenMock = artifacts.require("./mock/token/StandardTokenMock.sol");
+const SimpleToken = artifacts.require("./mock/token/SimpleToken.sol");
 
 // Smart Contracts
 const Storage = artifacts.require("./base/Storage.sol");
@@ -53,8 +53,7 @@ contract('StablePayBaseCalculateAndTransferFeeTest', accounts => {
             const platformFeeValue = 100 * platformFee;
             await settings.setPlatformFee(platformFeeValue.toString(), { from: owner });
 
-            const amount = web3.utils.toWei('10000000000', 'ether');
-            const token = await StandardTokenMock.new(customerAddress, amount);
+            const token = await SimpleToken.new({from: customerAddress});
             const orderArray = new KyberOrderFactory({
                 sourceToken: token.address,
                 targetToken: token.address,

@@ -1,10 +1,9 @@
-pragma solidity 0.5.3;
+pragma solidity 0.5.10;
 
 /**
  * Utility library of inline functions on addresses
  */
 library AddressLib {
-
     address internal constant ADDRESS_EMPTY = address(0x0);
 
     /**
@@ -16,11 +15,11 @@ library AddressLib {
      */
     function isContract(address account) internal view returns (bool) {
         uint256 size;
-        // XXX Currently there is no better way to check if there is a contract in an address
+        // Note: Currently there is no better way to check if there is a contract in an address
         // than to check the size of the code at that address.
         // See https://ethereum.stackexchange.com/a/14016/36603
         // for more details about how this works.
-        // TODO Check this again before the Serenity release, because all addresses will be
+        // Note: Check this again before the Serenity release, because all addresses will be
         // contracts then.
         // solhint-disable-next-line no-inline-assembly
         assembly {
@@ -37,7 +36,11 @@ library AddressLib {
         return self == other;
     }
 
-    function notEqualTo(address self, address other) internal pure returns (bool) {
+    function notEqualTo(address self, address other)
+        internal
+        pure
+        returns (bool)
+    {
         return self != other;
     }
 
@@ -45,19 +48,32 @@ library AddressLib {
         return self != ADDRESS_EMPTY;
     }
 
-    function requireNotEmpty(address self, string memory message) internal pure returns (bool) {
+    function requireNotEmpty(address self, string memory message)
+        internal
+        pure
+    {
         require(isNotEmpty(self), message);
     }
 
-    function requireEmpty(address self, string memory message) internal pure returns (bool) {
+    function requireEmpty(address self, string memory message)
+        internal
+        pure
+    {
         require(isEmpty(self), message);
     }
 
-    function requireEqualTo(address self, address other, string memory message) internal pure returns (bool) {
+    function requireEqualTo(address self, address other, string memory message)
+        internal
+        pure
+    {
         require(equalTo(self, other), message);
     }
 
-    function requireNotEqualTo(address self, address other, string memory message) internal pure returns (bool) {
+    function requireNotEqualTo(
+        address self,
+        address other,
+        string memory message
+    ) internal pure {
         require(notEqualTo(self, other), message);
     }
 }

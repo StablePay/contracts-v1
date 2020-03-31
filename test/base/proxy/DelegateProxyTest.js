@@ -37,7 +37,7 @@ contract('DelegateProxyTest', function (accounts) {
 
     withData({
         _1_proxy_234: [ProxyTargetMock, 234, 50000, undefined, false],
-        _2_proxy_0: [ProxyTargetMock, 0, 'New value must > 0.', true]
+        _2_proxy_0: [ProxyTargetMock, 0, 'New value must gt 0.', true]
     }, function(contract, value, reasonExpected, mustFail) {
         it(t('anUser', 'delegatedFwd', 'Should be able (or not) to invoke delagatecall function.', mustFail), async function() {
             //Setup

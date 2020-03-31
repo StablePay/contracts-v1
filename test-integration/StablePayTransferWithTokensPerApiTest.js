@@ -3,7 +3,7 @@ const IStablePay = artifacts.require("./interface/IStablePay.sol");
 const Settings = artifacts.require("./base/Settings.sol");
 const Vault = artifacts.require("./base/Vault.sol");
 const KyberNetworkProxyInterface = artifacts.require("./services/kyber/KyberNetworkProxyInterface.sol");
-const ERC20 = artifacts.require("./services/erc20/ERC20.sol");
+const ERC20 = artifacts.require("@openzeppelin/contracts/token/ERC20/ERC20Detailed.sol");
 
 const appConfig = require('../src/config');
 
@@ -63,21 +63,22 @@ contract('StablePayPayWithTokenPerApiTest', (accounts) => {
     });
 
     withData({  
-        _1_DAI_to_10_DAI: [0, 1, "DAI", "DAI", "10", true],
-        _2_KNC_to_20_DAI: [0, 1, "KNC", "DAI", "20", true],
-        _3_KNC_to_30_DAI: [0, 1, "KNC", "DAI", "30", true],
-        _4_KNC_to_80_DAI: [0, 1, "KNC", "DAI", "80", true],
-        _5_EOS_to_80_DAI: [0, 1, "EOS", "DAI", "25", true],
-        _6_OMG_to_15_DAI: [0, 1, "OMG", "DAI", "15", true],
-        _7_OMG_to_31_DAI: [0, 1, "OMG", "DAI", "31", true],
-        _8_MANA_to_30_DAI: [0, 1, "MANA", "DAI", "30", true],
-        _9_ZIL_to_25_DAI: [0, 1, "ZIL", "DAI", "25", true],
-        _10_ELF_to_32_DAI: [0, 1, "ELF", "DAI", "32", true],
-        _11_SNT_to_41_DAI: [0, 1, "SNT", "DAI", "41", true],
-        _12_BAT_to_21_DAI: [0, 1, "BAT", "DAI", "21", true],
-        _13_POWR_to_15_5_DAI: [0, 1, "POWR", "DAI", "15.5", true]
-    }, function(customerIndex, merchantIndex, sourceTokenName, targetTokenName, targetTokenAmount, verbose) {
-        it(t('anUser', 'payWithToken', `Should be able to payWithToken ${sourceTokenName} -> ${targetTokenAmount} ${targetTokenName}s.`), async function() {
+        _1_DAI_to_10_DAI_default: [0, 1, "DAI", "DAI", "10", undefined, true],
+        _2_KNC_to_20_DAI_default: [0, 1, "KNC", "DAI", "20", undefined, true],
+        _3_KNC_to_30_DAI_default: [0, 1, "KNC", "DAI", "30", undefined, true],
+        _4_KNC_to_80_DAI_default: [0, 1, "KNC", "DAI", "80", undefined, true],
+        _5_EOS_to_80_DAI_default: [0, 1, "EOS", "DAI", "25", undefined, true],
+        _6_OMG_to_15_DAI_default: [0, 1, "OMG", "DAI", "15", undefined, true],
+        _7_OMG_to_31_DAI_default: [0, 1, "OMG", "DAI", "31", undefined, true],
+        _8_MANA_to_30_DAI_default: [0, 1, "MANA", "DAI", "30", undefined, true],
+        _9_ZIL_to_25_DAI_default: [0, 1, "ZIL", "DAI", "25", undefined, true],
+        _10_ELF_to_32_DAI_default: [0, 1, "ELF", "DAI", "32", undefined, true],
+        _11_SNT_to_41_DAI_default: [0, 1, "SNT", "DAI", "41", undefined, true],
+        _12_BAT_to_21_DAI_default: [0, 1, "BAT", "DAI", "21", undefined, true],
+        _13_POWR_to_15_5_DAI_default: [0, 1, "POWR", "DAI", "15.5", undefined, true],
+        _14_KNC_to_15_5_WETH_ether: [0, 1, "KNC", "WETH", "0.01", 'ether', true],
+    }, function(customerIndex, merchantIndex, sourceTokenName, targetTokenName, targetTokenAmount, postActionName, verbose) {
+        it(t('anUser', 'transferWithTokens', `Should be able to payWithToken ${sourceTokenName} -> ${targetTokenAmount} ${targetTokenName}s.`), async function() {
             // Setup
             const source = {
                 address: kyberTokens[sourceTokenName]
@@ -115,7 +116,8 @@ contract('StablePayPayWithTokenPerApiTest', (accounts) => {
                 targetAmount: target.amount,
                 targetAddress: target.address,
                 merchantAddress: merchantAddress,
-                customerAddress: customerAddress
+                customerAddress: customerAddress,
+                postAction: postActionName,
             };
             const result = await stablePayWrapper.transferWithTokens(data, {from: customerAddress, gas: maxGas});
 
@@ -193,7 +195,6 @@ contract('StablePayPayWithTokenPerApiTest', (accounts) => {
                 console.log(customerTargetTokenBalance.minus().times(-1).toString(),'   ', customerAmount.asWeisFixed());
                 assert.equal(customerTargetTokenBalance.minus().times(-1).toString(), customerAmount.asWeisFixed());
             } else {
-                // TODO Check it
                 console.log('Customer Source Balance:   ', customerSourceTokenBalance.minus().times(-1).toString());
                 console.log('Amounts MAX:               ', amounts.max);
                 console.log('Amounts MIN:               ', amounts.min);

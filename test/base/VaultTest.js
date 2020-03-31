@@ -5,7 +5,7 @@ const ITransferMock = artifacts.require("./interface/ITransferMock.sol");
 const withData = require('leche').withData;
 const BigNumber = require('bignumber.js');
 const t = require('../util/consts').title;
-const base = require('../util/events').base;
+const vault = require('../util/events').vault;
 
 contract('VaultTest', function (accounts) {
 
@@ -28,18 +28,18 @@ contract('VaultTest', function (accounts) {
         _1_1ether: ["1"],
         _1_000001ether: ["0.00001"]
     }, function(valueEther) {
-        it(t('anOwner', 'deposit', 'Should able to deposit ether.', false), async function() {
+        it(t('anOwner', 'depositEthers', 'Should able to deposit ether.', false), async function() {
             // Setup
             const valueWei = web3.utils.toWei(valueEther, 'ether');
             const beforeBalance = await web3.eth.getBalance(instance.address);
             
             // Invocation
-            const result = await instance.deposit({from: account0, value: valueWei});
+            const result = await instance.depositEthers({from: account0, value: valueWei});
 
             // Assertions
             const afterBalance = await web3.eth.getBalance(instance.address);
-            await base
-                .depositReceived(result)
+            await vault
+                .ethersDeposited(result)
                 .emitted(instance.address, account0, valueWei);
 
             const diffBalance = BigNumber(afterBalance.toString()).minus(BigNumber(beforeBalance.toString()));
@@ -48,14 +48,14 @@ contract('VaultTest', function (accounts) {
     });
 
     withData({
-        _1_1ether: ["0", "Msg value > 0."]
+        _1_1ether: ["0", "Msg value is not gt 0."]
     }, function(valueWei, messageExpected) {
-        it(t('anOwner', 'deposit', 'Should not able to deposit ether.', true), async function() {
+        it(t('anOwner', 'depositEthers', 'Should not able to deposit ether.', true), async function() {
             // Setup
 
             // Invocation
             try {
-                await instance.deposit({from: account0, value: valueWei});
+                await instance.depositEthers({from: account0, value: valueWei});
 
                 // Assertions
                 fail(false, "It should have failed because the value is invalid.");

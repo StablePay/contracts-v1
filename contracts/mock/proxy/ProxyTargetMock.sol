@@ -1,4 +1,4 @@
-pragma solidity 0.5.3;
+pragma solidity 0.5.10;
 
 import "../../base/Base.sol";
 
@@ -16,7 +16,7 @@ contract ProxyTargetMock is Base {
     constructor(address _storage) public Base(_storage) {}
 
     function setValue(uint256 _newValue) public {
-        require(_newValue > 0, "New value must > 0.");
+        require(_newValue > 0, "New value must gt 0.");
         value = _newValue;
     }
 }

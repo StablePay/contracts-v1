@@ -7,7 +7,7 @@ const ProcessArgs = require('../src/utils/ProcessArgs');
 const processArgs = new ProcessArgs();
 
 const IProviderRegistry = artifacts.require("./interface/IProviderRegistry.sol");
-const ERC20 = artifacts.require("./interface/ERC20.sol");
+const ERC20 = artifacts.require("@openzeppelin/contracts/token/ERC20/IERC20.sol");
 
 const leche = require('leche');
 const withData = leche.withData;

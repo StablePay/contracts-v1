@@ -1,11 +1,10 @@
-pragma solidity 0.5.3;
+pragma solidity 0.5.10;
 
 contract StablePayCommon {
     struct SwappingProvider {
         address payable providerAddress;
         address ownerAddress;
         uint256 createdAt;
-        bool pausedByOwner;
         bool pausedByAdmin;
         bool exists;
     }

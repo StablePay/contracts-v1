@@ -35,11 +35,15 @@ contract('StablePayBaseGetFeeAmountTest', accounts => {
     withData({
         _1_amount100_fee1: [account1, '100', 1 * 100, '1'],
         _2_amount1000_fee1: [account1, '1000', 1 * 100, '10'],
-        _3_amount100_fee10: [account1, '100', 10 * 100, '10']
+        _3_amount100_fee10: [account1, '100', 10 * 100, '10'],
+        _4_amount100_fee0_5: [account1, '100000', 0.5 * 100, '500'],
+        _5_amount100_fee0: [account1, '100', 0 * 100, '0'],
+        _6_amount100_fee100: [account1, '100', 100 * 100, '100'],
     }, function(merchantAddress, targetAmount, platformFeeNumber, feeAmountExpected) {
         it(t('anUser', 'getFeeAmount', 'Should be able to get the fee amount.', false), async function() {
             //Setup
             const platformFeeString = platformFeeNumber.toString();
+
             await settings.setPlatformFee(platformFeeString, {from: owner});
             const orderArray = new KyberOrderFactory({
                 sourceToken: token1,

@@ -1,17 +1,13 @@
-const _ = require('lodash');
-const leche = require('leche');
 const uniswap = require('./uniswap');
 const BigNumber = require('bignumber.js');
-
 
 const exchange = artifacts.require("./services/uniswap/UniswapExchangeInterface.sol");
 const factory = artifacts.require("./services/uniswap/UniswapFactoryInterface.sol");
 
-const Token1 = artifacts.require("./services/erc20/EIP20.sol");
-const Token2 = artifacts.require("./services/erc20/EIP20.sol");
+const Token1 = artifacts.require("./mock/token/SimpleToken.sol");
+const Token2 = artifacts.require("./mock/token/SimpleToken.sol");
 
 const DECIMALS = (new BigNumber(10)).pow(18);
-const supply =  (new BigNumber(10).pow(10)).times(DECIMALS).toFixed();
 const approved = (new BigNumber(10).pow(8)).times(DECIMALS).toFixed();
 const initialLiquidity = (new BigNumber(10).pow(8)).times(DECIMALS).toFixed();
 
@@ -54,8 +50,8 @@ contract('deploy', function (accounts) {
 
         await uniswapFactory.initializeFactory(exchangeTemplate.address, {from: owner});
         
-        token1 = await Token1.new(supply, "a", 18, "A");
-        token2 = await Token2.new(supply, "b", 18, "B");
+        token1 = await Token1.new();
+        token2 = await Token2.new();
 
         assert.equal(await uniswapFactory.tokenCount(), 0);
 

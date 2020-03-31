@@ -1,4 +1,4 @@
-pragma solidity 0.5.3;
+pragma solidity 0.5.10;
 
 import "../interface/IStorage.sol";
 import "../interface/IVault.sol";
@@ -46,6 +46,20 @@ contract Base {
         uint256 amount
     );
 
+    /**
+        @notice This event is emitted when a specific amount of ether is transferred from the contract.
+        @param thisContract This smart contract address.
+        @param who transferred the tokens.
+        @param to who received the tokens.
+        @param amount total amount transferred.
+     */
+    event EthersTransferred(
+        address indexed thisContract,
+        address who,
+        address to,
+        uint256 amount
+    );
+
     /** Modifiers */
 
     /**
@@ -64,12 +78,6 @@ contract Base {
     /** @notice Throws if called by any account other than the owner. */
     modifier onlyOwner() {
         roleCheck(OWNER, msg.sender);
-        _;
-    }
-
-    /** @notice Modifier to scope access to admins */
-    modifier onlyAdmin() {
-        roleCheck(ADMIN, msg.sender);
         _;
     }
 
@@ -107,12 +115,9 @@ contract Base {
     /**
         @notice This fallback function transfer the ether received to a IVault implementation.
         @notice If ether value is zero, it throws an require error. 
-        @dev If the transfer was succesfully, it emits an DepositReceived event.
+        @dev If the transfer was successful, it emits an DepositReceived event.
      */
     function() external payable {
-        require(msg.value > 0, "Msg value > 0.");
-        bool depositResult = IVault(getVault()).deposit.value(msg.value)();
-        require(depositResult, "The deposit was not successful.");
         emit DepositReceived(address(this), msg.sender, msg.value);
     }
 
@@ -174,5 +179,22 @@ contract Base {
      */
     function roleCheck(string memory aRole, address anAddress) internal view {
         require(roleHas(aRole, anAddress) == true, "Invalid role");
+    }
+
+    /**
+        @notice It transfers the Ether left in the contract to the Vault contract.
+        @dev It can be invoked by a super user only.
+     */
+    function transferEthersToVault() external onlySuperUser() nonReentrant() {
+        uint256 currentBalance = address(this).balance;
+        require(currentBalance > 0, "Balance must be gt 0.");
+
+        address to = getVault();
+        require(to != address(0x0), "Vault address must not be eq 0x0.");
+        
+        IVault(to).depositEthers.value(currentBalance)();
+
+        emit EthersTransferred(address(this), msg.sender, to, currentBalance);
+
     }
 }

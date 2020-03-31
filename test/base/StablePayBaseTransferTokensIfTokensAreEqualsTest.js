@@ -7,7 +7,7 @@ const KyberOrderFactory = require('../factories/KyberOrderFactory');
 
 // Mock Smart Contracts
 const StablePayBaseMock = artifacts.require("./mock/StablePayBaseMock.sol");
-const StandardTokenMock = artifacts.require("./mock/StandardTokenMock.sol");
+const SimpleToken = artifacts.require("./mock/token/SimpleToken.sol");
 
 // Smart Contracts
 const Storage = artifacts.require("./base/Storage.sol");
@@ -38,8 +38,7 @@ contract('StablePayBaseTransferTokensIfTokensAreEqualsTest', accounts => {
     }, function(customerAddress, merchantAddress, targetAmount) {
         it(t('anUser', '_transferTokensIfTokensAreEquals', 'Should be able to transfer tokens.', false), async function() {
             // Setup
-            const amount = web3.utils.toWei('100000', 'ether');
-            const token = await StandardTokenMock.new(customerAddress, amount);
+            const token = await SimpleToken.new({from: customerAddress});
             const orderArray = new KyberOrderFactory({
                 sourceToken: token.address,
                 targetToken: token.address,
@@ -77,8 +76,7 @@ contract('StablePayBaseTransferTokensIfTokensAreEqualsTest', accounts => {
     }, function(customerAddress, merchantAddress, sourceAmount, targetAmount) {
         it(t('anUser', '_transferTokensIfTokensAreEquals', 'Should be able to transfer tokens (source/target amounts not equals).', false), async function() {
             // Setup
-            const amount = web3.utils.toWei('100000', 'ether');
-            const token = await StandardTokenMock.new(customerAddress, amount);
+            const token = await SimpleToken.new({from: customerAddress});
             const orderArray = new KyberOrderFactory({
                 sourceToken: token.address,
                 targetToken: token.address,
@@ -116,8 +114,7 @@ contract('StablePayBaseTransferTokensIfTokensAreEqualsTest', accounts => {
     }, function(customerAddress, merchantAddress, sourceAmount, targetAmount) {
         it(t('anUser', '_transferTokensIfTokensAreEquals', 'Should not be able to transfer tokens (source/target amounts not equals).', true), async function() {
             // Setup
-            const amount = web3.utils.toWei('100000', 'ether');
-            const token = await StandardTokenMock.new(customerAddress, amount);
+            const token = await SimpleToken.new({from: customerAddress});
             const orderArray = new KyberOrderFactory({
                 sourceToken: token.address,
                 targetToken: token.address,

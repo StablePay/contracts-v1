@@ -12,20 +12,27 @@ module.exports = {
 			name: 'DAI_COMPOUND', // To test Compound.finance Post Action 
 			minAmount: BigNumber("10").times(DECIMALS).toFixed(),
 			maxAmount: BigNumber("100").times(DECIMALS).toFixed()
+		},
+		{
+			name: 'WETH', // Used to send Ether to the receiver in a post action.
+			minAmount: BigNumber("0.001").times(DECIMALS).toFixed(),
+			maxAmount: BigNumber("1").times(DECIMALS).toFixed()
 		}
 	],
 	contracts: {
-		StablePay: '0x85F624020f1825cD1857a85a7420448f785760Df',
-		StablePayStorage: '0xE40b4FB5463C295e3b46e39618B8C336957741a6',
-		Settings: '0x9f6330fCe082fDe61cf6763852FED606AB22a12F',
-		Vault: '0x9E4b8Df56F6F2219c5489226A04f997f6c7b2686',
-		KyberSwappingProvider: '0x0C0456DEDbf6038956d7dEB427669eb74029957F',
-		UniswapSwappingProvider: '0x071b11a8c0d8B0f598aE0FaB1821cFe825828A86',
-		TransferToPostAction: '0x68db4f5e4dB17e2f2D6ba3DA21b9020ae69F48ee',
-		PostActionRegistry: '0xfFD4aB068A7cd4987e449afF602a6B9880558CF2',
-		Storage: '0x1544Dfec7022EC7C57c5A512b1151ED236DdbcBc',
-		Registration: '0xcDDF19727580e8c4BCC5d5a9a982B252A2ABBB8D',
-		CompoundSettings: '0x237be492336a6D44a1C8eF5D5048f8947eb907df',
+		StablePay: '0xBa318A1fbb2f3093DF31134C42730fDaAe753252',
+		StablePayStorage: '0x98D515Db67b3ea758c57bb5d48c51B7c14126256',
+		Settings: '0xac9311f2a326beF5b4ed087EEfAb72279cC39f46',
+		Vault: '0x1152cC566aC53Af2b8Fe9e3c7FA2a66Ca2D9B83D',
+		KyberSwappingProvider: '0x9220e22Bf7e5DDE3DD3a5c1D2E5D2bEBaf6DBb15',
+		UniswapSwappingProvider: '0xFaBc0f81e0b6D74f6A525Cee4329d1aDE178B0bb',
+		TransferToPostAction: '0xcfa4BC41ab1CcE3B0F09EBe8072337f2928E5BBF',
+		PostActionRegistry: '0xe844d377ae2C4EC04464C6491a25875Aa939614A',
+		Storage: '0xdEd6587465E1F19396241Cfda114069E0D38bF1C',
+		Registration: '0x9ab68F8c71BE836C2D34A04Fdd6d79A93CEa0A33',
+		CompoundSettings: '0x9aeC9273EAC87Ee0c7bB98A785dC52Bf5d0EbD78',
+		CompoundMintPostAction: '0x13e04C884744A7CFcbf9981F948cF74d6b4C9124',
+		EtherTransferPostAction: '0x5A6A24CF42961Ec77ff9c5eE10F3b8e40332C341',
 	},
 	providers: {
 		Kyber: '0x4b796265724e6574776f726b5f76310000000000000000000000000000000000',

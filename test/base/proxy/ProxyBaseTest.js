@@ -56,7 +56,7 @@ contract('ProxyBaseTest', function (accounts) {
 
     withData({
         _1_proxy_234: [234, undefined, false],
-        _1_proxy_0: [0, 'New value must > 0.', true]
+        _1_proxy_0: [0, 'New value must gt 0.', true]
     }, function(value, reasonExpected, mustFail) {
         it(t('anUser', 'fallback', 'Should be able (or not) to invoke function using proxy (delagatecall).', mustFail), async function() {
             //Setup

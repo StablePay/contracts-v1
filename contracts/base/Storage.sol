@@ -1,4 +1,4 @@
-pragma solidity 0.5.3;
+pragma solidity 0.5.10;
 
 import "../interface/IStorage.sol";
 
@@ -53,7 +53,6 @@ contract Storage is IStorage {
      */
     constructor() public {
         // Set the main owner upon deployment
-        // TODO implement ownable using access.role to allow admins
         boolStorage[keccak256(
             abi.encodePacked("access.role", "owner", msg.sender)
         )] = true;

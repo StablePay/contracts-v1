@@ -1,8 +1,15 @@
-pragma solidity 0.5.3;
+pragma solidity 0.5.10;
 pragma experimental ABIEncoderV2;
 
 import "../util/StablePayCommon.sol";
 
+/**
+    @notice This is the entry point to interact with the StablePay platform.
+    @dev It defines the functions to swap and transfer any token (ERC20) or Ether into any pre-configured token (ERC20).
+    @dev As StablePay doesn't use its own liquidity to swap tokens/ether, StablePay supports swap any token if at least one registered swapping provider supports it.
+
+    @author StablePay <hi@stablepay.io>
+ */
 contract IStablePay {
     /** Events */
 
@@ -60,27 +67,30 @@ contract IStablePay {
 
     /** Functions */
 
+    /**
+        @notice It transfers (and swaps if needed) a specific amount of tokens (defined in the order) to a specific receiver.
+        @dev If the source and target tokens are the same, StablePay only transfers the amount of tokens defined in the order.
+        @dev Otherwise, StablePay uses each swapping provider ordered in the keys provided as input.
+        @dev The provider keys list must be not empty in order to swap the tokens.
+
+        @param order order instance which defines the data needed to make the transfer and swap if needed.
+        @param providerKey provider key to be used as liquidity providers in the swapping process.
+     */
     function transferWithTokens(
         StablePayCommon.Order memory order,
-        bytes32[] memory providerKeys
-    ) public returns (bool);
+        bytes32 providerKey
+    ) public;
 
+    /**
+        @notice It swaps and transfers a specific amount of ether (defined in the order and msg.value parameter) to a specific amount of tokens and finally transfers it to a receiver address.
+        @dev StablePay uses each swapping provider ordered in the keys provided as input to attempt the swapping/exchange ether/tokens.
+        @dev The provider keys list must be not empty in order to swap the tokens.
+
+        @param order order instance which defines the data needed to make the swap (ether to token) and transfer.
+        @param providerKey provider key to be used as liquidity providers in the swapping process.
+     */
     function transferWithEthers(
         StablePayCommon.Order memory order,
-        bytes32[] memory providerKeys
-    ) public payable returns (bool);
-
-    function emitPaymentSentEvent(
-        StablePayCommon.Order memory order,
-        uint256 amountSent
-    ) internal {
-        emit PaymentSent(
-            address(this),
-            order.toAddress,
-            msg.sender,
-            order.sourceToken,
-            order.targetToken,
-            amountSent
-        );
-    }
+        bytes32 providerKey
+    ) public payable;
 }

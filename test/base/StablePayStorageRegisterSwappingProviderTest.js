@@ -29,7 +29,7 @@ contract('StablePayStorageRegisterSwappingProviderTest', accounts => {
     });
 
     withData({
-        _1_valid: [account2, account1, '_6textToBytes1', undefined, false],
+        _1_valid: [account2, owner, '_6textToBytes1', undefined, false],
         _2_invalidProviderAddress: ['0x0', account1, '_6textToBytes2', 'invalid address', true],
         _3_nullProviderAddress: ['', account1, '_6textToBytes3', 'invalid address', true]
     }, function(providerAddress, providerOwner, providerTextKey, expectedErrorMessage, mustFail) {
@@ -58,7 +58,6 @@ contract('StablePayStorageRegisterSwappingProviderTest', accounts => {
 
                 assert.equal(providerDataResult.providerAddress, providerAddress);
                 assert.equal(providerDataResult.ownerAddress, providerOwner);
-                assert.equal(providerDataResult.pausedByOwner, false);
                 assert.equal(providerDataResult.pausedByAdmin, true);
                 assert.equal(providerDataResult.exists, true);
                 assert.equal(providersCountResult, 1);

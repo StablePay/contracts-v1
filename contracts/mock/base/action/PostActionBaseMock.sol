@@ -1,4 +1,4 @@
-pragma solidity 0.5.3;
+pragma solidity 0.5.10;
 pragma experimental ABIEncoderV2;
 
 import "../../../base/action/PostActionBase.sol";
@@ -46,9 +46,7 @@ contract PostActionBaseMock is PostActionBase {
     }
 
     function execute(StablePayCommon.PostActionData memory postActionData)
-    public
-    returns (bool){
+    public {
         postActionData;
-        return true;
     }
 }

@@ -1,7 +1,7 @@
-pragma solidity 0.5.3;
+pragma solidity 0.5.10;
 
+import "@openzeppelin/contracts/math/SafeMath.sol";
 import "../base/Base.sol";
-import "../util/SafeMath.sol";
 import "../interface/IPostActionRegistry.sol";
 
 /**
@@ -31,7 +31,7 @@ contract PostActionRegistry is Base, IPostActionRegistry {
         @param postAction address to check.
      */
     modifier isValidAddress(address postAction) {
-        require(postAction != address(0x0), "Post action must be != 0x0.");
+        require(postAction != address(0x0), "Post action must not be eq 0x0.");
         _;
     }
 
@@ -73,14 +73,13 @@ contract PostActionRegistry is Base, IPostActionRegistry {
         @dev The sender must be a super user.
         @dev The post action address must not be empty.
         @param newPostAction the post action address to register.
-        @return true if the post action is registered. Otherwise it returns false.
      */
     function registerPostAction(address newPostAction)
         external
-        onlySuperUser
+        onlySuperUser()
+        nonReentrant()
         isValidAddress(newPostAction)
         postActionNotExists(newPostAction)
-        returns (bool)
     {
         actions[newPostAction] = true;
 
@@ -90,27 +89,23 @@ contract PostActionRegistry is Base, IPostActionRegistry {
             msg.sender,
             now
         );
-
-        return true;
     }
 
     /**
         @notice It unregisters a already registered post action in the platform.
         @dev The sender must be a super user.
         @param postAction the post action to unregister.
-        @return true if the post action is unregistered. Otherwise it returns false.
      */
     function unregisterPostAction(address postAction)
         external
-        onlySuperUser
+        onlySuperUser()
+        nonReentrant()
         isValidAddress(postAction)
         postActionExists(postAction)
-        returns (bool)
     {
         actions[postAction] = false;
 
         emit PostActionUnregistered(address(this), postAction, msg.sender, now);
-        return true;
     }
 
     /**
@@ -160,20 +155,21 @@ contract PostActionRegistry is Base, IPostActionRegistry {
         returns (address)
     {
         bool isRegistered = isRegisteredPostActionInternal(postAction);
-        return isRegistered ? postAction : getDefaultPostActionInternal();
+        address defaultPostAction = getDefaultPostActionInternal();
+        require(defaultPostAction != address(0x0), "Default post-action must not be eq 0x0.");
+        return isRegistered ? postAction : defaultPostAction;
     }
 
     /**
         @notice It sets a post action as default in the platform.
         @param postAction post action address to set as default in the platform.
-        @return true if the post action is set as default. Otherwise it returns false.
      */
     function setPostActionAsDefault(address postAction)
         external
-        onlySuperUser
+        onlySuperUser()
+        nonReentrant()
         isValidAddress(postAction)
         postActionExists(postAction)
-        returns (bool)
     {
         address previousDefaultPostAction = getDefaultPostActionInternal();
         require(
@@ -193,6 +189,5 @@ contract PostActionRegistry is Base, IPostActionRegistry {
             msg.sender,
             now
         );
-        return true;
     }
 }

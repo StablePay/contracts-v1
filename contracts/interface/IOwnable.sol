@@ -1,5 +1,5 @@
-pragma solidity 0.5.3;
+pragma solidity 0.5.10;
 
 contract IOwnable {
-    function transferOwnership(address newOwner) public;
+    function transferOwnership(address newOwner) external;
 }

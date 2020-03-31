@@ -14,12 +14,11 @@ const t = require('../util/consts').title;
 contract('BaseTest', function (accounts) {
     const owner = accounts[0];
     const account1 = accounts[1];
-    const account2 = accounts[2];
-    const account3 = accounts[3];
 
     let base;
     let settings;
     let role;
+    let vault;
     
     beforeEach('Setup contract for each test', async () => {
         const storage = await Storage.deployed();
@@ -35,6 +34,10 @@ contract('BaseTest', function (accounts) {
         role = await Role.deployed();
         assert(role);
         assert(role.address);
+
+        vault = await Vault.deployed();
+        assert(vault);
+        assert(vault.address);
     });
 
     withData({
@@ -87,42 +90,15 @@ contract('BaseTest', function (accounts) {
     });
 
     withData({
-        _1_account2_asAdmin_mustNotFail: [account2, true, undefined,  false],
-        _2_account2_notAsAdmin_mustFail: [account3, false, 'Invalid role',  true]
-    }, function(address, addAsAdmin, messageExpected, mustFail) {
-        it(t('anUser', '_onlyAdmin', 'Should be able (or not) to execute function for owners/admins.', mustFail), async function() {
-            // Setup
-            if (addAsAdmin) {
-                await role.adminRoleAdd('admin', address, { from: owner});
-            }
-
-            // Invocation
-            try {
-                await base._onlyAdmin({ from: address});
-                // Assertions
-                assert(!mustFail, "It should not have failed.");
-            } catch (error) {
-                // Assertions
-                assert(mustFail, "It should have failed.");
-                assert(error.message.includes(messageExpected));
-            }
-
-            if (addAsAdmin) {
-                await role.adminRoleRemove('admin', address, { from: owner});
-            }
-        });
-    });
-
-    withData({
         _1_1ether: ['1', undefined, false],
-        _2_0ether: ['0', 'Msg value > 0.', true]
+        _2_0ether: ['0', undefined, false]
     }, function(amount, messageExpected, mustFail) {
-        it(t('anUser', 'fallback', 'Should be able to transfer ether to Vault.', mustFail), async function() {
+        it(t('anUser', 'fallback', 'Should be able to transfer ether.', mustFail), async function() {
             //Setup
             const vault = await Vault.deployed();
             const stablePayProxy = await StablePay.deployed();
             const transferMock = await ITransferMock.at(stablePayProxy.address);
-            const vaultInitialBalance = await web3.eth.getBalance(vault.address);
+            const vaultInitialBalance = await web3.eth.getBalance(transferMock.address);
             const amountWei = await web3.utils.toWei(amount, 'ether');
             
             //Invocation
@@ -133,8 +109,41 @@ contract('BaseTest', function (accounts) {
                 // Assertions
                 assert(!mustFail, 'It should have failed because data is invalid.');
                 assert(result);
-                const vaultFinalBalance = await web3.eth.getBalance(vault.address);
+                const vaultFinalBalance = await web3.eth.getBalance(transferMock.address);
                 assert.equal(amountWei, BigNumber(vaultFinalBalance.toString()).minus(BigNumber(vaultInitialBalance.toString())));
+            } catch (error) {
+                // Assertions
+                assert(mustFail);
+                assert(error);
+                assert.equal(error.reason, messageExpected);
+            }
+        });
+    });
+
+    withData({
+        _1_1ether: ['1', undefined, false],
+        _2_0ether: ['0', 'Balance must be gt 0.', true]
+    }, function(amount, messageExpected, mustFail) {
+        it(t('anUser', 'transferEthersToVault', 'Should be able to transfer ether to Vault.', mustFail), async function() {
+            //Setup
+            const amountWei = await web3.utils.toWei(amount, 'ether');
+            const castedBase = await ITransferMock.at(base.address);
+            if(amount !== '0') {
+                await castedBase.transferEther({value: amountWei});
+            }
+            const initialVaultBalance = await web3.eth.getBalance(vault.address);
+            
+            //Invocation
+            try {
+                //Invocation
+                const result = await base.transferEthersToVault();
+
+                // Assertions
+                assert(!mustFail, 'It should have failed because data is invalid.');
+                assert(result);
+
+                const finalVaultBalance = await web3.eth.getBalance(vault.address);
+                assert.equal(BigNumber(finalVaultBalance.toString()), BigNumber(initialVaultBalance.toString()).plus(BigNumber(amountWei.toString())).toString());
             } catch (error) {
                 // Assertions
                 assert(mustFail);

@@ -6,7 +6,6 @@
 
     truffle exec ./scripts/registerNewUniswapSwappingProvider.js --network infuraRopsten
  */
-
 const appConfig = require('../src/config');
 
 // Smart contracts
@@ -32,26 +31,31 @@ module.exports = async (callback) => {
         const network = processArgs.network();
         console.log(`Script will be executed in network ${network}.`)
         const appConf = require('../config')(network);
-        const maxGasForDeploying = envConf.maxGas;
+        const maxGasForDeploying = appConf.maxGas;
         const kyberConf = appConf.kyber;
         const stablepayConf = appConf.stablepay;
         const stablepayContracts = stablepayConf.contracts;
         const kyberContracts = kyberConf.contracts;
         const kyberAddressFee = appConfig.getKyberAddressFee().get();
 
+        console.log(`Getting StablePayStorage contract address: ${stablepayContracts.StablePayStorage}.`);
+        assert(stablepayContracts.StablePayStorage, "StablePayStorage contract address is undefined.");
+
         const providerStrategy = await IProviderRegistry.at(stablepayContracts.StablePayStorage);
         assert(providerStrategy.address, "Provider registry address is undefined.");
 
-        const accounts = web3.eth.accounts._provider.addresses;
+        const accounts = await web3.eth.getAccounts();
         assert(accounts, "Accounts must be defined.");
 
         const sender = accounts[senderIndex];
         assert(sender, "Sender must be defined.");
+        console.log(`Address to use as sender: ${sender}.`);
 
         const providerKeyGenerator = new ProviderKeyGenerator();
         const providerKey = providerKeyGenerator.generateKey(providerName, providerVersion);
         assert(providerKey, 'Provider key object must be defined.');
         assert(providerKey.providerKey, 'Provider key value must be defined.');
+        console.log(`New swapping provider key: ${providerKey.providerKey}.`);
 
         const stablePayAddress = stablepayContracts.StablePay;
         assert(stablePayAddress, 'StablePay address must be defined.');
@@ -82,8 +86,7 @@ module.exports = async (callback) => {
 
         const swappingProviderRegistered = await providerStrategy.getSwappingProvider(providerKey.providerKey);
         assert(swappingProviderRegistered.exists === true, 'Swapping provider must exists.');
-        assert(swappingProviderRegistered.pausedByAdmin === false, 'Swapping provider must not be paused by admin.');
-        assert(swappingProviderRegistered.pausedByOwner === false, 'Swapping provider must not be paused by owner.');
+        assert(swappingProviderRegistered.pausedByAdmin === true, 'Swapping provider must be paused by admin.');
 
         console.log(`New Swapping Provider Address: ${swappingProviderRegistered.swappingProvider}`);
         console.log(`Provider Key: ${providerKey.providerKey}`);

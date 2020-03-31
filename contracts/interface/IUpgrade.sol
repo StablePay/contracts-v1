@@ -1,4 +1,4 @@
-pragma solidity 0.5.3;
+pragma solidity 0.5.10;
 
 /**
     @title This allows to upgrade any smart contract of the platform.
@@ -45,12 +45,11 @@ contract IUpgrade {
     /**
     @notice It upgrades a smart contract of the platform associated to a contract name.
     @dev It must be executed by an owner platform only.
-    @param _name smart contract name to be upgraded.
-    @param _upgradedContractAddress the new smart contract address.
-    @return true if the contract is updated. Otherwise it returns false.
+    @param name smart contract name to be upgraded.
+    @param upgradedContractAddress the new smart contract address.
   */
     function upgradeContract(
-        string calldata _name,
-        address _upgradedContractAddress
-    ) external returns (bool);
+        string calldata name,
+        address upgradedContractAddress
+    ) external;
 }
