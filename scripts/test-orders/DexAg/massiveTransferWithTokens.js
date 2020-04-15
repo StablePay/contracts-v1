@@ -1,3 +1,4 @@
+/* eslint-disable no-await-in-loop */
 /* eslint-disable no-console */
 /* eslint-disable global-require */
 /* eslint-disable import/order */
@@ -82,13 +83,23 @@ module.exports = async (callback) => {
     console.log('balanceTest', balanceTest);
     const targetTokenInstance = await ERC20.at(daiToken.address);
     assert(targetTokenInstance, 'Target token instance is undefined.');
-    console.log('getting token decimals');
     const tokenDecimals = await targetTokenInstance.decimals();
-    console.log('tokenDecimals', tokenDecimals);
     const decimalsPow = (new BigNumber(10)).pow(tokenDecimals);
 
+    const ALLOWED_TOKENS = ['ETH', 'DAI'];
+    const tokenList = Object.values(tokens);
+    // eslint-disable-next-line no-restricted-syntax
+    for (const token of tokenList) {
+      if (!token.address || !token.decimals || !token.symbol) {
+        console.log(`Token object does not have expected structure --- skipping ${JSON.stringify(token)}`);
+        return;
+      }
 
-    tokens.forEach(async (token) => {
+      if (!ALLOWED_TOKENS.includes(token.symbol.toUpperCase())) {
+        console.log(`Token source object is not supported for this test --- skipping ${JSON.stringify(token)}`);
+        return;
+      }
+
       console.log('\n', '-'.repeat(100));
       console.log(`Testing token => ${token.address} - ${token.decimals} - ${token.symbol}`);
 
@@ -97,6 +108,7 @@ module.exports = async (callback) => {
       let swapMessage;
       try {
         assert(!unavailableTokens.includes(token.symbol), `Pair ${token.symbol}-${DAI_NAME} is temporarily under maintenance.`);
+        // eslint-disable-next-line no-await-in-loop
         const createOrderResult = await axios.post(
           ordersUrl, {
             targetAmount,
@@ -155,7 +167,8 @@ module.exports = async (callback) => {
         console.log(`Error ${swapMessage} : ${error.toString()}`);
         console.log(`Error on ${token.name}=>${DAI_NAME} stablePayStorage.getExpectedRates(${token.address} (${token.symbol}), ${targetTokenInstance.address} (${DAI_NAME}), ${targetAmountWei});`);
       }
-    });
+    }
+
 
     console.log('>>>> The script finished successfully. <<<<');
     callback();
