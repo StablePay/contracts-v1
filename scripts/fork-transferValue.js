@@ -43,7 +43,7 @@ const DAI_WHALE = '0xe092436d60dd92170326b7782ea8d393cf67941d';
 const receiverIndex = 0;
 const amount = '10'; // WETH
 
-const amountInDAI = '10000'; // DAI
+const amountInDAI = '100'; // DAI
 
 module.exports = async (callback) => {
   try {
@@ -57,6 +57,7 @@ module.exports = async (callback) => {
     assert(receiver, 'Receiver is undefined.');
 
     const amountWei = BigNumber(amount.toString()).times(10 ** 18);
+    console.log('amountWei', amountWei);
     await web3.eth.sendTransaction({ from: ETH_WHALE, to: receiver, value: amountWei });
     await web3.eth.sendTransaction({ from: ETH_WHALE, to: DAI_WHALE, value: amountWei });
 
@@ -72,8 +73,8 @@ module.exports = async (callback) => {
     const initialBalanceWhaleAssetToken = await daiToken.balanceOf(DAI_WHALE);
     console.log(`Initial Balance DAI Token for DAI WHALE: ${initialBalanceWhaleAssetToken.toString()}`);
 
-    const amountDaiWeiDenom = BigNumber(amountInDAI.toString()).times(10 ** 18);
-    await daiToken.transfer(receiver, amountDaiWeiDenom, { from: DAI_WHALE });
+    const amountDaiBN = BigNumber(amountInDAI);
+    await daiToken.transfer(receiver, amountDaiBN, { from: DAI_WHALE });
 
     const finalBalanceDaiToken = await daiToken.balanceOf(receiver);
     console.log(`Final Balance DAI Token: ${finalBalanceDaiToken.toString()}`);
