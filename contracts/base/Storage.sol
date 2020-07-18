@@ -31,8 +31,8 @@ contract Storage is IStorage {
             // Make sure the access is permitted to only contracts in our control
             require(
                 addressStorage[keccak256(
-                        abi.encodePacked("contract.address", msg.sender)
-                    )] !=
+                    abi.encodePacked("contract.address", msg.sender)
+                )] !=
                     address(0x0),
                 "Sender is not a valid contract."
             );

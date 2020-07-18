@@ -171,9 +171,7 @@ contract StablePayBase is Base, IStablePay {
         @dev It throws a require error if the transfer result is not success. 
         @dev Otherwise it returns true.
      */
-    function transferFee(address _tokenAddress, uint256 _feeAmount)
-        internal
-    {
+    function transferFee(address _tokenAddress, uint256 _feeAmount) internal {
         if (_feeAmount > 0) {
             bool result = IERC20(_tokenAddress).transfer(
                 getVault(),
@@ -569,9 +567,7 @@ contract StablePayBase is Base, IStablePay {
 
         @param order order instance which defines the data needed to make the transfer and swap if needed.
      */
-    function requireTransferWithTokens(
-        StablePayCommon.Order memory order
-    )
+    function requireTransferWithTokens(StablePayCommon.Order memory order)
         internal
         view
         isNotPaused()
@@ -579,8 +575,7 @@ contract StablePayBase is Base, IStablePay {
         isTokenAvailable(order.targetToken, order.targetAmount)
         areOrderAmountsValidToken(order)
         isSender(order.fromAddress)
-    {
-    }
+    {}
 
     /**
         @notice It transfers (and swaps if needed) a specific amount of tokens (defined in the order) to a specific receiver.
@@ -703,9 +698,7 @@ contract StablePayBase is Base, IStablePay {
 
         @param order order instance which defines the data needed to make the transfer and swap if needed.
      */
-    function requireTransferWithEthers(
-        StablePayCommon.Order memory order
-    )
+    function requireTransferWithEthers(StablePayCommon.Order memory order)
         internal
         view
         isNotPaused()
@@ -713,8 +706,7 @@ contract StablePayBase is Base, IStablePay {
         isTokenAvailable(order.targetToken, order.targetAmount)
         areOrderAmountsValidEther(order)
         isSender(order.fromAddress)
-    {
-    }
+    {}
 
     /**
         @notice It swaps and transfers a specific amount of ether (defined in the order and msg.value parameter) to a specific amount of tokens and finally transfers it to a receiver address.

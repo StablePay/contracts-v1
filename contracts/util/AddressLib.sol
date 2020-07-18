@@ -55,10 +55,7 @@ library AddressLib {
         require(isNotEmpty(self), message);
     }
 
-    function requireEmpty(address self, string memory message)
-        internal
-        pure
-    {
+    function requireEmpty(address self, string memory message) internal pure {
         require(isEmpty(self), message);
     }
 

@@ -191,7 +191,7 @@ contract Base {
 
         address to = getVault();
         require(to != address(0x0), "Vault address must not be eq 0x0.");
-        
+
         IVault(to).depositEthers.value(currentBalance)();
 
         emit EthersTransferred(address(this), msg.sender, to, currentBalance);

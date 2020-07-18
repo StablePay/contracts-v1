@@ -95,7 +95,7 @@ contract KyberSwappingProvider is AbstractSwappingProvider {
         if (address(_token) != address(ETH_TOKEN_ADDRESS)) {
             decimals = ERC20Detailed(address(_token)).decimals();
         }
-        return _amount.mul(TEN ** decimals);
+        return _amount.mul(TEN**decimals);
     }
 
     /*
@@ -306,7 +306,10 @@ contract KyberSwappingProvider is AbstractSwappingProvider {
         isStablePay(msg.sender)
         returns (bool)
     {
-        require(_order.sourceToken == address(ETH_TOKEN_ADDRESS), "Source token must be eq ETH address.");
+        require(
+            _order.sourceToken == address(ETH_TOKEN_ADDRESS),
+            "Source token must be eq ETH address."
+        );
         require(msg.value > 0, "Msg value must be gt 0");
         require(_order.sourceAmount > 0, "Amount must be gt 0");
         require(

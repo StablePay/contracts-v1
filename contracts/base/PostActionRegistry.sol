@@ -156,7 +156,10 @@ contract PostActionRegistry is Base, IPostActionRegistry {
     {
         bool isRegistered = isRegisteredPostActionInternal(postAction);
         address defaultPostAction = getDefaultPostActionInternal();
-        require(defaultPostAction != address(0x0), "Default post-action must not be eq 0x0.");
+        require(
+            defaultPostAction != address(0x0),
+            "Default post-action must not be eq 0x0."
+        );
         return isRegistered ? postAction : defaultPostAction;
     }
 

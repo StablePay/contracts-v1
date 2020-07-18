@@ -82,8 +82,7 @@ interface ISettings {
         @dev This function only can be invoke by an owner or admin user.
         @param tokenAddress ERC20 address to disable. 
      */
-    function disableTokenAvailability(address tokenAddress)
-        external;
+    function disableTokenAvailability(address tokenAddress) external;
 
     /**
         @notice It gets the current tokens amount availability for specific token address.

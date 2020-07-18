@@ -85,7 +85,10 @@ contract Role is Base, IRole {
     {
         roleCheck("owner", msg.sender);
         uint16 currentTotalOwners = getTotalOwners();
-        require(currentTotalOwners > TOTAL_OWNERS_MIN, "Platform must have at least one owner.");
+        require(
+            currentTotalOwners > TOTAL_OWNERS_MIN,
+            "Platform must have at least one owner."
+        );
 
         _storage.deleteBool(
             keccak256(abi.encodePacked("access.role", "owner", msg.sender))
@@ -96,17 +99,11 @@ contract Role is Base, IRole {
         emit OwnerRemoved(address(this), msg.sender, now);
     }
 
-    function getTotalOwners()
-        internal
-        view
-        returns (uint16)
-    {
+    function getTotalOwners() internal view returns (uint16) {
         return ownersCounter;
     }
 
-    function setTotalOwners(uint16 newTotalOwners)
-        internal
-    {
+    function setTotalOwners(uint16 newTotalOwners) internal {
         ownersCounter = newTotalOwners;
     }
 

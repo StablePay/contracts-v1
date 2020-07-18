@@ -100,7 +100,7 @@ contract Vault is Base, IVault {
         address tokenAddress,
         address toAddress,
         uint256 amount
-    ) external onlySuperUser() nonReentrant(){
+    ) external onlySuperUser() nonReentrant() {
         require(
             tokenAddress != address(0x0),
             "Token address must not be eq 0x0."

@@ -54,10 +54,8 @@ contract StablePayStorage is Base, IProviderRegistry {
     modifier isSwappingProviderNewOrUpdate(bytes32 providerKey, address owner) {
         StablePayCommon.SwappingProvider storage swappingProvider = providers[providerKey];
 
-        bool isNewOrUpdate = (
-                swappingProvider.exists &&
-                    swappingProvider.ownerAddress == owner
-            ) ||
+        bool isNewOrUpdate = (swappingProvider.exists &&
+            swappingProvider.ownerAddress == owner) ||
             (!swappingProvider.exists);
         require(
             isNewOrUpdate,
@@ -130,11 +128,7 @@ contract StablePayStorage is Base, IProviderRegistry {
         return count;
     }
 
-    function getProviders()
-        external
-        view
-        returns (bytes32[] memory)
-    {
+    function getProviders() external view returns (bytes32[] memory) {
         return providersRegistry;
     }
 
