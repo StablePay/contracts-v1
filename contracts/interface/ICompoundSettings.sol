@@ -33,18 +33,15 @@ interface ICompoundSettings {
         @param erc20Address ERC20 implementation address.
         @param cErc20Address CErc20 implementation address
      */
-    function mapErc20ToCEr20(address erc20Address, address cErc20Address)
-        external;
+    function mapErc20ToCEr20(address erc20Address, address cErc20Address) external;
 
     /**
         @notice It updates the current CErc20 mapping for a ERC20.
         @param erc20Address ERC20 implementation address.
         @param newCErc20Address new CErc20 implementation address.
      */
-    function updateMapErc20ToCEr20(
-        address erc20Address,
-        address newCErc20Address
-    ) external;
+    function updateMapErc20ToCEr20(address erc20Address, address newCErc20Address)
+        external;
 
     /**
         @notice It gets the current CErc20 mapping for a specific ERC20 address.
@@ -59,5 +56,4 @@ interface ICompoundSettings {
         @return true if ERC20 address has a CErc20 mapped. Otherwise, it returns false.
      */
     function supportErc20(address erc20Address) external view returns (bool);
-
 }

@@ -9,15 +9,12 @@ import "./ERCAbstractProxy.sol";
  */
 contract DelegateProxy is ERCAbstractProxy, IsContract {
     /**
-    * @dev Performs a delegatecall and returns whatever the delegatecall returned (entire context execution will return!)
-    * @param destination Destination address to perform the delegatecall
-    * @param callData Calldata for the delegatecall
-    */
+     * @dev Performs a delegatecall and returns whatever the delegatecall returned (entire context execution will return!)
+     * @param destination Destination address to perform the delegatecall
+     * @param callData Calldata for the delegatecall
+     */
     function delegatedFwd(address destination, bytes memory callData) internal {
-        require(
-            isContract(destination),
-            "Destination address is not a contract."
-        );
+        require(isContract(destination), "Destination address is not a contract.");
 
         assembly {
             let result := delegatecall(

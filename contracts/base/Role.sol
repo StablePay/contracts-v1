@@ -77,12 +77,7 @@ contract Role is Base, IRole {
         @notice It removes the owner from the platform.
         @dev It needs to be executed after transfering the ownership to a new address.
      */
-    function deleteOwner()
-        external
-        onlyLatestRole()
-        onlyOwner()
-        nonReentrant()
-    {
+    function deleteOwner() external onlyLatestRole() onlyOwner() nonReentrant() {
         roleCheck("owner", msg.sender);
         uint16 currentTotalOwners = getTotalOwners();
         require(
@@ -179,14 +174,9 @@ contract Role is Base, IRole {
      */
     function roleRemove(string memory _role, address _address) internal {
         // Only an owner can transfer their access
-        require(
-            !roleHas("owner", _address),
-            "Only owner can transfer their access."
-        );
+        require(!roleHas("owner", _address), "Only owner can transfer their access.");
         // Remove from storage
-        _storage.deleteBool(
-            keccak256(abi.encodePacked("access.role", _role, _address))
-        );
+        _storage.deleteBool(keccak256(abi.encodePacked("access.role", _role, _address)));
         // Log it
         emit RoleRemoved(_address, _role);
     }

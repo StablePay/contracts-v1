@@ -53,10 +53,7 @@ contract Vault is Base, IVault {
         @param tokenAddress address which represents the ERC20 token.
         @param amount to transfer to this contract.
      */
-    function depositTokens(address tokenAddress, uint256 amount)
-        external
-        nonReentrant()
-    {
+    function depositTokens(address tokenAddress, uint256 amount) external nonReentrant() {
         require(amount > 0, "Amount must be gt 0.");
         require(tokenAddress != address(0x0), "Token address must be != 0x0.");
 
@@ -67,11 +64,7 @@ contract Vault is Base, IVault {
             "ERC20 allowance is not gte amount."
         );
 
-        bool transferFromResult = token.transferFrom(
-            msg.sender,
-            address(this),
-            amount
-        );
+        bool transferFromResult = token.transferFrom(msg.sender, address(this), amount);
         require(transferFromResult, "Transfer from sender to Vault failed.");
 
         emit TokensDeposited(address(this), tokenAddress, msg.sender, amount);
@@ -101,14 +94,8 @@ contract Vault is Base, IVault {
         address toAddress,
         uint256 amount
     ) external onlySuperUser() nonReentrant() {
-        require(
-            tokenAddress != address(0x0),
-            "Token address must not be eq 0x0."
-        );
-        require(
-            toAddress != address(0x0),
-            "Target address must not be eq 0x0."
-        );
+        require(tokenAddress != address(0x0), "Token address must not be eq 0x0.");
+        require(toAddress != address(0x0), "Target address must not be eq 0x0.");
         require(amount > 0, "Amount must be gt 0.");
         require(
             hasBalanceInErc(tokenAddress, address(this), amount),
@@ -135,15 +122,9 @@ contract Vault is Base, IVault {
         onlySuperUser()
         nonReentrant()
     {
-        require(
-            toAddress != address(0x0),
-            "Target address must not be eq 0x0."
-        );
+        require(toAddress != address(0x0), "Target address must not be eq 0x0.");
         require(amount > 0, "Amount must be gt 0.");
-        require(
-            address(this).balance >= amount,
-            "Contract has not enough balance."
-        );
+        require(address(this).balance >= amount, "Contract has not enough balance.");
 
         toAddress.transfer(amount);
 

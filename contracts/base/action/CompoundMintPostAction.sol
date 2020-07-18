@@ -75,29 +75,17 @@ contract CompoundMintPostAction is PostActionBase {
 
             CErc20 cTargetToken = CErc20(cTargetTokenAddress);
 
-            uint256 postActionInitialBalance = cTargetToken.balanceOf(
-                address(this)
-            );
+            uint256 postActionInitialBalance = cTargetToken.balanceOf(address(this));
 
             require(
-                targetToken.approve(
-                    cTargetTokenAddress,
-                    postActionData.toAmount
-                ),
+                targetToken.approve(cTargetTokenAddress, postActionData.toAmount),
                 "Compound: Approve target token failed."
             );
 
-            uint256 cTargetTokenMintResult = cTargetToken.mint(
-                postActionData.toAmount
-            );
-            require(
-                cTargetTokenMintResult == SUCCESS_CODE,
-                "CErc20 mint failed."
-            );
+            uint256 cTargetTokenMintResult = cTargetToken.mint(postActionData.toAmount);
+            require(cTargetTokenMintResult == SUCCESS_CODE, "CErc20 mint failed.");
 
-            uint256 postActionFinalBalance = cTargetToken.balanceOf(
-                address(this)
-            );
+            uint256 postActionFinalBalance = cTargetToken.balanceOf(address(this));
 
             uint256 cAssetTransferredBalance = calculateAndTransferCErc20To(
                 postActionData,
@@ -134,10 +122,7 @@ contract CompoundMintPostAction is PostActionBase {
             postActionInitialBalance
         );
         require(
-            cTargetToken.transfer(
-                postActionData.toAddress,
-                postActionCAssetBalance
-            ),
+            cTargetToken.transfer(postActionData.toAddress, postActionCAssetBalance),
             "Transfer to 'to' address failed."
         );
         return postActionCAssetBalance;

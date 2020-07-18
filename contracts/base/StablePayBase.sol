@@ -44,10 +44,7 @@ contract StablePayBase is Base, IStablePay {
     /** Modifiers */
 
     modifier isSender(address target) {
-        require(
-            msg.sender == target,
-            "Sender is not equals to 'target' address."
-        );
+        require(msg.sender == target, "Sender is not equals to 'target' address.");
         _;
     }
 
@@ -58,13 +55,8 @@ contract StablePayBase is Base, IStablePay {
     }
 
     modifier isPostActionValid(address postAction) {
-        bool isPostAction = getPostActionRegistry().isRegisteredPostAction(
-            postAction
-        );
-        require(
-            postAction == address(0x0) || isPostAction,
-            "Post action is not valid."
-        );
+        bool isPostAction = getPostActionRegistry().isRegisteredPostAction(postAction);
+        require(postAction == address(0x0) || isPostAction, "Post action is not valid.");
         _;
     }
 
@@ -77,10 +69,7 @@ contract StablePayBase is Base, IStablePay {
     modifier areOrderAmountsValidEther(StablePayCommon.Order memory order) {
         require(msg.value > 0, "Msg value is not gt 0");
         require(order.sourceAmount > 0, "Source amount is not gt 0");
-        require(
-            msg.value == order.sourceAmount,
-            "Msg value is not eq source amount"
-        );
+        require(msg.value == order.sourceAmount, "Msg value is not eq source amount");
         require(order.targetAmount > 0, "Target amount is not gt 0.");
         _;
     }
@@ -108,25 +97,14 @@ contract StablePayBase is Base, IStablePay {
      */
     function getProviderRegistry() internal view returns (IProviderRegistry) {
         address stablePayStorageAddress = _storage.getAddress(
-            keccak256(
-                abi.encodePacked(
-                    CONTRACT_NAME,
-                    STABLE_PAY_PROVIDER_REGISTRY_NAME
-                )
-            )
+            keccak256(abi.encodePacked(CONTRACT_NAME, STABLE_PAY_PROVIDER_REGISTRY_NAME))
         );
         return IProviderRegistry(stablePayStorageAddress);
     }
 
-    function getPostActionRegistry()
-        internal
-        view
-        returns (IPostActionRegistry)
-    {
+    function getPostActionRegistry() internal view returns (IPostActionRegistry) {
         address postActionRegistryAddress = _storage.getAddress(
-            keccak256(
-                abi.encodePacked(CONTRACT_NAME, POST_ACTION_REGISTRY_NAME)
-            )
+            keccak256(abi.encodePacked(CONTRACT_NAME, POST_ACTION_REGISTRY_NAME))
         );
         return IPostActionRegistry(postActionRegistryAddress);
     }
@@ -158,10 +136,9 @@ contract StablePayBase is Base, IStablePay {
 
         // Calculating the fee amount using the formula:
         //      target amount * platform fee / (100 -fee value basis- * 100 -Percentage-)
-        uint256 feeAmountAvoidDecimals = order
-            .targetAmount
-            .mul(platformFee)
-            .div(FEE_VALUE_BASIS_PERCENTAGE);
+        uint256 feeAmountAvoidDecimals = order.targetAmount.mul(platformFee).div(
+            FEE_VALUE_BASIS_PERCENTAGE
+        );
 
         return feeAmountAvoidDecimals;
     }
@@ -173,10 +150,7 @@ contract StablePayBase is Base, IStablePay {
      */
     function transferFee(address _tokenAddress, uint256 _feeAmount) internal {
         if (_feeAmount > 0) {
-            bool result = IERC20(_tokenAddress).transfer(
-                getVault(),
-                _feeAmount
-            );
+            bool result = IERC20(_tokenAddress).transfer(getVault(), _feeAmount);
             require(result, "Tokens transfer to vault was invalid.");
         }
     }
@@ -193,10 +167,7 @@ contract StablePayBase is Base, IStablePay {
         uint256 amount
     ) internal view {
         uint256 allowanceResult = IERC20(token).allowance(owner, spender);
-        require(
-            allowanceResult >= amount,
-            "Not enough allowed tokens to StablePay."
-        );
+        require(allowanceResult >= amount, "Not enough allowed tokens to StablePay.");
     }
 
     /**
@@ -211,15 +182,8 @@ contract StablePayBase is Base, IStablePay {
         uint256 amount
     ) internal {
         if (amount > 0) {
-            bool transferFromResult = IERC20(token).transferFrom(
-                from,
-                to,
-                amount
-            );
-            require(
-                transferFromResult,
-                "Transfer from StablePay was not successful."
-            );
+            bool transferFromResult = IERC20(token).transferFrom(from, to, amount);
+            require(transferFromResult, "Transfer from StablePay was not successful.");
         }
     }
 
@@ -346,8 +310,9 @@ contract StablePayBase is Base, IStablePay {
         StablePayCommon.Order memory order,
         uint256 feeAmount
     ) internal returns (uint256 toAmount) {
-        address postActionAddress = getPostActionRegistry()
-            .getPostActionOrDefault(order.postActionAddress);
+        address postActionAddress = getPostActionRegistry().getPostActionOrDefault(
+            order.postActionAddress
+        );
 
         // Calculate the 'target' amount.
         uint256 currentToAmount = order.targetAmount.sub(feeAmount);
@@ -357,10 +322,7 @@ contract StablePayBase is Base, IStablePay {
             postActionAddress,
             currentToAmount
         );
-        require(
-            transferToPostActionResult,
-            "Transfer to 'target' address failed."
-        );
+        require(transferToPostActionResult, "Transfer to 'target' address failed.");
 
         StablePayCommon.PostActionData memory postActionData = createPostActionData(
             order,
@@ -432,10 +394,7 @@ contract StablePayBase is Base, IStablePay {
                 order.toAddress,
                 order.targetAmount
             );
-            require(
-                transferFromResult,
-                "Transfer from StablePay was not successful."
-            );
+            require(transferFromResult, "Transfer from StablePay was not successful.");
 
             // Emit PaymentSent event for the from/to order.
             emitPaymentSentEvent(order, order.targetAmount);
@@ -460,10 +419,10 @@ contract StablePayBase is Base, IStablePay {
         @param providerKey associated to a specific swapping provider which will be used to attempt to make the ether/token swapping.
         @return true if the swapping was done. Otherwise it returns false.
      */
-    function doTransferWithTokens(
-        StablePayCommon.Order memory order,
-        bytes32 providerKey
-    ) internal returns (bool) {
+    function doTransferWithTokens(StablePayCommon.Order memory order, bytes32 providerKey)
+        internal
+        returns (bool)
+    {
         // Check tokens allowance to StablePayBase smart contract.
         allowanceHigherOrEquals(
             order.sourceToken,
@@ -487,12 +446,8 @@ contract StablePayBase is Base, IStablePay {
         );
 
         // Get the current source/target token balances for StablePay.
-        uint256 stablePaySourceInitialBalance = getTokenBalanceOf(
-            order.sourceToken
-        );
-        uint256 stablePayTargetInitialBalance = getTokenBalanceOf(
-            order.targetToken
-        );
+        uint256 stablePaySourceInitialBalance = getTokenBalanceOf(order.sourceToken);
+        uint256 stablePayTargetInitialBalance = getTokenBalanceOf(order.targetToken);
 
         // Get the swapping provider (smart contract) to make the swapping.
         ISwappingProvider iSwappingProvider = ISwappingProvider(
@@ -502,9 +457,7 @@ contract StablePayBase is Base, IStablePay {
         // Execute the swapping token using a given provider.
         if (iSwappingProvider.swapToken(order)) {
             // Get source token balance for StablePay.
-            uint256 stablePaySourceFinalBalance = getTokenBalanceOf(
-                order.sourceToken
-            );
+            uint256 stablePaySourceFinalBalance = getTokenBalanceOf(order.sourceToken);
 
             // Transfer the difference between initial/final tokens to the 'target' address when the diff > 0.
             // The final balance is higher than initial
@@ -517,9 +470,7 @@ contract StablePayBase is Base, IStablePay {
             );
 
             // Get target token balance for StablePay
-            uint256 stablePayTargetFinalBalance = getTokenBalanceOf(
-                order.targetToken
-            );
+            uint256 stablePayTargetFinalBalance = getTokenBalanceOf(order.targetToken);
 
             // Check current StablePay target token balance. It must be equals to order target amount.
             checkCurrentTargetBalance(
@@ -586,10 +537,9 @@ contract StablePayBase is Base, IStablePay {
         @param order order instance which defines the data needed to make the transfer and swap if needed.
         @param providerKey provider key to be used as liquidity providers in the swapping process.
      */
-    function transferWithTokens(
-        StablePayCommon.Order memory order,
-        bytes32 providerKey
-    ) public {
+    function transferWithTokens(StablePayCommon.Order memory order, bytes32 providerKey)
+        public
+    {
         requireTransferWithTokens(order);
 
         // Transfer tokens if source / target tokens are equal.
@@ -615,10 +565,10 @@ contract StablePayBase is Base, IStablePay {
         @param providerKey associated to a specific swapping provider which will be used to attempt to make the ether/token swapping.
         @return true if the swapping was done. Otherwise it returns false.
      */
-    function doTransferWithEthers(
-        StablePayCommon.Order memory order,
-        bytes32 providerKey
-    ) internal returns (bool) {
+    function doTransferWithEthers(StablePayCommon.Order memory order, bytes32 providerKey)
+        internal
+        returns (bool)
+    {
         // Get the swapping provider (struct) for the given provider key.
         StablePayCommon.SwappingProvider memory swappingProvider = getSwappingProvider(
             providerKey
@@ -626,9 +576,7 @@ contract StablePayBase is Base, IStablePay {
 
         // Get the initial source/target balances.
         uint256 stablePayInitialSourceBalance = getEtherBalanceOf();
-        uint256 stablePayInitialTargetBalance = getTokenBalanceOf(
-            order.targetToken
-        );
+        uint256 stablePayInitialTargetBalance = getTokenBalanceOf(order.targetToken);
 
         // Get the swapping provider (smart contract) to make the swapping.
         ISwappingProvider iSwappingProvider = ISwappingProvider(
@@ -639,9 +587,7 @@ contract StablePayBase is Base, IStablePay {
         if (iSwappingProvider.swapEther.value(msg.value)(order)) {
             // Get the final source/target balances.
             uint256 stablePayFinalSourceBalance = getEtherBalanceOf();
-            uint256 stablePayFinalTargetBalance = getTokenBalanceOf(
-                order.targetToken
-            );
+            uint256 stablePayFinalTargetBalance = getTokenBalanceOf(order.targetToken);
 
             // Transfer back the Ether left to the 'sender' address.
             uint256 diffEthers;
@@ -716,10 +662,10 @@ contract StablePayBase is Base, IStablePay {
         @param order order instance which defines the data needed to make the swap (ether to token) and transfer.
         @param providerKey provider key to be used as liquidity providers in the swapping process.
      */
-    function transferWithEthers(
-        StablePayCommon.Order memory order,
-        bytes32 providerKey
-    ) public payable {
+    function transferWithEthers(StablePayCommon.Order memory order, bytes32 providerKey)
+        public
+        payable
+    {
         requireTransferWithEthers(order);
 
         // Verify if the swapping provider is valid.
@@ -772,7 +718,6 @@ contract StablePayBase is Base, IStablePay {
             platformFee,
             order.data
         );
-
     }
 
     /**
@@ -781,10 +726,9 @@ contract StablePayBase is Base, IStablePay {
         @param order order instance associated with the swapping/transferring process.
         @param amountSent amount of tokens sent to the receiver address.
      */
-    function emitPaymentSentEvent(
-        StablePayCommon.Order memory order,
-        uint256 amountSent
-    ) internal {
+    function emitPaymentSentEvent(StablePayCommon.Order memory order, uint256 amountSent)
+        internal
+    {
         emit PaymentSent(
             address(this),
             order.toAddress,

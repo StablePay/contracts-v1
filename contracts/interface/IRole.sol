@@ -43,10 +43,7 @@ contract IRole is IOwnable {
         @param previousOwner address which was the previous owner.
         @param newOwner address which represents the new owner.
     */
-    event OwnershipTransferred(
-        address indexed previousOwner,
-        address indexed newOwner
-    );
+    event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
 
     /** Modifier */
 

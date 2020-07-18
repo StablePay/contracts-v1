@@ -46,15 +46,8 @@ contract ProxyBase is DelegateProxy, Base {
         @param aTargetId the target id values associated to a contract address.
         @return the target address associated to a target id.
      */
-    function getTargetAddress(string memory aTargetId)
-        internal
-        view
-        returns (address)
-    {
-        return
-            _storage.getAddress(
-                keccak256(abi.encodePacked(CONTRACT_NAME, aTargetId))
-            );
+    function getTargetAddress(string memory aTargetId) internal view returns (address) {
+        return _storage.getAddress(keccak256(abi.encodePacked(CONTRACT_NAME, aTargetId)));
     }
 
     /**
@@ -70,10 +63,7 @@ contract ProxyBase is DelegateProxy, Base {
     {
         require(toAddress != address(0x0), "Target address must be != 0x0.");
         require(amount > 0, "Amount must be gt 0.");
-        require(
-            address(this).balance >= amount,
-            "Contract has not enough balance."
-        );
+        require(address(this).balance >= amount, "Contract has not enough balance.");
 
         toAddress.transfer(amount);
     }

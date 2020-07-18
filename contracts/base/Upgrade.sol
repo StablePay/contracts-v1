@@ -33,10 +33,11 @@ contract Upgrade is Base, IUpgrade {
         @param name smart contract name to be upgraded.
         @param upgradedContractAddress the new smart contract address.
      */
-    function upgradeContract(
-        string calldata name,
-        address upgradedContractAddress
-    ) external onlySuperUser() nonReentrant() {
+    function upgradeContract(string calldata name, address upgradedContractAddress)
+        external
+        onlySuperUser()
+        nonReentrant()
+    {
         require(
             upgradedContractAddress != address(0x0),
             "Upgraded contract addresses must not be 0x0."
@@ -70,9 +71,7 @@ contract Upgrade is Base, IUpgrade {
             upgradedContractAddress
         );
         _storage.setAddress(
-            keccak256(
-                abi.encodePacked(CONTRACT_ADDRESS, upgradedContractAddress)
-            ),
+            keccak256(abi.encodePacked(CONTRACT_ADDRESS, upgradedContractAddress)),
             upgradedContractAddress
         );
         _storage.deleteAddress(

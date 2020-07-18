@@ -66,7 +66,11 @@ interface IProviderRegistry {
     )
         external
         view
-        returns (bool isSupported, uint256 minRate, uint256 maxRate);
+        returns (
+            bool isSupported,
+            uint256 minRate,
+            uint256 maxRate
+        );
 
     function getExpectedRates(
         IERC20 sourceToken,
@@ -85,15 +89,9 @@ interface IProviderRegistry {
         view
         returns (StablePayCommon.SwappingProvider memory);
 
-    function isSwappingProviderPaused(bytes32 providerKey)
-        external
-        view
-        returns (bool);
+    function isSwappingProviderPaused(bytes32 providerKey) external view returns (bool);
 
-    function isSwappingProviderValid(bytes32 providerKey)
-        external
-        view
-        returns (bool);
+    function isSwappingProviderValid(bytes32 providerKey) external view returns (bool);
 
     function getProviders() external view returns (bytes32[] memory);
 

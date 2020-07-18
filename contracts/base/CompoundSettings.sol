@@ -54,11 +54,7 @@ contract CompoundSettings is Base, ICompoundSettings {
             cErc20Address
         );
 
-        emit Erc20ToCEr20MappingCreated(
-            address(this),
-            erc20Address,
-            cErc20Address
-        );
+        emit Erc20ToCEr20MappingCreated(address(this), erc20Address, cErc20Address);
     }
 
     /**
@@ -66,10 +62,11 @@ contract CompoundSettings is Base, ICompoundSettings {
         @param erc20Address ERC20 implementation address.
         @param newCErc20Address new CErc20 implementation address.
      */
-    function updateMapErc20ToCEr20(
-        address erc20Address,
-        address newCErc20Address
-    ) external onlySuperUser() nonReentrant() {
+    function updateMapErc20ToCEr20(address erc20Address, address newCErc20Address)
+        external
+        onlySuperUser()
+        nonReentrant()
+    {
         erc20Address.requireNotEmpty("ERC20 address must not be 0x0.");
         newCErc20Address.requireNotEmpty("CERC20 address must not be 0x0.");
 
@@ -102,11 +99,7 @@ contract CompoundSettings is Base, ICompoundSettings {
         return getCEr20Internal(erc20Address);
     }
 
-    function getCEr20Internal(address erc20Address)
-        internal
-        view
-        returns (address)
-    {
+    function getCEr20Internal(address erc20Address) internal view returns (address) {
         return
             _storage.getAddress(
                 keccak256(abi.encodePacked(PLATFORM_CERC20, erc20Address))

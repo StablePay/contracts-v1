@@ -40,11 +40,7 @@ contract Base {
     /** Events */
 
     /** @notice This event is emitted when a deposit is received. */
-    event DepositReceived(
-        address indexed thisContract,
-        address from,
-        uint256 amount
-    );
+    event DepositReceived(address indexed thisContract, address from, uint256 amount);
 
     /**
         @notice This event is emitted when a specific amount of ether is transferred from the contract.
@@ -84,8 +80,7 @@ contract Base {
     /** @notice Modifier to scope access to admins */
     modifier onlySuperUser() {
         require(
-            roleHas(OWNER, msg.sender) == true ||
-                roleHas(ADMIN, msg.sender) == true,
+            roleHas(OWNER, msg.sender) == true || roleHas(ADMIN, msg.sender) == true,
             "Msg sender does not have permission."
         );
         _;
@@ -105,8 +100,7 @@ contract Base {
      */
     modifier isNotPaused() {
         require(
-            _storage.getBool(keccak256(abi.encodePacked(STATE_PAUSED))) ==
-                false,
+            _storage.getBool(keccak256(abi.encodePacked(STATE_PAUSED))) == false,
             "Platform is paused."
         );
         _;
@@ -146,9 +140,7 @@ contract Base {
     /** @notice It gets the current Vault smart contract address configured in the platform. */
     function getVault() internal view returns (address) {
         return
-            _storage.getAddress(
-                keccak256(abi.encodePacked(CONTRACT_NAME, VAULT_NAME))
-            );
+            _storage.getAddress(keccak256(abi.encodePacked(CONTRACT_NAME, VAULT_NAME)));
     }
 
     /** @notice It gets the current Storage smart contract address configured in the platform. */
@@ -168,9 +160,7 @@ contract Base {
         returns (bool)
     {
         return
-            _storage.getBool(
-                keccak256(abi.encodePacked(ACCESS_ROLE, aRole, anAddress))
-            );
+            _storage.getBool(keccak256(abi.encodePacked(ACCESS_ROLE, aRole, anAddress)));
     }
 
     /**
@@ -195,6 +185,5 @@ contract Base {
         IVault(to).depositEthers.value(currentBalance)();
 
         emit EthersTransferred(address(this), msg.sender, to, currentBalance);
-
     }
 }

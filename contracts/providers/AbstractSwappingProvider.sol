@@ -12,11 +12,7 @@ contract AbstractSwappingProvider is ISwappingProvider {
     /**
         @dev This event is emitted when a deposit is received.
      */
-    event DepositReceived(
-        address indexed thisContract,
-        address from,
-        uint256 amount
-    );
+    event DepositReceived(address indexed thisContract, address from, uint256 amount);
 
     /**
         @dev This event is emitted when a ether transfer is sent.
@@ -84,10 +80,7 @@ contract AbstractSwappingProvider is ISwappingProvider {
         );
         uint256 used = initialBalance.sub(finalBalance);
 
-        require(
-            sentAmount >= used,
-            "SwappingProvider: Sent amount is not gte used."
-        );
+        require(sentAmount >= used, "SwappingProvider: Sent amount is not gte used.");
         uint256 diff = sentAmount.sub(used);
         return diff;
     }
@@ -145,19 +138,17 @@ contract AbstractSwappingProvider is ISwappingProvider {
         @dev It mitigates a front-running attach approving a zero amount of tokens before the specific amount.
         @dev If any approve invocation returns false, it throws a require error.
      */
-    function approveTokensTo(IERC20 token, address to, uint256 amount)
-        internal
-        returns (bool)
-    {
+    function approveTokensTo(
+        IERC20 token,
+        address to,
+        uint256 amount
+    ) internal returns (bool) {
         // Mitigate ERC20 Approve front-running attack, by initially setting allowance to 0
         require(token.approve(to, 0), "Error mitigating front-running attack.");
 
         if (amount > 0) {
             // Set the spender's token allowance to tokenQty
-            require(
-                token.approve(to, amount),
-                "Error approving tokens for proxy."
-            );
+            require(token.approve(to, amount), "Error approving tokens for proxy.");
         }
         return true;
     }

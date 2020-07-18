@@ -64,20 +64,14 @@ interface IPostActionRegistry {
         @param postAction to test whether it is registered.
         @return true if post action is registered. Otherwise it returns false.
      */
-    function isRegisteredPostAction(address postAction)
-        external
-        view
-        returns (bool);
+    function isRegisteredPostAction(address postAction) external view returns (bool);
 
     /**
         @notice It gets the post action or the default post action if the post action passed a parameter is not valid (pre-registered).
         @param postAction post action to verify if it is registered.
         @return the post action passed as parameter if it is registered. Otherwise it returns the default post action.
      */
-    function getPostActionOrDefault(address postAction)
-        external
-        view
-        returns (address);
+    function getPostActionOrDefault(address postAction) external view returns (address);
 
     /**
         @notice It gets the default post action.

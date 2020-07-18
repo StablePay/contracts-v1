@@ -50,11 +50,7 @@ contract IVault {
     /**
         @notice This event is emitted when ethers are deposited to this contract.
      */
-    event EthersDeposited(
-        address indexed thisContract,
-        address from,
-        uint256 amount
-    );
+    event EthersDeposited(address indexed thisContract, address from, uint256 amount);
 
     /** Functions */
 

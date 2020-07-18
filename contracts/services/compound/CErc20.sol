@@ -35,10 +35,10 @@ contract CErc20 is CToken {
     function redeemUnderlying(uint256 redeemAmount) external returns (uint256);
 
     /**
-      * @notice Sender borrows assets from the protocol to their own address
-      * @param borrowAmount The amount of the underlying asset to borrow
-      * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
-      */
+     * @notice Sender borrows assets from the protocol to their own address
+     * @param borrowAmount The amount of the underlying asset to borrow
+     * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
+     */
     function borrow(uint256 borrowAmount) external returns (uint256);
 
     /**

@@ -128,9 +128,7 @@ contract EtherTransferPostAction is PostActionBase {
         );
 
         // Transfer Ether to the received address. See https://diligence.consensys.net/posts/2019/09/stop-using-soliditys-transfer-now/
-        (bool success, ) = postActionData.toAddress.call.value(
-            etherAmountToTransfer
-        )("");
+        (bool success, ) = postActionData.toAddress.call.value(etherAmountToTransfer)("");
         require(success, "Ether transfer to receiver failed.");
 
         return etherAmountToTransfer;

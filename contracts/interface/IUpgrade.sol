@@ -48,8 +48,6 @@ contract IUpgrade {
     @param name smart contract name to be upgraded.
     @param upgradedContractAddress the new smart contract address.
   */
-    function upgradeContract(
-        string calldata name,
-        address upgradedContractAddress
-    ) external;
+    function upgradeContract(string calldata name, address upgradedContractAddress)
+        external;
 }

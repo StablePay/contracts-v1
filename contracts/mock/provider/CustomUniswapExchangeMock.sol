@@ -301,16 +301,18 @@ contract CustomUniswapExchangeMock is UniswapExchangeInterface {
     bytes32 public name;
     bytes32 public symbol;
     uint256 public decimals;
+
     function transfer(address _to, uint256 _value) external returns (bool) {
         _to;
         _value;
         return true;
     }
 
-    function transferFrom(address _from, address _to, uint256 value)
-        external
-        returns (bool)
-    {
+    function transferFrom(
+        address _from,
+        address _to,
+        uint256 value
+    ) external returns (bool) {
         _from;
         _to;
         value;
@@ -323,11 +325,7 @@ contract CustomUniswapExchangeMock is UniswapExchangeInterface {
         return true;
     }
 
-    function allowance(address _owner, address _spender)
-        external
-        view
-        returns (uint256)
-    {
+    function allowance(address _owner, address _spender) external view returns (uint256) {
         _owner;
         _spender;
         return 0;

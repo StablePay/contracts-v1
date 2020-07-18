@@ -1,6 +1,6 @@
 /**
  *Submitted for verification at Etherscan.io on 2017-12-12
-*/
+ */
 
 // Copyright (C) 2015, 2016, 2017 Dapphub
 
@@ -31,7 +31,6 @@ contract WETH9 is IERC20 {
     function deposit() public payable;
 
     function withdraw(uint256 wad) public;
-
 }
 
 /*
@@ -711,4 +710,3 @@ Public License instead of this License.  But first, please read
 <http://www.gnu.org/philosophy/why-not-lgpl.html>.
 
 */
-

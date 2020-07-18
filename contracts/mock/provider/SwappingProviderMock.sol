@@ -21,38 +21,33 @@ contract SwappingProviderMock is AbstractSwappingProvider {
 
     /** Functions */
 
-    function setPlusAmounts(
-        uint256 _plusSourceAmount,
-        uint256 _plusTargetAmount
-    ) public returns (bool) {
+    function setPlusAmounts(uint256 _plusSourceAmount, uint256 _plusTargetAmount)
+        public
+        returns (bool)
+    {
         plusSourceAmount = _plusSourceAmount;
         plusTargetAmount = _plusTargetAmount;
         return true;
     }
 
-    function setTokens(address _sourceToken, address _targetToken)
-        public
-        returns (bool)
-    {
+    function setTokens(address _sourceToken, address _targetToken) public returns (bool) {
         sourceToken = _sourceToken;
         targetToken = _targetToken;
         return true;
     }
 
-    function setRates(bool _isSupported, uint256 _minRate, uint256 _maxRate)
-        public
-        returns (bool)
-    {
+    function setRates(
+        bool _isSupported,
+        uint256 _minRate,
+        uint256 _maxRate
+    ) public returns (bool) {
         isSupported = _isSupported;
         minRate = _minRate;
         maxRate = _maxRate;
         return true;
     }
 
-    function swapToken(StablePayCommon.Order calldata _order)
-        external
-        returns (bool)
-    {
+    function swapToken(StablePayCommon.Order calldata _order) external returns (bool) {
         bool targetTransferResult = IERC20(_order.targetToken).transfer(
             msg.sender,
             _order.targetAmount
@@ -71,15 +66,22 @@ contract SwappingProviderMock is AbstractSwappingProvider {
         return true;
     }
 
-    function getExpectedRate(IERC20 src, IERC20 dest, uint256 srcQty)
+    function getExpectedRate(
+        IERC20 src,
+        IERC20 dest,
+        uint256 srcQty
+    )
         external
         view
-        returns (bool _isSupported, uint256 _minRate, uint256 _maxRate)
+        returns (
+            bool _isSupported,
+            uint256 _minRate,
+            uint256 _maxRate
+        )
     {
         src;
         dest;
         srcQty;
         return (isSupported, minRate, maxRate);
     }
-
 }

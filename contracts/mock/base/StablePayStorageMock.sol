@@ -10,19 +10,13 @@ contract StablePayStorageMock is StablePayStorage {
 
     /** Constructor */
 
-    constructor(address _storageAddress)
-        public
-        StablePayStorage(_storageAddress)
-    {
+    constructor(address _storageAddress) public StablePayStorage(_storageAddress) {
         version = 1;
     }
 
     /** Methods */
 
-    function _isSwappingProviderNewOrUpdate(
-        bytes32 _providerKey,
-        address _owner
-    )
+    function _isSwappingProviderNewOrUpdate(bytes32 _providerKey, address _owner)
         public
         view
         isSwappingProviderNewOrUpdate(_providerKey, _owner)
