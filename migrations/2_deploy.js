@@ -9,7 +9,6 @@ const PLATFORM_FEE_KEY = 'config.platform.fee';
 const WETH = 'WETH';
 
 /** Platform configuration values. */
-const printDeployCostValue = appConfig.getPrintDeployCost().get();
 const platformFee = appConfig.getPlatformFee().get();
 const kyberAddressFee = appConfig.getKyberAddressFee().get();
 
@@ -114,8 +113,6 @@ module.exports = function(deployer, network, accounts) {
     }
 
     const deployerApp = new DeployerApp(deployer, web3, owner, network, ["test", "ganache", "coverage"]);
-    
-    await deployerApp.addContractInfoByTransactionInfo(SafeMath, txInfo);
     
     await deployerApp.deploys([
       Bytes32ArrayLib,
@@ -292,9 +289,6 @@ module.exports = function(deployer, network, accounts) {
     deployerApp.writeJson(`./build/${Date.now()}_${network}.json`);
     deployerApp.writeJson();
 
-    if(printDeployCostValue === true) {
-      deployerApp.prettyPrint(true);
-    }
     console.log(`>>>>>>>>>> Configuration starts HERE <<<<<<<<<<`)
     console.log(`StablePay: '${stablePayInstance.address}',`);
 		console.log(`StablePayStorage: '${stablePayStorageInstance.address}',`);

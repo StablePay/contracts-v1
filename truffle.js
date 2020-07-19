@@ -34,10 +34,12 @@ module.exports = {
 	compilers: {
 		solc: {
 			version: "0.5.10",
-			optimizer: {
-				enabled: true,
-				runs: 200
-			}
+			settings: {
+				optimizer: {
+					enabled: true,
+					runs: 200
+				},
+			},
 		}
 	},
 	api_keys: {
@@ -89,7 +91,8 @@ module.exports = {
 			},
 			gas: gasKeyValue,
 			gasPrice: web3.utils.toWei(gasPriceKeyValue, 'gwei'),
-			network_id: '4'
+			network_id: '4',
+			skipDryRun: true
 		},
 		infuraKovan: {
 			provider: function() {
@@ -102,7 +105,8 @@ module.exports = {
 			},
 			gas: gasKeyValue,
 			gasPrice: web3.utils.toWei(gasPriceKeyValue, 'gwei'),
-			network_id: '42'
+			network_id: '42',
+			skipDryRun: true
 		},
 		infuraRopsten: {
 			provider: function() {
@@ -142,7 +146,8 @@ module.exports = {
 			},
 			gas: gasKeyValue,
 			gasPrice: web3.utils.toWei(gasPriceKeyValue, 'gwei'),
-			network_id: '2'
+			network_id: '2',
+			skipDryRun: true
 		}
 	}
 };
