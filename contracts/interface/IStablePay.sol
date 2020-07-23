@@ -47,11 +47,7 @@ contract IStablePay {
     /**
         @dev This event is emitted when a deposit is received.
      */
-    event DepositReceived(
-        address indexed thisContract,
-        address from,
-        uint256 amount
-    );
+    event DepositReceived(address indexed thisContract, address from, uint256 amount);
 
     /**
         @dev This event is emitted when a new payment is sent to an address.
@@ -76,10 +72,8 @@ contract IStablePay {
         @param order order instance which defines the data needed to make the transfer and swap if needed.
         @param providerKey provider key to be used as liquidity providers in the swapping process.
      */
-    function transferWithTokens(
-        StablePayCommon.Order memory order,
-        bytes32 providerKey
-    ) public;
+    function transferWithTokens(StablePayCommon.Order memory order, bytes32 providerKey)
+        public;
 
     /**
         @notice It swaps and transfers a specific amount of ether (defined in the order and msg.value parameter) to a specific amount of tokens and finally transfers it to a receiver address.
@@ -89,8 +83,7 @@ contract IStablePay {
         @param order order instance which defines the data needed to make the swap (ether to token) and transfer.
         @param providerKey provider key to be used as liquidity providers in the swapping process.
      */
-    function transferWithEthers(
-        StablePayCommon.Order memory order,
-        bytes32 providerKey
-    ) public payable;
+    function transferWithEthers(StablePayCommon.Order memory order, bytes32 providerKey)
+        public
+        payable;
 }

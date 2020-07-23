@@ -18,8 +18,8 @@ contract DelegateProxyMock is DelegateProxy {
     }
 
     /**
-    * @dev ERC897, the address the proxy would delegate calls to
-    */
+     * @dev ERC897, the address the proxy would delegate calls to
+     */
     function implementation() external view returns (address) {
         return target;
     }

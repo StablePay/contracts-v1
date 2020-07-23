@@ -1,11 +1,12 @@
+# Welcome
+
 [![StablePay.io](https://stablepay.io/static/twitter.jpg)](https://stablepay.io)
 
 ---
+
 ## Description
 
-Support StablePay 
-
-
+Support StablePay
 
 <a href="https://stablepay.io/checkout?data=U2FsdGVkX19cn9910mppZsmHg8XvHvP7h1mQjDrCsczVXRAVEmywlnYkwBS8SawpmRz%2BHBuEDnDjQDL7w49yrsL%2FLHl8NGShXaiSlNfcF1hd1YqFJmMB8dJlSyHMRaDwPWlfd%2BP07Nv5NR6lH6afy8RTkv%2FQrRFc5TG0iYJ4%2FblClqQSO4thsdMajI8uILnFOIGr1N1hQmqdTmsVrI9IZfuJQpyaH3rJitjF8mUOYs3dprromTs%2BvNn%2BVtBcKNH%2Fo5V9HI1AvIDRT5EZvjLSpeBlZCqBoHGjZDpry3htMd%2B3ucAf%2BPGiplmEz64IWpe1MRYXDqA4tU3DPwEhL%2BADiw%3D%3D">
     <img src="https://stablepay.io/static/DonationsButtonBlueWhite.svg" >
@@ -73,8 +74,6 @@ Some useful external links related to the platform.
 │     JS code needed for testing purposes and the deployment process.
 ├── test
 │     All unit tests of the platform.
-├── test-integration
-│     All integration tests of the platform. These tests are executed in Ropsten.
 └── .gitignore
 ```
 
@@ -124,7 +123,11 @@ The **INFURA_KEY** key is needed to execute smart contracts in a testnet or main
 
 #### Platform Fee
 
-The **PLATFORM_FEE** is used to calculate the fee amount in each transaction in the smart contract execution. By default it is 1% (the platform fee value is multiplied by 100. So 2% is 200). **So, it is not required to modify the default value.**
+The **PLATFORM_FEE** is used to calculate the fee amount in each transaction in the smart contract execution.
+
+The platform fee value is multiplied by 100. So the value 200 is equivalente to 2% (2 * 100).
+
+By default it is 0%. **It is not required to modify the default value.**
 
 #### Kyber Address Fee
 
@@ -141,14 +144,6 @@ After configuring the environment variables, the tests can be executed.
 ```sh
 $ truffle test
 ```
-
-#### Integration Tests
-
-The platform contains integration tests to run in the Ropsten network.
-
-They can be executed using the command below:
-
-```truffle test ./test-integration/test-name.js --network infuraRopsten```
 
 #### Code Coverage
 

@@ -50,11 +50,7 @@ contract IVault {
     /**
         @notice This event is emitted when ethers are deposited to this contract.
      */
-    event EthersDeposited(
-        address indexed thisContract,
-        address from,
-        uint256 amount
-    );
+    event EthersDeposited(address indexed thisContract, address from, uint256 amount);
 
     /** Functions */
 
@@ -69,8 +65,7 @@ contract IVault {
         @param tokenAddress address which represents the ERC20 token.
         @param amount to transfer to this contract.
      */
-    function depositTokens(address tokenAddress, uint256 amount)
-        external;
+    function depositTokens(address tokenAddress, uint256 amount) external;
 
     /**
       @notice It transfers a specific amount of tokens to an address.
@@ -86,6 +81,5 @@ contract IVault {
       @notice It transfers a specific amount of ether to an address.
       @dev It checks if this smart contract has at least the amount of ether.
      */
-    function transferEthers(address payable toAddress, uint256 amount)
-        external;
+    function transferEthers(address payable toAddress, uint256 amount) external;
 }

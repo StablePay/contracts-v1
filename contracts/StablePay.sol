@@ -13,14 +13,11 @@ contract StablePay is ProxyBase {
     /** Modifiers */
 
     /** Constructor */
-    constructor(address storageAddress)
-        public
-        ProxyBase(storageAddress, STABLE_PAY)
-    {}
+    constructor(address storageAddress) public ProxyBase(storageAddress, STABLE_PAY) {}
 
     /**
-    * @dev ERC897, the address the proxy would delegate calls to
-    */
+     * @dev ERC897, the address the proxy would delegate calls to
+     */
     function implementation() external view returns (address) {
         return getTargetAddress(targetId);
     }

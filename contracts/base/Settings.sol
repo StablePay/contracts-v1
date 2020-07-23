@@ -57,11 +57,7 @@ contract Settings is Base, ISettings {
         @dev Example: Platform fee: 1% => The value to invoke the function must be: 100.
         @dev Example: Platform fee: 0.5% => The value to invoke the function must be: 50.
      */
-    function setPlatformFee(uint16 _fee)
-        external
-        onlySuperUser()
-        nonReentrant()
-    {
+    function setPlatformFee(uint16 _fee) external onlySuperUser() nonReentrant() {
         require(_fee <= MAX_FEE_VALUE, "Fee must be lte 100.");
         uint16 oldPlatformFee = _storage.getUint16(
             keccak256(abi.encodePacked(PLATFORM_FEE))
@@ -135,14 +131,8 @@ contract Settings is Base, ISettings {
             keccak256(abi.encodePacked(TOKEN_AVAILABLE, tokenAddress)),
             false
         );
-        _storage.setUint(
-            keccak256(abi.encodePacked(TOKEN_MIN_AMOUNT, tokenAddress)),
-            0
-        );
-        _storage.setUint(
-            keccak256(abi.encodePacked(TOKEN_MAX_AMOUNT, tokenAddress)),
-            0
-        );
+        _storage.setUint(keccak256(abi.encodePacked(TOKEN_MIN_AMOUNT, tokenAddress)), 0);
+        _storage.setUint(keccak256(abi.encodePacked(TOKEN_MAX_AMOUNT, tokenAddress)), 0);
 
         emit TokenAvailabilityUpdated(address(this), tokenAddress, 0, 0, false);
     }
@@ -157,7 +147,11 @@ contract Settings is Base, ISettings {
     function getTokenAvailability(address tokenAddress)
         external
         view
-        returns (bool available, uint256 minAmount, uint256 maxAmount)
+        returns (
+            bool available,
+            uint256 minAmount,
+            uint256 maxAmount
+        )
     {
         return getTokenAvailabilityInternal(tokenAddress);
     }
@@ -165,7 +159,11 @@ contract Settings is Base, ISettings {
     function getTokenAvailabilityInternal(address tokenAddress)
         internal
         view
-        returns (bool available, uint256 minAmount, uint256 maxAmount)
+        returns (
+            bool available,
+            uint256 minAmount,
+            uint256 maxAmount
+        )
     {
         available = _storage.getBool(
             keccak256(abi.encodePacked(TOKEN_AVAILABLE, tokenAddress))
@@ -227,9 +225,11 @@ contract Settings is Base, ISettings {
         view
         returns (bool)
     {
-        (bool available, uint256 minAmount, uint256 maxAmount) = getTokenAvailabilityInternal(
-            tokenAddress
-        );
+        (
+            bool available,
+            uint256 minAmount,
+            uint256 maxAmount
+        ) = getTokenAvailabilityInternal(tokenAddress);
         return available && amount >= minAmount && amount <= maxAmount;
     }
 }

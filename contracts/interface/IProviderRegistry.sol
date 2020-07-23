@@ -66,7 +66,11 @@ interface IProviderRegistry {
     )
         external
         view
-        returns (bool isSupported, uint256 minRate, uint256 maxRate);
+        returns (
+            bool isSupported,
+            uint256 minRate,
+            uint256 maxRate
+        );
 
     function getExpectedRates(
         IERC20 sourceToken,
@@ -85,28 +89,17 @@ interface IProviderRegistry {
         view
         returns (StablePayCommon.SwappingProvider memory);
 
-    function isSwappingProviderPaused(bytes32 providerKey)
-        external
-        view
-        returns (bool);
+    function isSwappingProviderPaused(bytes32 providerKey) external view returns (bool);
 
-    function isSwappingProviderValid(bytes32 providerKey)
-        external
-        view
-        returns (bool);
-    
-    function getProviders()
-        external
-        view
-        returns (bytes32[] memory);
+    function isSwappingProviderValid(bytes32 providerKey) external view returns (bool);
+
+    function getProviders() external view returns (bytes32[] memory);
 
     function getProvidersRegistryCount() external view returns (uint256);
 
-    function pauseByAdminSwappingProvider(bytes32 providerKey)
-        external;
+    function pauseByAdminSwappingProvider(bytes32 providerKey) external;
 
-    function unpauseByAdminSwappingProvider(bytes32 providerKey)
-        external;
+    function unpauseByAdminSwappingProvider(bytes32 providerKey) external;
 
     function registerSwappingProvider(
         address payable providerAddress,
@@ -119,6 +112,5 @@ interface IProviderRegistry {
         @param providerKey associated to the swapping provider.
         @return true if the swapping provider is unregistered. Otherwise it returns false.
      */
-    function unregisterSwappingProvider(bytes32 providerKey)
-        external;
+    function unregisterSwappingProvider(bytes32 providerKey) external;
 }

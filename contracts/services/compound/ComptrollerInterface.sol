@@ -10,16 +10,18 @@ interface ComptrollerInterface {
 
     /*** Assets You Are In ***/
 
-    function enterMarkets(address[] calldata cTokens)
-        external
-        returns (uint256[] memory);
+    function enterMarkets(address[] calldata cTokens) external returns (uint256[] memory);
+
     function exitMarket(address cToken) external returns (uint256);
 
     /*** Policy Hooks ***/
 
-    function mintAllowed(address cToken, address minter, uint256 mintAmount)
-        external
-        returns (uint256);
+    function mintAllowed(
+        address cToken,
+        address minter,
+        uint256 mintAmount
+    ) external returns (uint256);
+
     function mintVerify(
         address cToken,
         address minter,
@@ -32,6 +34,7 @@ interface ComptrollerInterface {
         address redeemer,
         uint256 redeemTokens
     ) external returns (uint256);
+
     function redeemVerify(
         address cToken,
         address redeemer,
@@ -44,6 +47,7 @@ interface ComptrollerInterface {
         address borrower,
         uint256 borrowAmount
     ) external returns (uint256);
+
     function borrowVerify(
         address cToken,
         address borrower,
@@ -56,6 +60,7 @@ interface ComptrollerInterface {
         address borrower,
         uint256 repayAmount
     ) external returns (uint256);
+
     function repayBorrowVerify(
         address cToken,
         address payer,
@@ -71,6 +76,7 @@ interface ComptrollerInterface {
         address borrower,
         uint256 repayAmount
     ) external returns (uint256);
+
     function liquidateBorrowVerify(
         address cTokenBorrowed,
         address cTokenCollateral,
@@ -87,6 +93,7 @@ interface ComptrollerInterface {
         address borrower,
         uint256 seizeTokens
     ) external returns (uint256);
+
     function seizeVerify(
         address cTokenCollateral,
         address cTokenBorrowed,
@@ -101,6 +108,7 @@ interface ComptrollerInterface {
         address dst,
         uint256 transferTokens
     ) external returns (uint256);
+
     function transferVerify(
         address cToken,
         address src,

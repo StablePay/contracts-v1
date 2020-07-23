@@ -101,11 +101,7 @@ contract CToken {
     /**
      * @notice Event emitted when the reserves are reduced
      */
-    event ReservesReduced(
-        address admin,
-        uint256 reduceAmount,
-        uint256 newTotalReserves
-    );
+    event ReservesReduced(address admin, uint256 reduceAmount, uint256 newTotalReserves);
 
     /**
      * @notice Transfer `amount` tokens from `msg.sender` to `dst`
@@ -122,9 +118,11 @@ contract CToken {
      * @param amount The number of tokens to transfer
      * @return Whether or not the transfer succeeded
      */
-    function transferFrom(address src, address dst, uint256 amount)
-        external
-        returns (bool);
+    function transferFrom(
+        address src,
+        address dst,
+        uint256 amount
+    ) external returns (bool);
 
     /**
      * @notice Approve `spender` to transfer up to `amount` from `src`
@@ -142,10 +140,7 @@ contract CToken {
      * @param spender The address of the account which may transfer tokens
      * @return The number of tokens allowed to be spent (-1 means infinite)
      */
-    function allowance(address owner, address spender)
-        external
-        view
-        returns (uint256);
+    function allowance(address owner, address spender) external view returns (uint256);
 
     /**
      * @notice Get the token balance of the `owner`
@@ -171,7 +166,12 @@ contract CToken {
     function getAccountSnapshot(address account)
         external
         view
-        returns (uint256, uint256, uint256, uint256);
+        returns (
+            uint256,
+            uint256,
+            uint256,
+            uint256
+        );
 
     /**
      * @notice Returns the current per-block borrow interest rate for this cToken
@@ -225,10 +225,10 @@ contract CToken {
     function getCash() external view returns (uint256);
 
     /**
-      * @notice Applies accrued interest to total borrows and reserves.
-      * @dev This calculates interest accrued from the last checkpointed block
-      *      up to the current block and writes new checkpoint to storage.
-      */
+     * @notice Applies accrued interest to total borrows and reserves.
+     * @dev This calculates interest accrued from the last checkpointed block
+     *      up to the current block and writes new checkpoint to storage.
+     */
     function accrueInterest() public returns (uint256);
 
     /**
@@ -240,7 +240,9 @@ contract CToken {
      * @param seizeTokens The number of cTokens to seize
      * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
      */
-    function seize(address liquidator, address borrower, uint256 seizeTokens)
-        external
-        returns (uint256);
+    function seize(
+        address liquidator,
+        address borrower,
+        uint256 seizeTokens
+    ) external returns (uint256);
 }

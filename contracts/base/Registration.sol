@@ -37,17 +37,14 @@ contract Registration is Base, IRegistration {
         @param contractName smart contract name to be registered.
         @param contractAddress the new smart contract address.
      */
-    function registerContract(
-        string calldata contractName,
-        address contractAddress
-    ) external onlySuperUser() nonReentrant() {
+    function registerContract(string calldata contractName, address contractAddress)
+        external
+        onlySuperUser()
+        nonReentrant()
+    {
         contractAddress.requireNotEmpty("Contract address must not be 0x0.");
-        address currentContractAddress = getContractAddressInternal(
-            contractName
-        );
-        currentContractAddress.requireEmpty(
-            "Current contract address must be 0x0."
-        );
+        address currentContractAddress = getContractAddressInternal(contractName);
+        currentContractAddress.requireEmpty("Current contract address must be 0x0.");
 
         _storage.setAddress(
             keccak256(abi.encodePacked(CONTRACT_NAME, contractName)),
@@ -58,11 +55,7 @@ contract Registration is Base, IRegistration {
             contractAddress
         );
 
-        emit NewContractRegistered(
-            address(this),
-            contractAddress,
-            contractName
-        );
+        emit NewContractRegistered(address(this), contractAddress, contractName);
     }
 
     /**
@@ -71,14 +64,13 @@ contract Registration is Base, IRegistration {
         @param contractName smart contract name to be unregistered.
         @param contractAddress the current smart contract address.
      */
-    function unregisterContract(
-        string calldata contractName,
-        address contractAddress
-    ) external onlySuperUser() nonReentrant() {
+    function unregisterContract(string calldata contractName, address contractAddress)
+        external
+        onlySuperUser()
+        nonReentrant()
+    {
         contractAddress.requireNotEmpty("Contract address must not be eq 0x0.");
-        address currentContractAddress = getContractAddressInternal(
-            contractName
-        );
+        address currentContractAddress = getContractAddressInternal(contractName);
         currentContractAddress.requireNotEmpty(
             "Current contract address must not be eq 0x0."
         );
@@ -97,7 +89,6 @@ contract Registration is Base, IRegistration {
         );
 
         emit ContractUnregistered(address(this), contractAddress, contractName);
-
     }
 
     /**
@@ -124,8 +115,6 @@ contract Registration is Base, IRegistration {
         returns (address)
     {
         return
-            _storage.getAddress(
-                keccak256(abi.encodePacked(CONTRACT_NAME, contractName))
-            );
+            _storage.getAddress(keccak256(abi.encodePacked(CONTRACT_NAME, contractName)));
     }
 }

@@ -20,18 +20,17 @@ contract CustomSwappingProviderMock is AbstractSwappingProvider {
 
     /** Methods */
 
-    function setExpectedRate(bool isSupported, uint256 minRate, uint256 maxRate)
-        public
-    {
+    function setExpectedRate(
+        bool isSupported,
+        uint256 minRate,
+        uint256 maxRate
+    ) public {
         _minRate = minRate;
         _maxRate = maxRate;
         _isSupported = isSupported;
     }
 
-    function swapToken(StablePayCommon.Order calldata order)
-        external
-        returns (bool)
-    {
+    function swapToken(StablePayCommon.Order calldata order) external returns (bool) {
         order;
         return _swapResult;
     }
@@ -52,7 +51,11 @@ contract CustomSwappingProviderMock is AbstractSwappingProvider {
     )
         external
         view
-        returns (bool isSupported, uint256 minRate, uint256 maxRate)
+        returns (
+            bool isSupported,
+            uint256 minRate,
+            uint256 maxRate
+        )
     {
         sourceToken;
         targetToken;
@@ -89,12 +92,6 @@ contract CustomSwappingProviderMock is AbstractSwappingProvider {
         uint256 initialBalance,
         uint256 finalBalance
     ) public pure returns (uint256) {
-        return
-            super.calculateDiffBalance(
-                sentAmount,
-                initialBalance,
-                finalBalance
-            );
+        return super.calculateDiffBalance(sentAmount, initialBalance, finalBalance);
     }
-
 }

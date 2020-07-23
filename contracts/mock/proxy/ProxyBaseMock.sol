@@ -18,8 +18,8 @@ contract ProxyBaseMock is ProxyBase {
     {}
 
     /**
-    * @dev ERC897, the address the proxy would delegate calls to
-    */
+     * @dev ERC897, the address the proxy would delegate calls to
+     */
     function implementation() external view returns (address) {
         return getTargetAddress(targetId);
     }
@@ -31,11 +31,7 @@ contract ProxyBaseMock is ProxyBase {
         return UPGRADEABLE;
     }
 
-    function _getTargetAddress(string memory _targetId)
-        public
-        view
-        returns (address)
-    {
+    function _getTargetAddress(string memory _targetId) public view returns (address) {
         return super.getTargetAddress(_targetId);
     }
 }
