@@ -50,7 +50,7 @@
     "ethereumjs-util": "5.1.5",
     "ethers": "4.0.20",
     "jsonfile": "4.0.0",
-    "lodash": "4.17.13",
+    "lodash": "4.17.19",
     "run-s": "0.0.0",
     "solidity-coverage": "0.6.7",
     "truffle": "5.0.26",
