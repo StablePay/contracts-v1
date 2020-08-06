@@ -14,7 +14,7 @@ Support StablePay
 
 Official [StablePay](https://stablepay.io) smart contracts repository.
 
-[![CircleCI](https://circleci.com/gh/StablePay/stablepay_contracts_dev.svg?style=svg&circle-token=acfb08abb88ef07bae7c052df5910d6df4c96745)](https://circleci.com/gh/StablePay/stablepay_contracts_dev)
+[![CircleCI](https://circleci.com/gh/StablePay/contracts.svg?style=svg&circle-token=acfb08abb88ef07bae7c052df5910d6df4c96745)](https://circleci.com/gh/StablePay/contracts)
 
 ## What is StablePay?
 
@@ -180,6 +180,7 @@ We copied some external contracts into this repository due to they were in a NPM
 * WETH9.sol. We got the source code from the [Etherscan.io website](https://etherscan.io/address/0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2#code). We added to it the IERC20 inheritance.
 
 ---
+
 ## Contact Us
 
 If you have any question or feedback, contact us at hi@stablepay.io.
