@@ -184,3 +184,6 @@ We copied some external contracts into this repository due to they were in a NPM
 ## Contact Us
 
 If you have any question or feedback, contact us at hi@stablepay.io.
+
+## Version 2 
+Details Coming soon
