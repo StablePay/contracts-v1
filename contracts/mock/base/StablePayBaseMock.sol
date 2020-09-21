@@ -10,10 +10,7 @@ contract StablePayBaseMock is StablePayBase {
 
     /** Constructor */
 
-    constructor(address _storageAddress)
-        public
-        StablePayBase(_storageAddress)
-    {}
+    constructor(address _storageAddress) public StablePayBase(_storageAddress) {}
 
     /** Methods */
 
@@ -25,9 +22,10 @@ contract StablePayBaseMock is StablePayBase {
         return super.getFeeAmount(order);
     }
 
-    function _transferTokensIfTokensAreEquals(
-        StablePayCommon.Order memory order
-    ) public returns (bool) {
+    function _transferTokensIfTokensAreEquals(StablePayCommon.Order memory order)
+        public
+        returns (bool)
+    {
         return super.transferTokensIfTokensAreEquals(order);
     }
 
@@ -71,11 +69,7 @@ contract StablePayBaseMock is StablePayBase {
         uint256 initialBalance,
         uint256 finalBalance
     ) public pure returns (bool) {
-        super.checkCurrentTargetBalance(
-            targetAmount,
-            initialBalance,
-            finalBalance
-        );
+        super.checkCurrentTargetBalance(targetAmount, initialBalance, finalBalance);
         return true;
     }
 
@@ -90,10 +84,6 @@ contract StablePayBaseMock is StablePayBase {
         StablePayCommon.Order memory order,
         uint256 feeAmount
     ) public returns (uint256 toAmount) {
-        return
-            super.calculateAndTransferAmountToPostActionAddress(
-                order,
-                feeAmount
-            );
+        return super.calculateAndTransferAmountToPostActionAddress(order, feeAmount);
     }
 }

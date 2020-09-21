@@ -60,7 +60,5 @@ interface IPostAction {
         @dev Depending on the implementation, it may transfer the target tokens to other platform either minting or swapping into a new token.
         @param postActionData needed data to execute the action.
      */
-    function execute(StablePayCommon.PostActionData calldata postActionData)
-        external;
-
+    function execute(StablePayCommon.PostActionData calldata postActionData) external;
 }

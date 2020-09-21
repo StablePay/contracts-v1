@@ -61,11 +61,7 @@ contract KyberSwappingProvider is AbstractSwappingProvider {
         return _minRate > 0 && _maxRate > 0;
     }
 
-    function getKyberNetworkProxy()
-        internal
-        view
-        returns (KyberNetworkProxyInterface)
-    {
+    function getKyberNetworkProxy() internal view returns (KyberNetworkProxyInterface) {
         return KyberNetworkProxyInterface(proxy);
     }
 
@@ -76,7 +72,11 @@ contract KyberSwappingProvider is AbstractSwappingProvider {
     )
         internal
         view
-        returns (bool isSupported, uint256 minRate, uint256 maxRate)
+        returns (
+            bool isSupported,
+            uint256 minRate,
+            uint256 maxRate
+        )
     {
         (minRate, maxRate) = getKyberNetworkProxy().getExpectedRate(
             _sourceToken,
@@ -95,7 +95,7 @@ contract KyberSwappingProvider is AbstractSwappingProvider {
         if (address(_token) != address(ETH_TOKEN_ADDRESS)) {
             decimals = ERC20Detailed(address(_token)).decimals();
         }
-        return _amount.mul(TEN ** decimals);
+        return _amount.mul(TEN**decimals);
     }
 
     /*
@@ -113,11 +113,7 @@ contract KyberSwappingProvider is AbstractSwappingProvider {
 
         uint256 minRateMinSourceAmount;
         uint256 maxRateMinSourceAmount;
-        (
-            ,
-            minRateMinSourceAmount,
-            maxRateMinSourceAmount
-        ) = getInternalExpectedRate(
+        (, minRateMinSourceAmount, maxRateMinSourceAmount) = getInternalExpectedRate(
             _sourceToken,
             _targetToken,
             minSourceAmountOne
@@ -129,11 +125,7 @@ contract KyberSwappingProvider is AbstractSwappingProvider {
 
         uint256 minRateMaxSourceAmount;
         uint256 maxRateMaxSourceAmount;
-        (
-            ,
-            minRateMaxSourceAmount,
-            maxRateMaxSourceAmount
-        ) = getInternalExpectedRate(
+        (, minRateMaxSourceAmount, maxRateMaxSourceAmount) = getInternalExpectedRate(
             _sourceToken,
             _targetToken,
             maxSourceAmountOne
@@ -173,7 +165,11 @@ contract KyberSwappingProvider is AbstractSwappingProvider {
         view
         isValidAddress(address(sourceToken))
         isValidAddress(address(targetToken))
-        returns (bool isSupported, uint256 minRate, uint256 maxRate)
+        returns (
+            bool isSupported,
+            uint256 minRate,
+            uint256 maxRate
+        )
     {
         require(targetAmount > 0, "Target amount is not gt 0.");
 
@@ -185,10 +181,7 @@ contract KyberSwappingProvider is AbstractSwappingProvider {
 
         // It is used to avoid loss decimals in the final result when it calculates rate with source amount.
         // That's the reason why it is multiplied by source token decimals.
-        uint256 targetAmountWithDecimals = multiplyByDecimals(
-            sourceToken,
-            targetAmount
-        );
+        uint256 targetAmountWithDecimals = multiplyByDecimals(sourceToken, targetAmount);
 
         if (isSupported) {
             (uint256 minRateValue, uint256 maxRateValue) = calculateRates(
@@ -257,9 +250,7 @@ contract KyberSwappingProvider is AbstractSwappingProvider {
         );
 
         // Check the current source token balance is higher (or equals) to the order source amount.
-        uint256 sourceInitialTokenBalance = getTokenBalanceOf(
-            _order.sourceToken
-        );
+        uint256 sourceInitialTokenBalance = getTokenBalanceOf(_order.sourceToken);
         require(
             sourceInitialTokenBalance >= _order.sourceAmount,
             "Not enough tokens in balance."
@@ -306,17 +297,14 @@ contract KyberSwappingProvider is AbstractSwappingProvider {
         isStablePay(msg.sender)
         returns (bool)
     {
-        require(_order.sourceToken == address(ETH_TOKEN_ADDRESS), "Source token must be eq ETH address.");
+        require(
+            _order.sourceToken == address(ETH_TOKEN_ADDRESS),
+            "Source token must be eq ETH address."
+        );
         require(msg.value > 0, "Msg value must be gt 0");
         require(_order.sourceAmount > 0, "Amount must be gt 0");
-        require(
-            msg.value == _order.sourceAmount,
-            "Msg value is not eq source amount"
-        );
-        require(
-            _order.toAddress != address(0x0),
-            "To address must be not eq 0x0."
-        );
+        require(msg.value == _order.sourceAmount, "Msg value is not eq source amount");
+        require(_order.toAddress != address(0x0), "To address must be not eq 0x0.");
 
         // Gets the ERC20 source/target token instances.
         IERC20 sourceToken = IERC20(_order.sourceToken);

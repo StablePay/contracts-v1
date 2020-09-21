@@ -13,9 +13,7 @@ contract ISwappingProvider {
         @dev After the transfer, the StablePay contract will check the transfer result.
         @param order info to perform the swapping.
      */
-    function swapToken(StablePayCommon.Order calldata order)
-        external
-        returns (bool);
+    function swapToken(StablePayCommon.Order calldata order) external returns (bool);
 
     /**
         @dev Perform the swapping between ether and a token.
@@ -38,5 +36,9 @@ contract ISwappingProvider {
     )
         external
         view
-        returns (bool isSupported, uint256 minRate, uint256 maxRate);
+        returns (
+            bool isSupported,
+            uint256 minRate,
+            uint256 maxRate
+        );
 }

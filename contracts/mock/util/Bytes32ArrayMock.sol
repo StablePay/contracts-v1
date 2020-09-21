@@ -26,11 +26,7 @@ contract Bytes32ArrayMock {
         data = data.removeAt(index);
     }
 
-    function getIndex(bytes32 item)
-        public
-        view
-        returns (bool found, uint256 indexAt)
-    {
+    function getIndex(bytes32 item) public view returns (bool found, uint256 indexAt) {
         return data.getIndex(item);
     }
 

@@ -82,8 +82,7 @@ interface ISettings {
         @dev This function only can be invoke by an owner or admin user.
         @param tokenAddress ERC20 address to disable. 
      */
-    function disableTokenAvailability(address tokenAddress)
-        external;
+    function disableTokenAvailability(address tokenAddress) external;
 
     /**
         @notice It gets the current tokens amount availability for specific token address.
@@ -95,7 +94,11 @@ interface ISettings {
     function getTokenAvailability(address tokenAddress)
         external
         view
-        returns (bool available, uint256 minAmount, uint256 maxAmount);
+        returns (
+            bool available,
+            uint256 minAmount,
+            uint256 maxAmount
+        );
 
     /**
         @notice It configures the target token amount availability in the platform.
@@ -120,5 +123,4 @@ interface ISettings {
         external
         view
         returns (bool);
-
 }

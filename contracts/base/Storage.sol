@@ -31,9 +31,8 @@ contract Storage is IStorage {
             // Make sure the access is permitted to only contracts in our control
             require(
                 addressStorage[keccak256(
-                        abi.encodePacked("contract.address", msg.sender)
-                    )] !=
-                    address(0x0),
+                    abi.encodePacked("contract.address", msg.sender)
+                )] != address(0x0),
                 "Sender is not a valid contract."
             );
         } else {
@@ -123,10 +122,7 @@ contract Storage is IStorage {
         @param _key key to associated to the value.
         @param _value value to store with the key.
      */
-    function setAddress(bytes32 _key, address _value)
-        external
-        onlyKnownContracts
-    {
+    function setAddress(bytes32 _key, address _value) external onlyKnownContracts {
         addressStorage[_key] = _value;
     }
 
@@ -144,10 +140,7 @@ contract Storage is IStorage {
         @param _key key to associated to the value.
         @param _value value to store with the key.
      */
-    function setString(bytes32 _key, string calldata _value)
-        external
-        onlyKnownContracts
-    {
+    function setString(bytes32 _key, string calldata _value) external onlyKnownContracts {
         stringStorage[_key] = _value;
     }
 
@@ -156,10 +149,7 @@ contract Storage is IStorage {
         @param _key key to associated to the value.
         @param _value value to store with the key.
      */
-    function setBytes(bytes32 _key, bytes calldata _value)
-        external
-        onlyKnownContracts
-    {
+    function setBytes(bytes32 _key, bytes calldata _value) external onlyKnownContracts {
         bytesStorage[_key] = _value;
     }
 
@@ -186,10 +176,7 @@ contract Storage is IStorage {
         @param _key key to associated to the value.
         @param _value value to store with the key.
      */
-    function setUint16(bytes32 _key, uint16 _value)
-        external
-        onlyKnownContracts
-    {
+    function setUint16(bytes32 _key, uint16 _value) external onlyKnownContracts {
         uInt16Storage[_key] = _value;
     }
 

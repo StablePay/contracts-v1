@@ -5,9 +5,7 @@ const DEFAULT_GAS_WEI = "4600000";
 const DEFAULT_ADDRESS_COUNT = "10";
 const DEFAULT_ADDRESS_INDEX = "0";
 const DEFAULT_GAS_GWEI_PRICE = '20';
-const DEFAULT_PRINT_DEPLOY_COST = false;
 
-const PRINT_DEPLOY_COST_KEY = "PRINT_DEPLOY_COST";
 const PLATFORM_FEE_KEY = 'PLATFORM_FEE';
 const ADDRESS_COUNT_KEY = 'ADDRESS_COUNT_KEY';
 const DEFAULT_ADDRESS_INDEX_KEY = 'DEFAULT_ADDRESS_INDEX_KEY';
@@ -28,7 +26,6 @@ class AppConfig {
 
 AppConfig.prototype.initializeConf = function() {
     this.createItem(STABLEPAY_API_URL_KEY, undefined, 'It is used to call StablePay API Rest endpoints.');
-    this.createItem(PRINT_DEPLOY_COST_KEY, DEFAULT_PRINT_DEPLOY_COST, 'It prints the costs per contract.');
     this.createItem(PLATFORM_FEE_KEY, undefined, 'This is the platform fee.');
     this.createItem(DEFAULT_ADDRESS_INDEX_KEY, DEFAULT_ADDRESS_INDEX, 'This is the address index to be used as default.');
     this.createItem(ADDRESS_COUNT_KEY, DEFAULT_ADDRESS_COUNT, 'Addresses needed to deploy smart contracts.');
@@ -71,10 +68,6 @@ AppConfig.prototype.getDefaultAddressIndex = function() {
 
 AppConfig.prototype.getPlatformFee = function() {
     return this.conf.get(PLATFORM_FEE_KEY);
-}
-
-AppConfig.prototype.getPrintDeployCost = function() {
-    return this.conf.get(PRINT_DEPLOY_COST_KEY);
 }
 
 AppConfig.prototype.getEtherscanApiKey = function() {

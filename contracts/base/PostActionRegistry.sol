@@ -14,7 +14,8 @@ contract PostActionRegistry is Base, IPostActionRegistry {
     using SafeMath for uint256;
 
     /** Constants */
-    string internal constant PLATFORM_DEFAULT_POST_ACTION = "config.platform.defaultPostAction";
+    string
+        internal constant PLATFORM_DEFAULT_POST_ACTION = "config.platform.defaultPostAction";
 
     /** Properties */
 
@@ -83,12 +84,7 @@ contract PostActionRegistry is Base, IPostActionRegistry {
     {
         actions[newPostAction] = true;
 
-        emit NewPostActionRegistered(
-            address(this),
-            newPostAction,
-            msg.sender,
-            now
-        );
+        emit NewPostActionRegistered(address(this), newPostAction, msg.sender, now);
     }
 
     /**
@@ -113,11 +109,7 @@ contract PostActionRegistry is Base, IPostActionRegistry {
         @param postAction to test whether it is registered.
         @return true if post action is registered. Otherwise it returns false.
      */
-    function isRegisteredPostAction(address postAction)
-        external
-        view
-        returns (bool)
-    {
+    function isRegisteredPostAction(address postAction) external view returns (bool) {
         return isRegisteredPostActionInternal(postAction);
     }
 
@@ -149,14 +141,13 @@ contract PostActionRegistry is Base, IPostActionRegistry {
         @param postAction post action to verify if it is registered.
         @return the post action passed as parameter if it is registered. Otherwise it returns the default post action.
      */
-    function getPostActionOrDefault(address postAction)
-        external
-        view
-        returns (address)
-    {
+    function getPostActionOrDefault(address postAction) external view returns (address) {
         bool isRegistered = isRegisteredPostActionInternal(postAction);
         address defaultPostAction = getDefaultPostActionInternal();
-        require(defaultPostAction != address(0x0), "Default post-action must not be eq 0x0.");
+        require(
+            defaultPostAction != address(0x0),
+            "Default post-action must not be eq 0x0."
+        );
         return isRegistered ? postAction : defaultPostAction;
     }
 

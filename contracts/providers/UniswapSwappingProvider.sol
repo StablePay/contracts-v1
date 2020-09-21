@@ -25,9 +25,7 @@ contract UniswapSwappingProvider is AbstractSwappingProvider {
         isStablePay(msg.sender)
         returns (bool)
     {
-        UniswapFactoryInterface uFactory = UniswapFactoryInterface(
-            uniswapFactory
-        );
+        UniswapFactoryInterface uFactory = UniswapFactoryInterface(uniswapFactory);
         UniswapExchangeInterface sourceExchange = UniswapExchangeInterface(
             uFactory.getExchange(_order.sourceToken)
         );
@@ -47,9 +45,7 @@ contract UniswapSwappingProvider is AbstractSwappingProvider {
         require(_order.targetAmount > 0, "Target amount cannot be zero");
 
         // Check the current source token balance is higher (or equals) to the order source amount.
-        uint256 sourceInitialTokenBalance = getTokenBalanceOf(
-            _order.sourceToken
-        );
+        uint256 sourceInitialTokenBalance = getTokenBalanceOf(_order.sourceToken);
 
         require(
             sourceInitialTokenBalance >= _order.sourceAmount,
@@ -87,10 +83,7 @@ contract UniswapSwappingProvider is AbstractSwappingProvider {
         approveTokensTo(IERC20(_order.sourceToken), address(sourceExchange), 0);
 
         require(
-            IERC20(_order.targetToken).transfer(
-                msg.sender,
-                _order.targetAmount
-            ),
+            IERC20(_order.targetToken).transfer(msg.sender, _order.targetAmount),
             "Source transfer invocation was not successful."
         );
 
@@ -115,9 +108,7 @@ contract UniswapSwappingProvider is AbstractSwappingProvider {
         isStablePay(msg.sender)
         returns (bool)
     {
-        UniswapFactoryInterface uFactory = UniswapFactoryInterface(
-            uniswapFactory
-        );
+        UniswapFactoryInterface uFactory = UniswapFactoryInterface(uniswapFactory);
 
         require(
             uFactory.getExchange(_order.targetToken) != address(0x0),
@@ -143,10 +134,7 @@ contract UniswapSwappingProvider is AbstractSwappingProvider {
         );
 
         require(
-            IERC20(_order.targetToken).transfer(
-                msg.sender,
-                _order.targetAmount
-            ),
+            IERC20(_order.targetToken).transfer(msg.sender, _order.targetAmount),
             "Source transfer invocation was not successful."
         );
 
@@ -171,7 +159,11 @@ contract UniswapSwappingProvider is AbstractSwappingProvider {
     )
         external
         view
-        returns (bool isSupported, uint256 minRate, uint256 maxRate)
+        returns (
+            bool isSupported,
+            uint256 minRate,
+            uint256 maxRate
+        )
     {
         require(
             address(_sourceToken) != address(0x0),
@@ -183,9 +175,7 @@ contract UniswapSwappingProvider is AbstractSwappingProvider {
         );
         require(_targetAmount > 0, "Target amount is not gt 0.");
 
-        UniswapFactoryInterface uFactory = UniswapFactoryInterface(
-            uniswapFactory
-        );
+        UniswapFactoryInterface uFactory = UniswapFactoryInterface(uniswapFactory);
         UniswapExchangeInterface targetExchange = UniswapExchangeInterface(
             uFactory.getExchange(address(_targetToken))
         );
@@ -229,8 +219,9 @@ contract UniswapSwappingProvider is AbstractSwappingProvider {
             address(sourceExchange) != address(0x0) &&
             address(targetExchange) != address(0x0);
         if (isSupported) {
-            uint256 ethToBuyTargetToken = targetExchange
-                .getEthToTokenOutputPrice(_targetAmount);
+            uint256 ethToBuyTargetToken = targetExchange.getEthToTokenOutputPrice(
+                _targetAmount
+            );
             rate = sourceExchange.getTokenToEthOutputPrice(ethToBuyTargetToken);
         }
 
