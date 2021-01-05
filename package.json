@@ -63,7 +63,7 @@
   },
   "devDependencies": {
     "@gnosis.pm/mock-contract": "3.0.7",
-    "axios": "0.18.1",
+    "axios": "0.21.1",
     "chai": "4.1.2",
     "chai-as-promised": "7.1.1",
     "chai-bignumber": "2.0.2",
